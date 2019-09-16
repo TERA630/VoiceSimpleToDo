@@ -22,10 +22,6 @@ class MainViewModel : ViewModel() {
         val idToRemove = listAll.indexOfFirst { it.id == id }
         listAll.removeAt(idToRemove)
     }
-    fun deleteList(index: Int) {
-
-        // if(is Parent) {} else {}
-    }
 
     private fun makeDummyList(): MutableList<ItemEntity> {
         val result = mutableListOf<ItemEntity>()
