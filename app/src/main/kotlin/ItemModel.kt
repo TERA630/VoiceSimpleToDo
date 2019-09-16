@@ -11,6 +11,7 @@ data class ItemEntity( // table within the database . field correspond to column
     var description: String = "",
     var tag: String = "",
     var isParent: Boolean = false,
+    var isClosed: Boolean = true,
     var isChild: Boolean = false,
     var isChildOf: Int = 0
 )

@@ -3,11 +3,10 @@ package com.example.voicesimpletodo
 import androidx.lifecycle.ViewModel
 
 class MainViewModel : ViewModel() {
-    var currentList: List<ItemEntity> = listOf()
-
-
+    var listAll = mutableListOf<ItemEntity>()
     fun init() {
-        currentList = makeDummyList()
+        listAll = makeDummyList()
+        listOpened = listAll.filter { it.isParent }.toMutableList()
     }
 
     fun findParents(): List<String> {
@@ -15,7 +14,18 @@ class MainViewModel : ViewModel() {
         return result
     }
 
-    private fun makeDummyList(): List<ItemEntity> {
+    fun appendList(item: ItemEntity) {
+        listAll.add(item)
+        return
+    }
+
+    fun removeList
+    fun deleteList(index: Int) {
+
+        // if(is Parent) {} else {}
+    }
+
+    private fun makeDummyList(): MutableList<ItemEntity> {
         val result = mutableListOf<ItemEntity>()
         result.add(ItemEntity(1, "靴下を履く", "まず腰を下ろす", "準備", isParent = true, isChild = false))
         result.add(ItemEntity(2, "天気を確認する", "スマホ", "準備", isParent = true, isChild = false))
@@ -30,10 +40,12 @@ class MainViewModel : ViewModel() {
             )
         )
         result.add(ItemEntity(4, "口を洗浄する", "うがい､歯磨き", tag = "準備", isParent = true, isChild = false))
-        result.add(ItemEntity(5, "髪を整える", "ヘアスプレー", "準備", isParent = true, isChild = false))
+        //   result.add(ItemEntity(5,"洗口液","使えば無くなる",tag = "準備",isParent = false,isChild = true,isClosed = true,isChildOf = 4))
+        result.add(ItemEntity(6, "髪を整える", "ヘアスプレー", "準備", isParent = true, isChild = false))
+        //   result.add(ItemEntity(7,"櫛を入れる","","準備",false,isClosed = true,isChild = true,isChildOf = 6))
         result.add(
             ItemEntity(
-                6,
+                8,
                 "プロテインを作る",
                 "3杯､可能なら牛乳を入れる",
                 "準備",
