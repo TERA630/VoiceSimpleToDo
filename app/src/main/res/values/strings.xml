@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">VoiceSimpleTodo</string>
+    <string name="action_settings">Settings</string>
+
+    // Message
+    <string name="enterNewItem">Enter new Item..</string>
+    <string name="enterDescription">Enter description</string>
+    <string name="itemDeleteTitle">行の削除</string>
+    <string name="itemDeleteMessage">行を削除しますか</string>
+    <string name="yes">はい</string>
+    <string name="no">いいえ</string>
+    <string name="requireAudioPermission">このアプリの利用には音声の録音を許可してください</string>
+    <string name="hearing">認識中</string>
+    <string name="listening">listening..</string>
+    // Content
+    <string name="button">push to action</string>
+    <string name="rowContents">enter row item</string>
+    // Menu
+    <string name="undo">元に戻す</string>
+    <string name="restoreDefault">デフォルトアイテムとする</string>
+    <string name="saveCurrentFile">現在のファイルにセーブする</string>
+</resources>
