@@ -6,7 +6,6 @@ class MainViewModel : ViewModel() {
     var listAll = mutableListOf<ItemEntity>()
     fun init() {
         listAll = makeDummyList()
-        listOpened = listAll.filter { it.isParent }.toMutableList()
     }
 
     fun findParents(): List<String> {
@@ -19,7 +18,10 @@ class MainViewModel : ViewModel() {
         return
     }
 
-    fun removeList
+    fun removeItemHasId(id:Int){
+        val idToRemove = listAll.indexOfFirst { it.id == id }
+        listAll.removeAt(idToRemove)
+    }
     fun deleteList(index: Int) {
 
         // if(is Parent) {} else {}
@@ -29,16 +31,7 @@ class MainViewModel : ViewModel() {
         val result = mutableListOf<ItemEntity>()
         result.add(ItemEntity(1, "靴下を履く", "まず腰を下ろす", "準備", isParent = true, isChild = false))
         result.add(ItemEntity(2, "天気を確認する", "スマホ", "準備", isParent = true, isChild = false))
-        result.add(
-            ItemEntity(
-                3,
-                "服に着替える",
-                "自転車通勤か電車通勤か､研究会があるか",
-                "準備",
-                isParent = true,
-                isChild = false
-            )
-        )
+        result.add(ItemEntity(3, "服に着替える", "自転車通勤か電車通勤か､研究会があるか", "準備", isParent = true, isChild = false))
         result.add(ItemEntity(4, "口を洗浄する", "うがい､歯磨き", tag = "準備", isParent = true, isChild = false))
         //   result.add(ItemEntity(5,"洗口液","使えば無くなる",tag = "準備",isParent = false,isChild = true,isClosed = true,isChildOf = 4))
         result.add(ItemEntity(6, "髪を整える", "ヘアスプレー", "準備", isParent = true, isChild = false))
