@@ -17,6 +17,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     // local property
     lateinit var listToShow:List<ItemEntity>
     lateinit var contentRange:IntRange
+    val openedItem = mutableSetOf<String>()
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -69,8 +70,19 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     class ViewHolderOfCell(private val rowView: View) : RecyclerView.ViewHolder(rowView)
 
     private fun makeListToShow(){
-        listToShow = vModel.listAll.filter { it.isParent }
-        contentRange = IntRange(0,listToShow.lastIndex)
+        val listOfTopLevel = vModel.listAll.filter { it.isParent }
+        val tagSet = mutableSetOf<String>()
+        for(i in  listOfTopLevel.indices) {tagSet.add(listOfTopLevel[i].title)}
+        val listOfTagAndtTitle = mutableListOf<String>()
+        
+
+
+
+
+        contentRange = IntRange(0,listOfTopLevel.lastIndex)
+    }
+    private fun updateListToShow(){
+
     }
 
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
