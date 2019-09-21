@@ -11,13 +11,15 @@ import kotlinx.android.synthetic.main.simplerow.view.*
 
 class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     // Local Const
-    private val cItem = 1
-    private val cFooter = 2
+    private val cParent = 1
+    private val cChild = 2
+    private val cTag = 3
+    private val cFooter = 4
 
     // local property
     lateinit var listToShow:List<ItemEntity>
+    val listWithViewType = mutableListOf<ListWithViewType>()
     lateinit var contentRange:IntRange
-    val openedItem = mutableSetOf<String>()
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -42,7 +44,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
     override fun getItemViewType(position: Int): Int {
         return when (position) {
-            in contentRange -> cItem
+            in contentRange -> cParent
             else -> cFooter
         }
     }
@@ -56,7 +58,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            cItem -> {
+            cParent -> {
                 val itemView = LayoutInflater.from(parent.context).inflate(R.layout.simplerow, parent, false)
                 ViewHolderOfCell(itemView)
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
@@ -72,17 +74,20 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     private fun makeListToShow(){
         val listOfTopLevel = vModel.listAll.filter { it.isParent }
         val tagSet = mutableSetOf<String>()
-        for(i in  listOfTopLevel.indices) {tagSet.add(listOfTopLevel[i].title)}
-        val listOfTagAndtTitle = mutableListOf<String>()
-        
-
-
-
-
-        contentRange = IntRange(0,listOfTopLevel.lastIndex)
-    }
-    private fun updateListToShow(){
-
+        for(i in listOfTopLevel.indices) {
+            tagSet.add(listOfTopLevel[i].tag)
+        }
+        val listOfTagAndTopLevel = mutableListOf<ListWithViewType>()
+        tagSet.forEach{
+            tag ->
+                listOfTagAndTopLevel.add(ListWithViewType(tag,cTag))
+                listOfTopLevel.forEachIndexed{index:Int,item->
+                if(item.tag == tag) {
+                    listOfTagAndTopLevel.add(ListWithViewType(item.title,cParent))
+                }
+            }
+        }
+        contentRange = IntRange(0,listOfTagAndTopLevel.lastIndex)
     }
 
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
@@ -112,3 +117,8 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         editText.hideSoftKeyBoard()
     }
 }
+
+class ListWithViewType(
+    private val title:String,
+    private val viewType:Int
+)
