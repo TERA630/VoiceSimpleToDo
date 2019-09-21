@@ -32,8 +32,8 @@ class MainViewModel : ViewModel() {
         result.add(ItemEntity(5,"洗口液","使えば無くなる",tag = "準備",isParent = false,isChild = true,isClosed = true,isChildOf = 4))
         result.add(ItemEntity(6, "髪を整える", "ヘアスプレー", "準備", isParent = true, isChild = false))
         result.add(ItemEntity(7,"櫛を入れる","","準備",false,isClosed = true,isChild = true,isChildOf = 6))
-        result.add(ItemEntity(8, "プロテインを作る", "3杯､可能なら牛乳を入れる", "準備", isParent = true, isChild = false)
-        )
+        result.add(ItemEntity(8, "プロテインを作る", "3杯､可能なら牛乳を入れる", "準備", isParent = true, isChild = false))
+        result.add(ItemEntity(9,"自転車の空気を確かめる","どちらも","自転車",isParent = true,isChild = false))
         return result
     }
 }

@@ -20,6 +20,8 @@
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
         android:textAlignment="center"
+        android:background="#1e90ff"
+        android:textColor="#f8f8ff"
         tools:text="this one" />
 
 </androidx.cardview.widget.CardView>

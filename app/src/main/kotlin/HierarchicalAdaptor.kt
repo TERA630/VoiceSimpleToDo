@@ -12,14 +12,15 @@ import kotlinx.android.synthetic.main.simplerow.view.*
 class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     // Local Const
     private val cParent = 1
-    private val cChild = 2
-    private val cTag = 3
-    private val cFooter = 4
+    private val cChild =  2
+    private val cFooter = 3
+    private val cTag = 4
 
     // local property
     lateinit var listToShow:List<ItemEntity>
-    val listWithViewType = mutableListOf<ListWithViewType>()
+    private val listWithViewType = mutableListOf<ItemWithViewType>()
     lateinit var contentRange:IntRange
+    val openedItem = mutableSetOf<String>()
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -40,20 +41,12 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         itemTouchHelper.attachToRecyclerView(recyclerView)
     }
     override fun getItemCount(): Int {
-        return listToShow.size +1 // データ＋入力用フッタ
+        return listWithViewType.size +1 // データ＋入力用フッタ
     }
     override fun getItemViewType(position: Int): Int {
         return when (position) {
-            in contentRange -> cParent
+            in contentRange -> listWithViewType[position].viewType
             else -> cFooter
-        }
-    }
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int){
-        val footRange = listToShow.lastIndex + 1         //　position 最終行　フッター
-        when (position) {
-            in contentRange -> holder.itemView.rowText.text = listToShow[position].title
-            footRange -> bindFooter(holder, position)
-            else -> throw IllegalStateException("$position is out of range")
         }
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -62,13 +55,26 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
                 val itemView = LayoutInflater.from(parent.context).inflate(R.layout.simplerow, parent, false)
                 ViewHolderOfCell(itemView)
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
+            cTag ->{
+                val itemView = LayoutInflater.from(parent.context).inflate(R.layout.tagrow, parent, false)
+                ViewHolderOfCell(itemView)
+            }
             else -> {
                 val footerView = LayoutInflater.from(parent.context).inflate(R.layout.list_footer ,parent,false)
                 ViewHolderOfCell(footerView)
             }   // Footer アイテム追加
         }
-
     }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int){
+        val footRange = listToShow.lastIndex + 1         //　position 最終行　フッター
+        when (position) {
+            in contentRange -> holder.itemView.rowText.text = listWithViewType[position].title
+            footRange -> bindFooter(holder, position)
+            else -> throw IllegalStateException("$position is out of range")
+        }
+    }
+
     class ViewHolderOfCell(private val rowView: View) : RecyclerView.ViewHolder(rowView)
 
     private fun makeListToShow(){
@@ -77,16 +83,18 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         for(i in listOfTopLevel.indices) {
             tagSet.add(listOfTopLevel[i].tag)
         }
-        val listOfTagAndTopLevel = mutableListOf<ListWithViewType>()
+        val listOfTagAndTopLevel = mutableListOf<ItemWithViewType>()
         tagSet.forEach{
             tag ->
-                listOfTagAndTopLevel.add(ListWithViewType(tag,cTag))
-                listOfTopLevel.forEachIndexed{index:Int,item->
+                listOfTagAndTopLevel.add(ItemWithViewType(tag,cTag))
+                listOfTopLevel.forEachIndexed{ index:Int,item->
                 if(item.tag == tag) {
-                    listOfTagAndTopLevel.add(ListWithViewType(item.title,cParent))
+                    listOfTagAndTopLevel.add(ItemWithViewType(item.title,cParent))
                 }
             }
         }
+        if(listWithViewType.size >=1 ){ listWithViewType.clear()}
+            listWithViewType.addAll(listOfTagAndTopLevel)
         contentRange = IntRange(0,listOfTagAndTopLevel.lastIndex)
     }
 
@@ -118,7 +126,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
 }
 
-class ListWithViewType(
-    private val title:String,
-    private val viewType:Int
+class ItemWithViewType( val title:String,
+                        val viewType:Int
 )
