@@ -81,7 +81,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         tagSet.forEach{
             tag ->
                 listOfTagAndTopLevel.add(ListWithViewType(tag,cTag))
-                listToShow.forEachIndexed{index:Int,item->
+                listOfTopLevel.forEachIndexed{index:Int,item->
                 if(item.tag == tag) {
                     listOfTagAndTopLevel.add(ListWithViewType(item.title,cParent))
                 }
