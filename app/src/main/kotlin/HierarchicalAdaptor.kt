@@ -17,10 +17,8 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     private val cTag = 4
 
     // local property
-    lateinit var listToShow:List<ItemEntity>
     private val listWithViewType = mutableListOf<ItemWithViewType>()
     lateinit var contentRange:IntRange
-    val openedItem = mutableSetOf<String>()
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -67,7 +65,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int){
-        val footRange = listToShow.lastIndex + 1         //　position 最終行　フッター
+        val footRange = listWithViewType.lastIndex + 1         //　position 最終行　フッター
         when (position) {
             in contentRange -> holder.itemView.rowText.text = listWithViewType[position].title
             footRange -> bindFooter(holder, position)
@@ -86,16 +84,16 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         val listOfTagAndTopLevel = mutableListOf<ItemWithViewType>()
         tagSet.forEach{
             tag ->
-                listOfTagAndTopLevel.add(ItemWithViewType(tag,cTag))
-                listOfTopLevel.forEachIndexed{ index:Int,item->
+                listOfTagAndTopLevel.add(ItemWithViewType(tag,cTag,0))
+                listOfTopLevel.forEach{ item->
                 if(item.tag == tag) {
-                    listOfTagAndTopLevel.add(ItemWithViewType(item.title,cParent))
+                    listOfTagAndTopLevel.add(ItemWithViewType(item.title,cParent,item.id))
                 }
             }
         }
         if(listWithViewType.size >=1 ){ listWithViewType.clear()}
             listWithViewType.addAll(listOfTagAndTopLevel)
-        contentRange = IntRange(0,listOfTagAndTopLevel.lastIndex)
+        contentRange = IntRange(0,listWithViewType.lastIndex)
     }
 
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
@@ -111,7 +109,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         notifyItemInserted(position)
     }
     private fun removeRowItem(position: Int){
-        val idToReMove = listToShow[position].id
+        val idToReMove = listWithViewType[position].rootId
         vModel.removeItemHasId(idToReMove)
         makeListToShow()
         notifyItemRemoved(position)
@@ -127,5 +125,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
 }
 
 class ItemWithViewType( val title:String,
-                        val viewType:Int
+                        val viewType:Int,
+                        val rootId:Int
 )
