@@ -5,10 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="4dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginBottom="4dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="2dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="2dp"
     android:theme="@style/ThemeOverlay.AppCompat.Light"
     app:cardCornerRadius="4dp"
     app:cardElevation="1dp"
@@ -17,8 +17,7 @@
     <TextView
         android:id="@+id/rowText"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
+        android:padding="4dp"
         tools:text="this one" />
 
 </androidx.cardview.widget.CardView>

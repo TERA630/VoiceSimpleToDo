@@ -104,7 +104,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         }
     }
     private fun appendRowItem(text:String,position: Int){
-        vModel.appendList(ItemEntity(11,text,"text description","tag",isParent = true,isChild = false))
+        vModel.appendList(ItemEntity(11,text,"text description","未分類",isParent = true,isChild = false))
         makeListToShow()
         notifyItemInserted(position)
     }
