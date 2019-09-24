@@ -8,14 +8,26 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class  MainActivity : AppCompatActivity() {
 
-    lateinit var vModel:MainViewModel
+    private lateinit var vModel:MainViewModel
+    private var mDatabase:MyDataBase? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vModel = ViewModelProvider(this).get(MainViewModel::class.java)
-        vModel.init()
+
+        mDatabase = MyDataBase.getInstance(this)
+        if(mDatabase==null) vModel.init()
+        mDatabase?.let{
+            val job = Job()
+            CoroutineScope(Dispatchers.Default + job).launch {
+                val list = it.myDao().findAll()  }
+        }
         constructViews()
     }
 
