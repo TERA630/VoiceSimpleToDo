@@ -82,7 +82,12 @@ dependencies {
     implementation "io.grpc:grpc-stub:$grpc_version"
     implementation "com.google.auth:google-auth-library-oauth2-http:0.16.2"
 
+    // Dependency Injection
+    implementation "org.koin:koin-android:$koin_version"
+    implementation "org.koin:koin-androidx-viewmodel:$koin_version"
+    implementation "org.koin:koin-androidx-scope:$koin_version"
 
+    // Tests
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

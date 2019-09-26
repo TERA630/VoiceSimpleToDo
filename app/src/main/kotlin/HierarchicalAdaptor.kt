@@ -18,7 +18,8 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
 
     // local property
     private val listWithViewType = mutableListOf<ItemWithViewType>()
-    lateinit var contentRange:IntRange
+    private lateinit var contentRange:IntRange
+
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -63,7 +64,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
             }   // Footer アイテム追加
         }
     }
-
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int){
         val footRange = listWithViewType.lastIndex + 1         //　position 最終行　フッター
         when (position) {

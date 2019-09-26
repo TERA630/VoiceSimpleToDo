@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 
 class MainViewModel : ViewModel() {
     var listAll = mutableListOf<ItemEntity>()
+
     fun init() {
         listAll = makeDummyList()
     }

@@ -8,13 +8,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class  MainActivity : AppCompatActivity() {
 
-    lateinit var vModel:MainViewModel
+    private val vModel:MainViewModel by viewModel ()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vModel = ViewModelProvider(this).get(MainViewModel::class.java)
         vModel.init()
         constructViews()
     }
@@ -45,9 +45,5 @@ class  MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
-
     }
-
-
-
 }
