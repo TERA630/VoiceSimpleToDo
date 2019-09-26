@@ -18,11 +18,11 @@ class MyApplication:Application(){
         }
     }
     private val myModule:Module = module {
-        viewModel { MainViewModel() }
         single {
             Room.databaseBuilder(androidContext(),MyDataBase::class.java,"myDatabase.db").build()
         }
         factory { get<MyDataBase>().myDao() }
+        viewModel { MainViewModel(get()) }
 
     }
 

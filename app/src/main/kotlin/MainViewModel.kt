@@ -1,12 +1,20 @@
 package com.example.voicesimpletodo
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel(private val myDao: MyDao) : ViewModel() {
     var listAll = mutableListOf<ItemEntity>()
+    val listObeserbable  = MutableLiveData<List<ItemEntity>>().apply{ value = listAll}
 
     fun init() {
-        listAll = makeDummyList()
+        viewModelScope.launch {
+            listAll = myDao.findAll().toMutableList()
+            if(listAll.size == 0) listAll = makeDummyList()
+            listObeserbable.postValue(listAll)
+        }
     }
 
     fun findParents(): List<String> {
