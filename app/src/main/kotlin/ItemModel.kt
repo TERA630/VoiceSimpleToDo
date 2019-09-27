@@ -27,9 +27,6 @@ interface MyDao {
     @Query("SELECT * FROM recordItem")
     suspend fun findAll(): List<ItemEntity>
 
-//    @Query("SELECT * FROM recordItem")
-//    suspend fun findTopLevel():List<ItemEntity>
-
     @Update
     suspend fun updateItem(item: ItemEntity)
 
