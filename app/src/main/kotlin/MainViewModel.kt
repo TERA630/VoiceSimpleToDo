@@ -17,11 +17,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         }
     }
 
-    fun findParents(): List<String> {
-        val result = emptyList<String>()
-        return result
-    }
-
     fun appendList(item: ItemEntity) {
         listAll.add(item)
         return
@@ -30,6 +25,10 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     fun removeItemHasId(id:Int){
         val idToRemove = listAll.indexOfFirst { it.id == id }
         listAll.removeAt(idToRemove)
+    }
+
+    fun findParents():List<ItemEntity>{
+        return  listAll.filter { it.isParent }
     }
 
     private fun makeDummyList(): MutableList<ItemEntity> {
@@ -43,6 +42,8 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         result.add(ItemEntity(7,"櫛を入れる","","準備",false,isClosed = true,isChild = true,isChildOf = 6))
         result.add(ItemEntity(8, "プロテインを作る", "3杯､可能なら牛乳を入れる", "準備", isParent = true, isChild = false))
         result.add(ItemEntity(9,"自転車の空気を確かめる","どちらも","自転車",isParent = true,isChild = false))
+        result.add(ItemEntity(10,"入金チェック","SBJ、スルガ、三井住友","財政",isParent = true))
+        result.add(ItemEntity(11,"書類整備","クリアファイルに入れて整理","財政",isParent = true))
         return result
     }
 }
