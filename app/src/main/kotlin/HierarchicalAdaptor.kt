@@ -8,8 +8,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.list_footer.view.*
 import kotlinx.android.synthetic.main.simplerow.view.*
-import org.koin.core.KoinComponent
-import org.koin.core.inject
 
 class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     // Local Const
@@ -22,6 +20,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     private val listWithViewType = mutableListOf<ItemWithViewType>()
     private lateinit var contentRange:IntRange
 
+    // Recycler Adaptor lifecycle
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         makeListToShow(vModel.findParents())
@@ -78,8 +77,8 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
 
     private fun makeListToShow(_list: List<ItemEntity>){
         val tagSet = mutableSetOf<String>()
-        for(i in _list.indices) {
-            tagSet.add(_list[i].tag)
+        _list.forEach {
+            tagSet.add(it.tag)
         }
         val listOfTagAndTopLevel = mutableListOf<ItemWithViewType>()
         tagSet.forEach{
