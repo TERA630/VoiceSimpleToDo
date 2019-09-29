@@ -29,7 +29,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         listObservable.postValue(list)
         return
     }
-
     fun removeItemHasId(id:Int){
         val list = listObservable.value
         if (list.isNullOrEmpty()) {
@@ -37,9 +36,9 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         } else {
             val idToRemove = list.indexOfFirst { it.id == id }
             list.removeAt(idToRemove)
+            listObservable.postValue(list)
         }
     }
-
     fun findParents():List<ItemEntity>{
         val list = listObservable.value
         return if (list == null) {
@@ -50,7 +49,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             listOfTopLevel
         }
     }
-
     private fun makeDummyList(): MutableList<ItemEntity> {
         val result = mutableListOf<ItemEntity>()
         result.add(ItemEntity(1, "靴下を履く", "まず腰を下ろす", "準備", isParent = true, isChild = false))
