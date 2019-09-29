@@ -1,34 +1,54 @@
 package com.example.voicesimpletodo
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
-    var listAll = mutableListOf<ItemEntity>()
-    val listObeserbable  = MutableLiveData<List<ItemEntity>>().apply{ value = listAll}
+    val listObservable  = MutableLiveData<MutableList<ItemEntity>>().apply{ value = makeDummyList()}
 
     fun init() {
         viewModelScope.launch {
-            listAll = myDao.findAll().toMutableList()
-            if(listAll.size == 0) listAll = makeDummyList()
-            listObeserbable.postValue(listAll)
+            val list  = withTimeoutOrNull(1000L){
+                myDao.findAll().toMutableList()
+            }
+            val listFromDBOrDefalut = if(list == null || list.size == 0){
+                makeDummyList()
+            } else {
+                list
+            }
+            listObservable.postValue(listFromDBOrDefalut)
         }
     }
-
     fun appendList(item: ItemEntity) {
-        listAll.add(item)
+        val list = listObservable.value ?:  mutableListOf()
+        list.add(item)
+        listObservable.postValue(list)
         return
     }
 
     fun removeItemHasId(id:Int){
-        val idToRemove = listAll.indexOfFirst { it.id == id }
-        listAll.removeAt(idToRemove)
+        val list = listObservable.value
+        if (list.isNullOrEmpty()) {
+            Log.w("MainViewModel#removeItemHasId","listObservable is Null or Empty.")
+        } else {
+            val idToRemove = list.indexOfFirst { it.id == id }
+            list.removeAt(idToRemove)
+        }
     }
 
     fun findParents():List<ItemEntity>{
-        return  listAll.filter { it.isParent }
+        val list = listObservable.value
+        return if (list == null) {
+            Log.w("MainViewModel#removeItemHasId","listObservable is Null.")
+            emptyList()
+        } else {
+            val listOfTopLevel = list.filter { it.isParent }
+            listOfTopLevel
+        }
     }
 
     private fun makeDummyList(): MutableList<ItemEntity> {

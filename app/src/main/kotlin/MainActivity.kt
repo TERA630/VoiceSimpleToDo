@@ -5,7 +5,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -41,12 +40,12 @@ class  MainActivity : AppCompatActivity() {
         val adaptor = HierarchicalAdaptor(vModel)
         simpleList.adapter = adaptor
 
-        vModel.listObeserbable.observe(this, Observer {
+        vModel.listObservable.observe(this, Observer {
             adaptor.updateAllList(it)
         })
 
         setSupportActionBar(toolbar)
-        fab.setOnClickListener { view->
+        fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
