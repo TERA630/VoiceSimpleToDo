@@ -17,6 +17,6 @@
     <string name="rowContents">enter row item</string>
     // Menu
     <string name="undo">元に戻す</string>
-    <string name="restoreDefault">デフォルトアイテムとする</string>
+    <string name="restoreDefault">アイテムを以前の状態に戻す</string>
     <string name="saveCurrentFile">現在のファイルにセーブする</string>
 </resources>

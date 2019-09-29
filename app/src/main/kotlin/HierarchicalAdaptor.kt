@@ -90,8 +90,8 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
                 }
             }
         }
-        if(listWithViewType.size >=1 ){ listWithViewType.clear()}
-            listWithViewType.addAll(listOfTagAndTopLevel)
+        listWithViewType.clear()
+        listWithViewType.addAll(listOfTagAndTopLevel)
         contentRange = IntRange(0,listWithViewType.lastIndex)
     }
 
@@ -103,19 +103,16 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         }
     }
     private fun appendRowItem(text:String,position: Int){
-        vModel.appendList(ItemEntity(11,text,"text description","未分類",isParent = true,isChild = false))
-        makeListToShow(vModel.findParents())
         notifyItemInserted(position)
+        vModel.appendList(ItemEntity(11,text,"text description","未分類",isParent = true,isChild = false))
     }
     private fun removeRowItem(position: Int){
         notifyItemRemoved(position)
         val idToReMove = listWithViewType[position].rootId
         vModel.removeItemHasId(idToReMove)
-        makeListToShow(vModel.findParents())
     }
     fun updateAllList(_list:List<ItemEntity>){
         makeListToShow(_list)
-    //    notifyDataSetChanged()
     }
 
     private fun onFooterEditorEnd(editText: TextView,position: Int) {

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
@@ -16,8 +17,10 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
                 myDao.findAll().toMutableList()
             }
             val listFromDBOrDefault = if(list == null || list.size == 0){
+                Log.i("MainViewModel#init","Dummy list was fetched.")
                 makeDummyList()
             } else {
+                Log.i("MainViewModel#init","list was fetched. number of list was ${list.size}")
                 list
             }
             listObservable.postValue(listFromDBOrDefault)
@@ -63,5 +66,19 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         result.add(ItemEntity(10,"入金チェック","SBJ、スルガ、三井住友","財政",isParent = true))
         result.add(ItemEntity(11,"書類整備","クリアファイルに入れて整理","財政",isParent = true))
         return result
+    }
+    fun saveListToDB(){
+        val list = listObservable.value
+        if (list.isNullOrEmpty()) {
+            Log.w("MainViewModel#removeItemHasId","listObservable is Null or Empty.")
+        } else {
+            runBlocking {
+                myDao.insertAll(list)
+            }
+            Log.i("MainViewModel#saveListToDB","list was saved. item was number ${list.size} ")
+        }
+
+
+
     }
 }
