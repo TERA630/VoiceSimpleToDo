@@ -115,7 +115,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
     fun updateAllList(_list:List<ItemEntity>){
         makeListToShow(_list)
-        notifyDataSetChanged()
+    //    notifyDataSetChanged()
     }
 
     private fun onFooterEditorEnd(editText: TextView,position: Int) {

@@ -15,12 +15,12 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             val list  = withTimeoutOrNull(1000L){
                 myDao.findAll().toMutableList()
             }
-            val listFromDBOrDefalut = if(list == null || list.size == 0){
+            val listFromDBOrDefault = if(list == null || list.size == 0){
                 makeDummyList()
             } else {
                 list
             }
-            listObservable.postValue(listFromDBOrDefalut)
+            listObservable.postValue(listFromDBOrDefault)
         }
     }
     fun appendList(item: ItemEntity) {
