@@ -73,7 +73,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
             else -> throw IllegalStateException("$position is out of range")
         }
     }
-
     class ViewHolderOfCell(private val rowView: View) : RecyclerView.ViewHolder(rowView)
 
     private fun makeListToShow(_list: List<ItemEntity>){
