@@ -19,6 +19,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     // local property
     private val listWithViewType = mutableListOf<ItemWithViewType>()
     private lateinit var contentRange:IntRange
+    private var footerRange:Int = 1
 
     // Recycler Adaptor lifecycle
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -40,7 +41,8 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         itemTouchHelper.attachToRecyclerView(recyclerView)
     }
     override fun getItemCount(): Int {
-        return listWithViewType.size +1 // データ＋入力用フッタ
+        val itemcount =  listWithViewType.size +1 // データ＋入力用フッタ
+        return itemcount
     }
     override fun getItemViewType(position: Int): Int {
         return when (position) {
@@ -65,10 +67,9 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         }
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int){
-        val footRange = listWithViewType.lastIndex + 1         //　position 最終行　フッター
         when (position) {
             in contentRange -> holder.itemView.rowText.text = listWithViewType[position].title
-            footRange -> bindFooter(holder, position)
+            footerRange -> bindFooter(holder, position)
             else -> throw IllegalStateException("$position is out of range")
         }
     }
@@ -80,6 +81,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         _list.forEach {
             tagSet.add(it.tag)
         }
+
         val listOfTagAndTopLevel = mutableListOf<ItemWithViewType>()
         tagSet.forEach{
             tag ->
@@ -93,6 +95,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         listWithViewType.clear()
         listWithViewType.addAll(listOfTagAndTopLevel)
         contentRange = IntRange(0,listWithViewType.lastIndex)
+        footerRange = listWithViewType.lastIndex +1
     }
 
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
@@ -103,11 +106,9 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         }
     }
     private fun appendRowItem(text:String,position: Int){
-        notifyItemInserted(position)
         vModel.appendList(ItemEntity(11,text,"text description","未分類",isParent = true,isChild = false))
     }
     private fun removeRowItem(position: Int){
-        notifyItemRemoved(position)
         val idToReMove = listWithViewType[position].rootId
         vModel.removeItemHasId(idToReMove)
     }

@@ -57,6 +57,7 @@ class  MainActivity : AppCompatActivity() {
 
         vModel.listObservable.observe(this, Observer {
             adaptor.updateAllList(it)
+            adaptor.notifyDataSetChanged()
         })
 
         setSupportActionBar(toolbar)
