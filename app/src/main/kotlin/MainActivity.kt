@@ -5,15 +5,14 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class  MainActivity : AppCompatActivity() {
 
-    private val vModel:MainViewModel by viewModel ()
+    private lateinit var vModel:MainViewModel
+    private var mDatabase:MyDataBase? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vModel.init()
