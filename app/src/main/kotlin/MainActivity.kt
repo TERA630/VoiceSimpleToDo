@@ -19,6 +19,11 @@ class  MainActivity : AppCompatActivity() {
         constructViews()
     }
 
+    override fun onPause() {
+        super.onPause()
+        vModel.saveListToDB()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -30,22 +35,32 @@ class  MainActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            R.id.saveItems -> {
+                vModel.saveListToDB()
+                return true
+            }
+            R.id.restoreItems->{
+                vModel.init()
+                return true
+            }
+
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
     }
+
     private fun constructViews(){
         setContentView(R.layout.activity_main)
         // recycler view
         val adaptor = HierarchicalAdaptor(vModel)
         simpleList.adapter = adaptor
 
-        vModel.listObeserbable.observe(this, Observer {
+        vModel.listObservable.observe(this, Observer {
             adaptor.updateAllList(it)
         })
 
         setSupportActionBar(toolbar)
-        fab.setOnClickListener { view->
+        fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
