@@ -101,7 +101,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
                     if(item.isOpened ){
                         val childList = _list.filter { it.isChild && it.isChildOf == item.id}
                         childList.forEach {
-                            listOfTagAndTopLevel.add(ItemWithViewType(it.title,cChild,item.id) )}
+                            listOfTagAndTopLevel.add(ItemWithViewType(it.title,cChild,it.id) )}
                     }
 
                 }
