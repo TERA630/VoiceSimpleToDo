@@ -47,7 +47,8 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         if (list.isNullOrEmpty()) {
             Log.w("MainViewModel#flipOpenedItem","listObservable is Null or Empty.")
         } else {
-            list[id].isOpened = list[id].isOpened == false // IsOpenedの反転
+            val idToFlip = list.indexOfFirst { it.id == id }
+            list[idToFlip].isOpened = (!list[idToFlip].isOpened) // IsOpenedの反転
             listObservable.postValue(list)
         }
     }
@@ -76,6 +77,8 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         result.add(ItemEntity(10,"自転車の空気を確かめる","どちらも","自転車",isParent = true,isChild = false))
         result.add(ItemEntity(11,"入金チェック","SBJ、スルガ、三井住友","財政",isParent = true))
         result.add(ItemEntity(12,"書類整備","クリアファイルに入れて整理","財政",isParent = true))
+        result.add(ItemEntity(13,"股関節柔軟","BMCの動画","運動",isParent = true))
+        result.add(ItemEntity(14,"踵寄せ","座位であぐらをかき､踵を股間に寄せる","運動",isParent = false,isChild = true,isChildOf = 13))
         return result
     }
     fun saveListToDB(){

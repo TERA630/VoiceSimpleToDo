@@ -19,7 +19,6 @@ class  MainActivity : AppCompatActivity() {
         vModel.init()
         constructViews()
     }
-
     override fun onPause() {
         super.onPause()
         vModel.saveListToDB()
@@ -38,24 +37,21 @@ class  MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.saveItems -> {
                 vModel.saveListToDB()
-                return true
+                true
             }
             R.id.restoreItems->{
                 vModel.init()
-                return true
+                true
             }
-
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
     }
-
     private fun constructViews(){
         setContentView(R.layout.activity_main)
         // recycler view
         val adaptor = HierarchicalAdaptor(vModel)
         simpleList.adapter = adaptor
-
         vModel.listObservable.observe(this, Observer {
             adaptor.updateAllList(it)
             adaptor.notifyDataSetChanged()

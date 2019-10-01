@@ -33,7 +33,7 @@ interface MyDao {
     suspend fun delete(item: ItemEntity)
 }
 
-@Database(entities = [ItemEntity::class], exportSchema = false, version = 1)
+@Database(entities = [ItemEntity::class], exportSchema = false, version = 2)
 abstract class MyDataBase : RoomDatabase() {
     abstract fun myDao(): MyDao
 
