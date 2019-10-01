@@ -42,6 +42,16 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             listObservable.postValue(list)
         }
     }
+    fun flipOpenedItemHasId(id:Int){
+        val list = listObservable.value
+        if (list.isNullOrEmpty()) {
+            Log.w("MainViewModel#flipOpenedItem","listObservable is Null or Empty.")
+        } else {
+            list[id].isOpened = list[id].isOpened == false // IsOpenedの反転
+            listObservable.postValue(list)
+        }
+    }
+
     fun findParents():List<ItemEntity>{
         val list = listObservable.value
         return if (list == null) {

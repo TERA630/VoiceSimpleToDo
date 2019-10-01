@@ -52,7 +52,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         when (viewType) {
             cParent -> {
                 val itemView = layoutInflater.inflate(R.layout.simplerow, parent, false)
-                itemView.setOnClickListener {  }
                 return ViewHolderOfCell(itemView)
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
             cChild->{
@@ -71,7 +70,15 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int){
         when (position) {
-            in contentRange -> holder.itemView.rowText.text = listWithViewType[position].title
+            in contentRange -> {
+                holder.itemView.rowText.text = listWithViewType[position].title
+                if(holder.itemViewType == cParent){
+                    holder.itemView.setOnClickListener {
+                        val id = listWithViewType[position].rootId
+                        vModel.flipOpenedItemHasId(id)
+                    }
+                }
+            }
             footerRange -> bindFooter(holder, position)
             else -> throw IllegalStateException("$position is out of range")
         }

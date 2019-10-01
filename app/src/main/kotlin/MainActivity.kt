@@ -8,11 +8,12 @@ import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class  MainActivity : AppCompatActivity() {
 
-    private lateinit var vModel:MainViewModel
-    private var mDatabase:MyDataBase? = null
+    private val vModel by viewModel<MainViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vModel.init()
