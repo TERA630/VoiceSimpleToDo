@@ -28,11 +28,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         val itemTouchHelper = ItemTouchHelper( object : ItemTouchHelper.SimpleCallback
             (0,(ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) ) {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-                val fromPosition = viewHolder.adapterPosition
-                val toPosition = target.adapterPosition
-                recyclerView.adapter!!.notifyItemMoved(fromPosition, toPosition)
-                // vModel. moveItem(from:Int,to:Int)
-                return true
+                return false
             }
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 removeRowItem(viewHolder.adapterPosition)
@@ -51,18 +47,25 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         }
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return when (viewType) {
+        val layoutInflater = LayoutInflater.from(parent.context)
+
+        when (viewType) {
             cParent -> {
-                val itemView = LayoutInflater.from(parent.context).inflate(R.layout.simplerow, parent, false)
-                ViewHolderOfCell(itemView)
+                val itemView = layoutInflater.inflate(R.layout.simplerow, parent, false)
+                itemView.setOnClickListener {  }
+                return ViewHolderOfCell(itemView)
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
+            cChild->{
+                val itemView = layoutInflater.inflate(R.layout.row_child,parent,false)
+                return ViewHolderOfCell(itemView)
+            }
             cTag ->{
                 val itemView = LayoutInflater.from(parent.context).inflate(R.layout.tagrow, parent, false)
-                ViewHolderOfCell(itemView)
+                return ViewHolderOfCell(itemView)
             }
             else -> {
                 val footerView = LayoutInflater.from(parent.context).inflate(R.layout.list_footer ,parent,false)
-                ViewHolderOfCell(footerView)
+                return ViewHolderOfCell(footerView)
             }   // Footer アイテム追加
         }
     }
@@ -86,8 +89,14 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
             tag ->
                 listOfTagAndTopLevel.add(ItemWithViewType(tag,cTag,0))
                 _list.forEach{ item->
-                if(item.tag == tag) {
+                if(item.tag == tag && item.isParent) {
                     listOfTagAndTopLevel.add(ItemWithViewType(item.title,cParent,item.id))
+                    if(item.isOpened ){
+                        val childList = _list.filter { it.isChild && it.isChildOf == item.id}
+                        childList.forEach {
+                            listOfTagAndTopLevel.add(ItemWithViewType(it.title,cChild,item.id) )}
+                    }
+
                 }
             }
         }
