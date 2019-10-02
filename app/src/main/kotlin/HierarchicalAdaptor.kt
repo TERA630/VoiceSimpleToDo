@@ -1,8 +1,10 @@
 package com.example.voicesimpletodo
 
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -117,7 +119,19 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         val iV = holder.itemView
 
         iV.originAddButton.setOnClickListener {
-            onFooterEditorEnd(iV.originNewText,position)
+            onFooterEditorEnd(iV.footerText,position)
+        }
+        iV.footerText.setOnEditorActionListener{ editText,actionId,event->
+
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                onFooterEditorEnd(editText, position)
+                return@setOnEditorActionListener true
+            }
+            if (event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) { // Enterキー押したとき
+                onFooterEditorEnd(editText, position)
+                return@setOnEditorActionListener true
+            }
+            return@setOnEditorActionListener false
         }
     }
     private fun appendRowItem(text:String,position: Int){
