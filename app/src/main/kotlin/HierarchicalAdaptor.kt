@@ -145,6 +145,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         makeListToShow(_list)
     }
 
+
     private fun onFooterEditorEnd(editText: TextView,position: Int) {
         val newText = editText.text.toString()
         if (newText.isBlank()) return
