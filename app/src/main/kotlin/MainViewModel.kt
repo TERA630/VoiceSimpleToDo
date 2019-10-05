@@ -9,7 +9,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
-    val listObservable  = MutableLiveData<MutableList<ItemEntity>>().apply{ value = makeDummyList()}
+    val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
 
     fun init() {
         viewModelScope.launch {

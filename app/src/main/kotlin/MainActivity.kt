@@ -17,7 +17,7 @@ class  MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vModel.init()
-        constructViews()
+        constructViews(savedInstanceState)
     }
     override fun onPause() {
         super.onPause()
@@ -29,7 +29,6 @@ class  MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -47,8 +46,14 @@ class  MainActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-    private fun constructViews(){
+    private fun constructViews(savedInstanceState: Bundle?){
         setContentView(R.layout.activity_main)
+        if(savedInstanceState == null) {
+            val originFragment = OriginFragment.newInstance()
+            supportFragmentManager.beginTransaction()
+                .add(R.id.activityFrame,originFragment)
+                .commit()
+        }
         // recycler view
         val adaptor = HierarchicalAdaptor(vModel)
         simpleList.adapter = adaptor
