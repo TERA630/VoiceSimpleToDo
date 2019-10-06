@@ -22,6 +22,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     private val listWithViewType = mutableListOf<ItemWithViewType>()
     private lateinit var contentRange:IntRange
     private var footerRange:Int = 1
+    private lateinit var mHandler:OriginFragment.EventToFragment
 
     // Recycler Adaptor lifecycle
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -74,11 +75,9 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         when (position) {
             in contentRange -> {
                 holder.itemView.rowText.text = listWithViewType[position].title
-                if(holder.itemViewType == cParent){
-                    holder.itemView.setOnClickListener {
-                        val id = listWithViewType[position].rootId
-                        vModel.flipOpenedItemHasId(id)
-                    }
+                if(holder.itemViewType == cParent ){
+                    if (vModel.idHasChild(listWithViewType[position].rootId) ) bindContentsWithChildes(holder,position)
+                    else bindContents(holder,position)
                 }
             }
             footerRange -> bindFooter(holder, position)
@@ -114,6 +113,26 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         contentRange = IntRange(0,listWithViewType.lastIndex)
         footerRange = listWithViewType.lastIndex +1
     }
+
+
+    private  fun bindContentsWithChildes(holder: RecyclerView.ViewHolder, position:Int){
+
+        holder.itemView.setOnClickListener {
+            val id = listWithViewType[position].rootId
+            vModel.flipOpenedItemHasId(id)
+        }
+
+    }
+    private fun bindContents(holder: RecyclerView.ViewHolder,position: Int){
+
+
+
+    }
+
+    fun setHandler(_handler: OriginFragment.EventToFragment) {
+        this.mHandler = _handler
+    }
+
 
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
         val iV = holder.itemView

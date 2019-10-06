@@ -33,6 +33,7 @@ class DetailFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
     }
 
     override fun onCreateView(
@@ -46,7 +47,10 @@ class DetailFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance() =
-            DetailFragment()
+        fun newInstance(itemId:Int) :DetailFragment{
+            val detailFragment = DetailFragment()
+            return detailFragment
+
+
+
     }
-}

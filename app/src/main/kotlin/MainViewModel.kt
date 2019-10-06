@@ -26,6 +26,11 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             listObservable.postValue(listFromDBOrDefault)
         }
     }
+    fun idHasChild(itemId:Int):Boolean{
+
+
+        return true
+    }
     fun appendList(item: ItemEntity) {
         val list = listObservable.value ?:  mutableListOf()
         list.add(item)

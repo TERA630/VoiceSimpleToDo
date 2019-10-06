@@ -4,16 +4,15 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class  MainActivity : AppCompatActivity() {
 
     private val vModel by viewModel<MainViewModel>()
 
+    // Activity Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vModel.init()
@@ -24,6 +23,7 @@ class  MainActivity : AppCompatActivity() {
         vModel.saveListToDB()
     }
 
+    // Activity Event
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -55,17 +55,18 @@ class  MainActivity : AppCompatActivity() {
                 .commit()
         }
         // recycler view
-        val adaptor = HierarchicalAdaptor(vModel)
-        simpleList.adapter = adaptor
-        vModel.listObservable.observe(this, Observer {
-            adaptor.updateAllList(it)
-            adaptor.notifyDataSetChanged()
-        })
 
         setSupportActionBar(toolbar)
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
+    }
+    private fun moveToDetailFragment(itemId:Int){
+        val detailFragment = DetailFragment.newInstance(itemId)
+        supportFragmentManager.beginTransaction()
+            .add(R.id.activityFrame,detailFragment)
+            .commit()
+
     }
 }
