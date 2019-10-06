@@ -28,7 +28,7 @@ class DetailFragment : Fragment() {
         detail_title.setText(item.title)
         detail_tag.setText(item.tag)
         detail_description.setText(item.description)
-
+        makeSpinner()
         detail_cancel.setOnClickListener{ transitToOrigin() }
     }
 
@@ -44,10 +44,7 @@ class DetailFragment : Fragment() {
         val adaptor = ArrayAdapter<String>(this.context!!,android.R.layout.simple_spinner_item)
        val list = vModel.findParents()
         list.forEach { adaptor.add(it.title) }
-
-
-
-        
+        detail_parent.adapter = adaptor
     }
 
 
