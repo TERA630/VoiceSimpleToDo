@@ -25,7 +25,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
                 Log.i("MainViewModel#init","list was fetched. number of list was ${list.size}")
                 list
             }
-            updateTagAndObservableList(listFromDBOrDefault)
+            updateTagAndList(listFromDBOrDefault)
 
         }
     }
@@ -40,10 +40,10 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     fun appendList(item: ItemEntity) {
         val list = listObservable.value ?:  mutableListOf()
         list.add(item)
-        updateTagAndObservableList(list)
+        updateTagAndList(list)
         return
     }
-    private fun updateTagAndObservableList(_list:MutableList<ItemEntity>){
+    private fun updateTagAndList(_list:MutableList<ItemEntity>){
         val tagList = _list.distinctBy { it.tag }
         tagSet.clear()
         tagList.forEach { tagSet.add(it.tag) }
@@ -51,35 +51,27 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
 
     }
     fun removeItemHasId(id:Int){
-        val list = listObservable.value
-        if (list.isNullOrEmpty()) {
-            Log.w("MainViewModel#removeItemHasId","listObservable is Null or Empty.")
-        } else {
-            val idToRemove = list.indexOfFirst { it.id == id }
-            list.removeAt(idToRemove)
-            updateTagAndObservableList(list)
-        }
+        val list = getListValue()
+        val idToRemove = list.indexOfFirst { it.id == id }
+        list.removeAt(idToRemove)
+        updateTagAndList(list)
+    }
+    fun findParents():List<ItemEntity>{
+        val list = getListValue()
+        return list.filter { it.isParent }
     }
     fun flipOpenedItemHasId(id:Int){
-        val list = listObservable.value
-        if (list.isNullOrEmpty()) {
-            Log.w("MainViewModel#flipOpenedItem","listObservable is Null or Empty.")
-        } else {
-            val idToFlip = list.indexOfFirst { it.id == id }
-            list[idToFlip].isOpened = (!list[idToFlip].isOpened) // IsOpenedの反転
-            listObservable.postValue(list)
-        }
+        val list = getListValue()
+        val idToFlip = list.indexOfFirst { it.id == id }
+        list[idToFlip].isOpened = (!list[idToFlip].isOpened) // IsOpenedの反転
+        listObservable.postValue(list)
     }
-
-    fun findParents():List<ItemEntity>{
+    private fun getListValue():MutableList<ItemEntity>{
         val list = listObservable.value
-        return if (list == null) {
-            Log.w("MainViewModel#removeItemHasId","listObservable is Null.")
-            emptyList()
-        } else {
-            val listOfTopLevel = list.filter { it.isParent }
-            listOfTopLevel
-        }
+        return if (list.isNullOrEmpty()) {
+            Log.w("MainViewModel","listObservable is Null or Empty.")
+            mutableListOf()
+        } else list
     }
     private fun makeDummyList(): MutableList<ItemEntity> {
         val result = mutableListOf<ItemEntity>()
@@ -100,29 +92,18 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         return result
     }
     fun saveListToDB(){
-        val list = listObservable.value
-        if (list.isNullOrEmpty()) {
-            Log.w("MainViewModel#removeItemHasId","listObservable is Null or Empty.")
-        } else {
-            runBlocking {
-                myDao.insertAll(list)
-            }
-            Log.i("MainViewModel#saveListToDB","list was saved. item was number ${list.size} ")
+        val list = getListValue()
+        runBlocking {
+            myDao.insertAll(list)
         }
+        Log.i("MainViewModel#saveListToDB","list was saved. item was number ${list.size} ")
     }
     fun setCurrentItemId(itemId: Int){
         currentId = itemId
     }
     fun currentItem()  : ItemEntity{
-        val list = listObservable.value
-        return if (list.isNullOrEmpty()) {
-            Log.w("MainViewModel#currentItem","listObservable is Null or Empty.")
-            ItemEntity(Int.MAX_VALUE,"error current Item")
-        } else {
-            val idToGet = list.indexOfFirst { it.id == currentId }
-            list[idToGet]
-        }
-
-
+        val list = getListValue()
+        val idToGet = list.indexOfFirst { it.id == currentId }
+        return list[idToGet]
     }
 }
