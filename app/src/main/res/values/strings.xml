@@ -12,6 +12,8 @@
     <string name="requireAudioPermission">このアプリの利用には音声の録音を許可してください</string>
     <string name="hearing">認識中</string>
     <string name="listening">listening..</string>
+    <string name="inputOK">確定</string>
+    <string name="cancel">cancel</string>
     // Content
     <string name="button">push to action</string>
     <string name="rowContents">enter row item</string>

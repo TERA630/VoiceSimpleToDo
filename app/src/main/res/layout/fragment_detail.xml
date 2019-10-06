@@ -20,10 +20,10 @@
         android:inputType="textMultiLine"
         />
     <Button android:id="@+id/detail_ok"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="@string/inputOK"/>
     <Button android:id="@+id/detail_cancel"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-
+        android:layout_height="wrap_content"
+        android:text="@string/cancel" />
 </LinearLayout>
