@@ -10,6 +10,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
+    val tagSet = mutableSetOf<String>()
+    var currentId  = 1
 
     fun init() {
         viewModelScope.launch {
@@ -23,19 +25,30 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
                 Log.i("MainViewModel#init","list was fetched. number of list was ${list.size}")
                 list
             }
-            listObservable.postValue(listFromDBOrDefault)
+            updateTagAndObservableList(listFromDBOrDefault)
+
         }
     }
     fun idHasChild(itemId:Int):Boolean{
-
-
-        return true
+        val list = listObservable.value
+        return if(list.isNullOrEmpty() || itemId == 0) false
+        else {
+            val childList = list.filter { it.isChildOf == itemId }
+            childList.isNotEmpty() // listにアイテムがあれば　true
+        }
     }
     fun appendList(item: ItemEntity) {
         val list = listObservable.value ?:  mutableListOf()
         list.add(item)
-        listObservable.postValue(list)
+        updateTagAndObservableList(list)
         return
+    }
+    private fun updateTagAndObservableList(_list:MutableList<ItemEntity>){
+        val tagList = _list.distinctBy { it.tag }
+        tagSet.clear()
+        tagList.forEach { tagSet.add(it.tag) }
+        listObservable.postValue(_list)
+
     }
     fun removeItemHasId(id:Int){
         val list = listObservable.value
@@ -44,7 +57,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         } else {
             val idToRemove = list.indexOfFirst { it.id == id }
             list.removeAt(idToRemove)
-            listObservable.postValue(list)
+            updateTagAndObservableList(list)
         }
     }
     fun flipOpenedItemHasId(id:Int){
@@ -96,7 +109,19 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             }
             Log.i("MainViewModel#saveListToDB","list was saved. item was number ${list.size} ")
         }
-
+    }
+    fun setCurrentItemId(itemId: Int){
+        currentId = itemId
+    }
+    fun currentItem()  : ItemEntity{
+        val list = listObservable.value
+        return if (list.isNullOrEmpty()) {
+            Log.w("MainViewModel#currentItem","listObservable is Null or Empty.")
+            ItemEntity(Int.MAX_VALUE,"error current Item")
+        } else {
+            val idToGet = list.indexOfFirst { it.id == currentId }
+            list[idToGet]
+        }
 
 
     }

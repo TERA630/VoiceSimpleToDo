@@ -76,22 +76,26 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
             in contentRange -> {
                 holder.itemView.rowText.text = listWithViewType[position].title
                 if(holder.itemViewType == cParent ){
-                    if (vModel.idHasChild(listWithViewType[position].rootId) ) bindContentsWithChildes(holder,position)
-                    else bindContents(holder,position)
+                    if (vModel.idHasChild(listWithViewType[position].rootId) ) {
+                        bindContentsWithChildes(holder,position)
+                    } else {
+                        bindContents(holder,position)
+                    }
                 }
             }
             footerRange -> bindFooter(holder, position)
             else -> throw IllegalStateException("$position is out of range")
         }
     }
-    class ViewHolderOfCell(private val rowView: View) : RecyclerView.ViewHolder(rowView)
+    class ViewHolderOfCell(rowView: View) : RecyclerView.ViewHolder(rowView)
 
+
+    // lifecycle sub-routine
     private fun makeListToShow(_list: List<ItemEntity>){
         val tagSet = mutableSetOf<String>()
         _list.forEach {
             tagSet.add(it.tag)
         }
-
         val listOfTagAndTopItemWithOpenedChild = mutableListOf<ItemWithViewType>()
         tagSet.forEach{
             tag ->
@@ -113,10 +117,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         contentRange = IntRange(0,listWithViewType.lastIndex)
         footerRange = listWithViewType.lastIndex +1
     }
-
-
     private  fun bindContentsWithChildes(holder: RecyclerView.ViewHolder, position:Int){
-
         holder.itemView.setOnClickListener {
             val id = listWithViewType[position].rootId
             vModel.flipOpenedItemHasId(id)
@@ -124,14 +125,14 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
 
     }
     private fun bindContents(holder: RecyclerView.ViewHolder,position: Int){
-
-
-
+        holder.itemView.setOnClickListener {
+            val idToEdit = listWithViewType[position].rootId
+            vModel.setCurrentItemId(idToEdit)
+            mHandler.transitOriginToDetail()
+        }
     }
 
-    fun setHandler(_handler: OriginFragment.EventToFragment) {
-        this.mHandler = _handler
-    }
+
 
 
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
@@ -144,6 +145,9 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
 
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
                 onFooterEditorEnd(editText, position)
+                return@setOnEditorActionListener true
+            }
+            if (event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) { // Enterキー押したとき
                 return@setOnEditorActionListener true
             }
             if (event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) { // Enterキー押したとき
@@ -162,6 +166,9 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
     fun updateAllList(_list:List<ItemEntity>){
         makeListToShow(_list)
+    }
+    fun setHandler(_handler: OriginFragment.EventToFragment) {
+        this.mHandler = _handler
     }
 
 

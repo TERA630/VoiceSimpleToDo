@@ -5,7 +5,7 @@ import androidx.room.*
 @Entity(tableName = "recordItem")
 data class ItemEntity( // table within the database . field correspond to columns
     @PrimaryKey(autoGenerate = true)
-    var id: Int = 0,
+    var id: Int = 0,        // 実際のアイテムIDは1から開始｡
     var title: String = "",
     var description: String = "",
     var tag: String = "",

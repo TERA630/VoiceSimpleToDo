@@ -1,40 +1,18 @@
 package com.example.voicesimpletodo
 
-
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.fragment_detail.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [DetailFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class DetailFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-        private val vModel by sharedViewModel<MainViewModel>()
 
-
-
-        private var param1: String? = null
-        private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-
-    }
+    private val vModel by sharedViewModel<MainViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,13 +22,42 @@ class DetailFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_detail, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val item = vModel.currentItem()
+        detail_title.setText(item.title)
+        detail_tag.setText(item.tag)
+        detail_description.setText(item.description)
+
+        detail_cancel.setOnClickListener{ transitToOrigin() }
+    }
+
+    private fun transitToOrigin(){
+        activity?.supportFragmentManager?.
+            beginTransaction()?.
+            addToBackStack(null)?.
+            replace(R.id.activityFrame, OriginFragment.newInstance())?.
+            commit()
+    }
+
+    private fun makeSpinner(){
+        val adaptor = ArrayAdapter<String>(this.context!!,android.R.layout.simple_spinner_item)
+       val list = vModel.findParents()
+        list.forEach { adaptor.add(it.title) }
+
+
+
+        
+    }
+
 
     companion object {
         @JvmStatic
-        fun newInstance(itemId:Int) :DetailFragment{
-            val detailFragment = DetailFragment()
-            return detailFragment
+        fun newInstance() :DetailFragment {
+            return DetailFragment()
 
 
-
+        }
     }
+
+}

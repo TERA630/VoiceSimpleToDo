@@ -21,14 +21,14 @@ class OriginFragment:Fragment(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val mAdaptor = HierarchicalAdaptor(vModel)
-        simpleList.adapter = mAdaptor
+        mAdaptor = HierarchicalAdaptor(vModel)
         mAdaptor.setHandler(object :EventToFragment{
-            override fun transitOriginToDetail(itemId: Int) {
+            override fun transitOriginToDetail() {
                 activity?.supportFragmentManager?.
                     beginTransaction()?.
                     addToBackStack(null)?.
-                    replace(R.id.activityFrame, DetailFragment.newInstance(itemId))?.commit()
+                    replace(R.id.activityFrame, DetailFragment.newInstance())?.
+                    commit()
             }
         })
     }
@@ -39,6 +39,7 @@ class OriginFragment:Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        simpleList.adapter = mAdaptor
         vModel.listObservable.observe(this, Observer {
             mAdaptor.updateAllList(it)
             mAdaptor.notifyDataSetChanged()
@@ -46,7 +47,7 @@ class OriginFragment:Fragment(){
     }
 
     interface EventToFragment {
-        fun transitOriginToDetail(itemId:Int)
+        fun transitOriginToDetail()
     }
 
 

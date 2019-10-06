@@ -46,6 +46,7 @@ class  MainActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+    // Lifecycle sub-routine
     private fun constructViews(savedInstanceState: Bundle?){
         setContentView(R.layout.activity_main)
         if(savedInstanceState == null) {
@@ -54,19 +55,10 @@ class  MainActivity : AppCompatActivity() {
                 .add(R.id.activityFrame,originFragment)
                 .commit()
         }
-        // recycler view
-
         setSupportActionBar(toolbar)
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
-    }
-    private fun moveToDetailFragment(itemId:Int){
-        val detailFragment = DetailFragment.newInstance(itemId)
-        supportFragmentManager.beginTransaction()
-            .add(R.id.activityFrame,detailFragment)
-            .commit()
-
     }
 }
