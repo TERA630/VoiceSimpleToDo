@@ -13,7 +13,7 @@
         android:layout_width="match_parent" android:layout_height="wrap_content">
 
         <EditText
-            android:id="@+id/originNewText"
+            android:id="@+id/footerText"
             android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:background="@android:color/transparent" android:hint="@string/enterNewItem"

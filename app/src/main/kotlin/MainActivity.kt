@@ -4,33 +4,31 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class  MainActivity : AppCompatActivity() {
 
     private val vModel by viewModel<MainViewModel>()
 
+    // Activity Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vModel.init()
-        constructViews()
+        constructViews(savedInstanceState)
     }
-
     override fun onPause() {
         super.onPause()
         vModel.saveListToDB()
     }
 
+    // Activity Event
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -38,29 +36,25 @@ class  MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.saveItems -> {
                 vModel.saveListToDB()
-                return true
+                true
             }
             R.id.restoreItems->{
                 vModel.init()
-                return true
+                true
             }
-
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
     }
-
-    private fun constructViews(){
+    // Lifecycle sub-routine
+    private fun constructViews(savedInstanceState: Bundle?){
         setContentView(R.layout.activity_main)
-        // recycler view
-        val adaptor = HierarchicalAdaptor(vModel)
-        simpleList.adapter = adaptor
-
-        vModel.listObservable.observe(this, Observer {
-            adaptor.updateAllList(it)
-            adaptor.notifyDataSetChanged()
-        })
-
+        if(savedInstanceState == null) {
+            val originFragment = OriginFragment.newInstance()
+            supportFragmentManager.beginTransaction()
+                .add(R.id.activityFrame,originFragment)
+                .commit()
+        }
         setSupportActionBar(toolbar)
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)

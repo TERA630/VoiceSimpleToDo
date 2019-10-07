@@ -5,7 +5,7 @@ import androidx.room.*
 @Entity(tableName = "recordItem")
 data class ItemEntity( // table within the database . field correspond to columns
     @PrimaryKey(autoGenerate = true)
-    var id: Int = 0,
+    var id: Int = 0,        // 実際のアイテムIDは1から開始｡
     var title: String = "",
     var description: String = "",
     var tag: String = "",
@@ -33,11 +33,7 @@ interface MyDao {
     suspend fun delete(item: ItemEntity)
 }
 
-@Database(entities = [ItemEntity::class], exportSchema = false, version = 1)
+@Database(entities = [ItemEntity::class], exportSchema = false, version = 2)
 abstract class MyDataBase : RoomDatabase() {
     abstract fun myDao(): MyDao
-
-    companion object {
-        private var instance: MyDataBase? = null
-    }
 }

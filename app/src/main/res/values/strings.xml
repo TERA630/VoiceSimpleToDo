@@ -12,6 +12,8 @@
     <string name="requireAudioPermission">このアプリの利用には音声の録音を許可してください</string>
     <string name="hearing">認識中</string>
     <string name="listening">listening..</string>
+    <string name="inputOK">確定</string>
+    <string name="cancel">cancel</string>
     // Content
     <string name="button">push to action</string>
     <string name="rowContents">enter row item</string>
@@ -19,4 +21,12 @@
     <string name="undo">元に戻す</string>
     <string name="restoreDefault">アイテムを以前の状態に戻す</string>
     <string name="saveCurrentFile">現在のファイルにセーブする</string>
+    // hint
+    <string name="hint_title">アイテムのタイトルを入力</string>
+    <string name="hint_tag">分類などタグを入力</string>
+    <string name="hint_parent">親アイテムを選択します</string>
+    <string name="hint_description">アイテムの詳細を入力</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

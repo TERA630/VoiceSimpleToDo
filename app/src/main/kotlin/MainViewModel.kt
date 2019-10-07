@@ -9,7 +9,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
-    val listObservable  = MutableLiveData<MutableList<ItemEntity>>().apply{ value = makeDummyList()}
+    val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
+    val tagSet = mutableSetOf<String>()
+    var currentId  = 1
 
     fun init() {
         viewModelScope.launch {
@@ -23,43 +25,45 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
                 Log.i("MainViewModel#init","list was fetched. number of list was ${list.size}")
                 list
             }
-            listObservable.postValue(listFromDBOrDefault)
-        }
-    }
-    fun appendList(item: ItemEntity) {
-        val list = listObservable.value ?:  mutableListOf()
-        list.add(item)
-        listObservable.postValue(list)
-        return
-    }
-    fun removeItemHasId(id:Int){
-        val list = listObservable.value
-        if (list.isNullOrEmpty()) {
-            Log.w("MainViewModel#removeItemHasId","listObservable is Null or Empty.")
-        } else {
-            val idToRemove = list.indexOfFirst { it.id == id }
-            list.removeAt(idToRemove)
-            listObservable.postValue(list)
-        }
-    }
-    fun flipOpenedItemHasId(id:Int){
-        val list = listObservable.value
-        if (list.isNullOrEmpty()) {
-            Log.w("MainViewModel#flipOpenedItem","listObservable is Null or Empty.")
-        } else {
-            list[id].isOpened = list[id].isOpened == false // IsOpenedの反転
-            listObservable.postValue(list)
+            updateTagAndList(listFromDBOrDefault)
+
         }
     }
 
-    fun findParents():List<ItemEntity>{
+    fun appendList(item: ItemEntity) {
+        val list = listObservable.value ?:  mutableListOf()
+        list.add(item)
+        updateTagAndList(list)
+        return
+    }
+    fun currentItem()  : ItemEntity{
+        val list = getListValue()
+        val idToGet = list.indexOfFirst { it.id == currentId }
+        return list[idToGet]
+    }
+    private fun getListValue():MutableList<ItemEntity>{
         val list = listObservable.value
-        return if (list == null) {
-            Log.w("MainViewModel#removeItemHasId","listObservable is Null.")
-            emptyList()
-        } else {
-            val listOfTopLevel = list.filter { it.isParent }
-            listOfTopLevel
+        return if (list.isNullOrEmpty()) {
+            Log.w("MainViewModel","listObservable is Null or Empty.")
+            mutableListOf()
+        } else list
+    }
+    fun findParents():List<ItemEntity>{
+        val list = getListValue()
+        return list.filter { it.isParent }
+    }
+    fun flipOpenedItemHasId(id:Int){
+        val list = getListValue()
+        val idToFlip = list.indexOfFirst { it.id == id }
+        list[idToFlip].isOpened = (!list[idToFlip].isOpened) // IsOpenedの反転
+        listObservable.postValue(list)
+    }
+    fun idHasChild(itemId:Int):Boolean{
+        val list = listObservable.value
+        return if(list.isNullOrEmpty() || itemId == 0) false
+        else {
+            val childList = list.filter { it.isChildOf == itemId }
+            childList.isNotEmpty() // listにアイテムがあれば　true
         }
     }
     private fun makeDummyList(): MutableList<ItemEntity> {
@@ -76,20 +80,38 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         result.add(ItemEntity(10,"自転車の空気を確かめる","どちらも","自転車",isParent = true,isChild = false))
         result.add(ItemEntity(11,"入金チェック","SBJ、スルガ、三井住友","財政",isParent = true))
         result.add(ItemEntity(12,"書類整備","クリアファイルに入れて整理","財政",isParent = true))
+        result.add(ItemEntity(13,"股関節柔軟","BMCの動画","運動",isParent = true))
+        result.add(ItemEntity(14,"踵寄せ","座位であぐらをかき､踵を股間に寄せる","運動",isParent = false,isChild = true,isChildOf = 13))
         return result
     }
+    fun removeItemHasId(id:Int){
+        val list = getListValue()
+        val idToRemove = list.indexOfFirst { it.id == id }
+        list.removeAt(idToRemove)
+        updateTagAndList(list)
+    }
     fun saveListToDB(){
-        val list = listObservable.value
-        if (list.isNullOrEmpty()) {
-            Log.w("MainViewModel#removeItemHasId","listObservable is Null or Empty.")
-        } else {
-            runBlocking {
-                myDao.insertAll(list)
-            }
-            Log.i("MainViewModel#saveListToDB","list was saved. item was number ${list.size} ")
+        val list = getListValue()
+        runBlocking {
+            myDao.insertAll(list)
         }
-
-
+        Log.i("MainViewModel#saveListToDB","list was saved. item was number ${list.size} ")
+    }
+    fun setCurrentItemId(itemId: Int){
+        currentId = itemId
+    }
+    fun updateItemHasId(id: Int,item: ItemEntity){
+        val list = getListValue()
+        val idToUpdate = list.indexOfFirst { it.id == id }
+        list[idToUpdate] = item
+        updateTagAndList(list)
+    }
+    private fun updateTagAndList(_list:MutableList<ItemEntity>){
+        val tagList = _list.distinctBy { it.tag }
+        tagSet.clear()
+        tagList.forEach { tagSet.add(it.tag) }
+        listObservable.postValue(_list)
 
     }
+
 }
