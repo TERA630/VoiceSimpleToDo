@@ -29,32 +29,24 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
 
         }
     }
-    fun idHasChild(itemId:Int):Boolean{
-        val list = listObservable.value
-        return if(list.isNullOrEmpty() || itemId == 0) false
-        else {
-            val childList = list.filter { it.isChildOf == itemId }
-            childList.isNotEmpty() // listにアイテムがあれば　true
-        }
-    }
+
     fun appendList(item: ItemEntity) {
         val list = listObservable.value ?:  mutableListOf()
         list.add(item)
         updateTagAndList(list)
         return
     }
-    private fun updateTagAndList(_list:MutableList<ItemEntity>){
-        val tagList = _list.distinctBy { it.tag }
-        tagSet.clear()
-        tagList.forEach { tagSet.add(it.tag) }
-        listObservable.postValue(_list)
-
-    }
-    fun removeItemHasId(id:Int){
+    fun currentItem()  : ItemEntity{
         val list = getListValue()
-        val idToRemove = list.indexOfFirst { it.id == id }
-        list.removeAt(idToRemove)
-        updateTagAndList(list)
+        val idToGet = list.indexOfFirst { it.id == currentId }
+        return list[idToGet]
+    }
+    private fun getListValue():MutableList<ItemEntity>{
+        val list = listObservable.value
+        return if (list.isNullOrEmpty()) {
+            Log.w("MainViewModel","listObservable is Null or Empty.")
+            mutableListOf()
+        } else list
     }
     fun findParents():List<ItemEntity>{
         val list = getListValue()
@@ -66,12 +58,13 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         list[idToFlip].isOpened = (!list[idToFlip].isOpened) // IsOpenedの反転
         listObservable.postValue(list)
     }
-    private fun getListValue():MutableList<ItemEntity>{
+    fun idHasChild(itemId:Int):Boolean{
         val list = listObservable.value
-        return if (list.isNullOrEmpty()) {
-            Log.w("MainViewModel","listObservable is Null or Empty.")
-            mutableListOf()
-        } else list
+        return if(list.isNullOrEmpty() || itemId == 0) false
+        else {
+            val childList = list.filter { it.isChildOf == itemId }
+            childList.isNotEmpty() // listにアイテムがあれば　true
+        }
     }
     private fun makeDummyList(): MutableList<ItemEntity> {
         val result = mutableListOf<ItemEntity>()
@@ -91,6 +84,12 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         result.add(ItemEntity(14,"踵寄せ","座位であぐらをかき､踵を股間に寄せる","運動",isParent = false,isChild = true,isChildOf = 13))
         return result
     }
+    fun removeItemHasId(id:Int){
+        val list = getListValue()
+        val idToRemove = list.indexOfFirst { it.id == id }
+        list.removeAt(idToRemove)
+        updateTagAndList(list)
+    }
     fun saveListToDB(){
         val list = getListValue()
         runBlocking {
@@ -101,9 +100,18 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     fun setCurrentItemId(itemId: Int){
         currentId = itemId
     }
-    fun currentItem()  : ItemEntity{
+    fun updateItemHasId(id: Int,item: ItemEntity){
         val list = getListValue()
-        val idToGet = list.indexOfFirst { it.id == currentId }
-        return list[idToGet]
+        val idToUpdate = list.indexOfFirst { it.id == id }
+        list[idToUpdate] = item
+        updateTagAndList(list)
     }
+    private fun updateTagAndList(_list:MutableList<ItemEntity>){
+        val tagList = _list.distinctBy { it.tag }
+        tagSet.clear()
+        tagList.forEach { tagSet.add(it.tag) }
+        listObservable.postValue(_list)
+
+    }
+
 }

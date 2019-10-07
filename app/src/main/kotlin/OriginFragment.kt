@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.fragment_origin.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class OriginFragment:Fragment(){
@@ -39,7 +39,7 @@ class OriginFragment:Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        simpleList.adapter = mAdaptor
+        originList.adapter = mAdaptor
         vModel.listObservable.observe(this, Observer {
             mAdaptor.updateAllList(it)
             mAdaptor.notifyDataSetChanged()

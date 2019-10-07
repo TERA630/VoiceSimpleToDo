@@ -89,15 +89,10 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
     class ViewHolderOfCell(rowView: View) : RecyclerView.ViewHolder(rowView)
 
-
     // lifecycle sub-routine
     private fun makeListToShow(_list: List<ItemEntity>){
-        val tagSet = mutableSetOf<String>()
-        _list.forEach {
-            tagSet.add(it.tag)
-        }
         val listOfTagAndTopItemWithOpenedChild = mutableListOf<ItemWithViewType>()
-        tagSet.forEach{
+        vModel.tagSet.forEach{
             tag ->
                 listOfTagAndTopItemWithOpenedChild.add(ItemWithViewType(tag,cTag,0))
                 _list.forEach{ item->
@@ -122,7 +117,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
             val id = listWithViewType[position].rootId
             vModel.flipOpenedItemHasId(id)
         }
-
     }
     private fun bindContents(holder: RecyclerView.ViewHolder,position: Int){
         holder.itemView.setOnClickListener {
@@ -131,9 +125,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
             mHandler.transitOriginToDetail()
         }
     }
-
-
-
 
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
         val iV = holder.itemView
@@ -170,7 +161,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     fun setHandler(_handler: OriginFragment.EventToFragment) {
         this.mHandler = _handler
     }
-
 
     private fun onFooterEditorEnd(editText: TextView,position: Int) {
         val newText = editText.text.toString()

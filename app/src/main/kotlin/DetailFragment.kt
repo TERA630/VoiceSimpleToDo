@@ -25,10 +25,11 @@ class DetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val item = vModel.currentItem()
-        detail_title.setText(item.title)
-        detail_tag.setText(item.tag)
-        detail_description.setText(item.description)
-        makeSpinner()
+        entityToView(item)
+        detail_ok.setOnClickListener {
+            viewToEntity(item)
+            transitToOrigin()
+        }
         detail_cancel.setOnClickListener{ transitToOrigin() }
     }
 
@@ -39,14 +40,24 @@ class DetailFragment : Fragment() {
             replace(R.id.activityFrame, OriginFragment.newInstance())?.
             commit()
     }
-
     private fun makeSpinner(){
         val adaptor = ArrayAdapter<String>(this.context!!,android.R.layout.simple_spinner_item)
        val list = vModel.findParents()
         list.forEach { adaptor.add(it.title) }
         detail_parent.adapter = adaptor
     }
-
+    private fun entityToView(item: ItemEntity){
+        detail_title.setText(item.title)
+        detail_tag.setText(item.tag)
+        detail_description.setText(item.description)
+        makeSpinner()
+    }
+    private fun viewToEntity(item:ItemEntity){
+        item.title = detail_title.text.toString()
+        item.tag = detail_tag.text.toString()
+        item.description = detail_description.text.toString()
+        vModel.updateItemHasId(vModel.currentId,item)
+    }
 
     companion object {
         @JvmStatic
