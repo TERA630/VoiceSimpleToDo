@@ -40,6 +40,7 @@ class DetailFragment : Fragment() {
     }
     private fun makeSpinner(){
         val adaptor = ArrayAdapter<String>(this.context!!,android.R.layout.simple_spinner_item)
+        adaptor.add("なし")
        val list = vModel.findParents()
         list.forEach { adaptor.add(it.title) }
         detail_parent.adapter = adaptor
@@ -55,6 +56,11 @@ class DetailFragment : Fragment() {
     private fun viewToEntity(item:ItemEntity){
         item.title = detail_title.text.toString()
         item.tag = detail_tag.text.toString()
+        val spinnerPosition = detail_parent.selectedItemPosition
+        if(spinnerPosition == 0 ) {
+            item.isChild = false
+            item.isChildOf = 0
+        }
         item.description = detail_description.text.toString()
         vModel.updateItemHasId(vModel.currentId,item)
     }

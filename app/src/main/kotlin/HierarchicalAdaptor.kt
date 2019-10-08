@@ -150,10 +150,12 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
     // event handler
     private fun appendRowItem(text:String,position: Int){
-        vModel.appendList(ItemEntity(11,text,"text description","未分類",isParent = true,isChild = false))
+        val idToAppend = vModel.lastIdOfItems() + 1
+        vModel.appendList(ItemEntity(idToAppend,text,"text description","未分類",isParent = true,isChild = false))
     }
     private fun removeRowItem(position: Int){
         val idToReMove = listWithViewType[position].rootId
+        if(idToReMove==0) return // tagの時はなにもしない｡
         vModel.removeItemHasId(idToReMove)
     }
     private fun onFooterEditorEnd(editText: TextView,position: Int) {

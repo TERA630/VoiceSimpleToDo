@@ -48,6 +48,11 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             mutableListOf()
         } else list
     }
+    fun lastIdOfItems():Int{
+        val list = getListValue()
+        val lastItem = list.maxBy { s -> s.id }
+        return lastItem!!.id
+    }
     fun findParents():List<ItemEntity>{
         val list = getListValue()
         return list.filter { it.isParent }

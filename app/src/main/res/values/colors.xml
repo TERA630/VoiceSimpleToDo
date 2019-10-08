@@ -5,4 +5,7 @@
     <color name="colorAccent">#D81B60</color>
     <color name="cardBackGround">#b0b0a0</color>
     <color name="colorSlightShadow">#f0f0f0</color>
+    <color name="colorLightYellow">#ffffe0</color>
+    <color name="colorWheat">#f5deb3</color>
+    <color name="colorTan">#d2b48c</color>
 </resources>

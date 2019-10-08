@@ -12,13 +12,17 @@
     android:theme="@style/ThemeOverlay.AppCompat.Light"
     app:cardCornerRadius="4dp"
     app:cardElevation="1dp"
-    app:cardUseCompatPadding="true">
+    android:background="@color/colorTan"
+    app:cardUseCompatPadding="true"
+    >
 
     <TextView
         android:id="@+id/rowText"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:padding="4dp"
+        android:background="@color/colorLightYellow"
+        android:paddingStart="10dp"
         android:textSize="14sp"
+        android:paddingEnd="8dp"
         tools:text="this one" />
 
 </androidx.cardview.widget.CardView>
