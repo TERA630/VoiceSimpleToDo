@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.list_footer.view.*
@@ -125,7 +126,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
             mHandler.transitOriginToDetail()
         }
     }
-
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
         val iV = holder.itemView
 
@@ -148,6 +148,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
             return@setOnEditorActionListener false
         }
     }
+    // event handler
     private fun appendRowItem(text:String,position: Int){
         vModel.appendList(ItemEntity(11,text,"text description","未分類",isParent = true,isChild = false))
     }
@@ -155,13 +156,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         val idToReMove = listWithViewType[position].rootId
         vModel.removeItemHasId(idToReMove)
     }
-    fun updateAllList(_list:List<ItemEntity>){
-        makeListToShow(_list)
-    }
-    fun setHandler(_handler: OriginFragment.EventToFragment) {
-        this.mHandler = _handler
-    }
-
     private fun onFooterEditorEnd(editText: TextView,position: Int) {
         val newText = editText.text.toString()
         if (newText.isBlank()) return
@@ -169,6 +163,22 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         editText.text = ""
         editText.hideSoftKeyBoard()
     }
+
+    // public method
+    fun updateAllList(_list:List<ItemEntity>){
+        val old  = mutableListOf<ItemWithViewType>()
+        old.addAll(listWithViewType)
+        val oldList = old.toList()
+        makeListToShow(_list)
+        val new = listWithViewType
+        val diffResult = DiffUtil.calculateDiff(MyDiffUtil(oldList,new),true)
+        diffResult.dispatchUpdatesTo(this)
+    }
+    fun setHandler(_handler: OriginFragment.EventToFragment) {
+        this.mHandler = _handler
+    }
+
+
 }
 
 class ItemWithViewType( val title:String,

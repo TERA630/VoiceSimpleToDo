@@ -42,7 +42,6 @@ class OriginFragment:Fragment(){
         originList.adapter = mAdaptor
         vModel.listObservable.observe(this, Observer {
             mAdaptor.updateAllList(it)
-            mAdaptor.notifyDataSetChanged()
         })
     }
 

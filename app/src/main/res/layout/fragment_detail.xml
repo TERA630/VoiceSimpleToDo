@@ -18,7 +18,7 @@
 
         tools:text="Title"
         android:importantForAutofill="no" />
-    <EditText android:id="@+id/detail_tag"
+    <AutoCompleteTextView android:id="@+id/detail_tag"
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginStart="16dp" android:layout_marginTop="8dp"
         android:inputType="text" app:layout_constraintStart_toStartOf="parent"

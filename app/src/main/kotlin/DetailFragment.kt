@@ -9,14 +9,12 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_detail.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-
 class DetailFragment : Fragment() {
 
     private val vModel by sharedViewModel<MainViewModel>()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_detail, container, false)
@@ -48,7 +46,9 @@ class DetailFragment : Fragment() {
     }
     private fun entityToView(item: ItemEntity){
         detail_title.setText(item.title)
-        detail_tag.setText(item.tag)
+        val arrayAdapter = ArrayAdapter<String>(this.context!!,android.R.layout.simple_list_item_1)
+        arrayAdapter.addAll(vModel.tagSet)
+        detail_tag.setAdapter(arrayAdapter)
         detail_description.setText(item.description)
         makeSpinner()
     }

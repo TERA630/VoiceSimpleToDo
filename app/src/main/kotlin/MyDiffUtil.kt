@@ -6,11 +6,15 @@ class MyDiffUtil(private val old:List<ItemWithViewType>,
                  private val new:List<ItemWithViewType>):DiffUtil.Callback(){
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val titleSame = old[oldItemPosition].title == new[newItemPosition].title
+        val viewTypeSame =  old[oldItemPosition].viewType == new[newItemPosition].viewType
+        return titleSame and viewTypeSame
     }
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val idSame = old[oldItemPosition].rootId == new[newItemPosition].rootId
+        val titleSame = old[oldItemPosition].title == new[newItemPosition].title
+        return idSame and titleSame
     }
 
     override fun getNewListSize(): Int {
