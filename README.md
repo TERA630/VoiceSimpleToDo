@@ -7,11 +7,14 @@
 
 #調べたこと
 ##Koin＋Room
-Viewmodel　
-Activityでは　val myViewmodel by viewModel<MainViewModel>()
-Fragementでは val myViewmodel by sharedViewModel<MainViewModel>()
+Viewmodelを呼び出せる｡
+Activityでは　
+       val myViewmodel by viewModel<MainViewModel>()
+Fragementでは 
+       val myViewmodel by sharedViewModel<MainViewModel>()
 
 Applicaitonクラスを継承したMyApplicaitonクラスで
+       
        startKoin {
             androidContext(this@MyApplication)
             modules(myModule)
