@@ -1,13 +1,25 @@
 package com.example.voicesimpletodo
 
+import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.work.Constraints
 import com.google.android.material.snackbar.Snackbar
+import com.google.auth.oauth2.AccessToken
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.*
 
+/** We reuse an access token if its expiration time is longer than this.  */
+const val ACCESS_TOKEN_EXPIRATION_TOLERANCE = 30 * 60 * 1000 // thirty minutes
+/** We refresh the current access token before it expires.  */
+const val ACCESS_TOKEN_FETCH_MARGIN = 60 * 1000 // one minute
+const val HOSTNAME = "speech.googleapis.com"
+const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
+const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
+const val PREFS = "SpeechService"
 class  MainActivity : AppCompatActivity() {
 
     private val vModel by viewModel<MainViewModel>()
@@ -17,6 +29,8 @@ class  MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         vModel.init()
         constructViews(savedInstanceState)
+        val token = getAccessTokenFromPreference() ?: startWorker()
+
     }
     override fun onPause() {
         super.onPause()
@@ -60,5 +74,26 @@ class  MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
+    }
+    private fun getAccessTokenFromPreference(): AccessToken? {
+        val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return null
+
+        val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null)
+        val expirationTime = prefs.getLong(PREF_ACCESS_TOKEN_EXPIRATION_TIME, -1L)
+
+        return if (tokenValue.isNullOrEmpty() || expirationTime < 0) null
+        else if (expirationTime > System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TOLERANCE)
+            AccessToken(tokenValue, Date(expirationTime))
+        else null
+    }
+
+    private fun startWorker(){
+        val constraints = Constraints.Builder()
+            .setRequiresCharging(false)
+            .build()
+
+    //    val request = PeriodicWorkRequestBuilder<ConfidenceWorker>(1,TimeUnit.HOURS)
+   //        .setConstraints(constraints)
+    //        .build()
     }
 }
