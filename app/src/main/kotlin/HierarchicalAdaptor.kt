@@ -59,7 +59,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
                 return ViewHolderOfCell(itemView)
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
             cChild->{
-                val itemView = layoutInflater.inflate(R.layout.row_child,parent,false)
+                val itemView = layoutInflater.inflate(R.layout.item_child,parent,false)
                 return ViewHolderOfCell(itemView)
             }
             cTag ->{
