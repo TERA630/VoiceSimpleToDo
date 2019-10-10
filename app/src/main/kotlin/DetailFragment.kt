@@ -41,7 +41,7 @@ class DetailFragment : Fragment() {
         detail_title.setText(item.title)
         val arrayAdapter = ArrayAdapter<String>(this.context!!,android.R.layout.simple_list_item_1)
         arrayAdapter.addAll(vModel.tagSet)
-
+        detail_tag.setText(item.tag)
         detail_tag.setAdapter(arrayAdapter)
         detail_description.setText(item.description)
         makeSpinner()

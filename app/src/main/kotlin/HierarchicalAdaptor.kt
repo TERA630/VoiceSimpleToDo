@@ -9,8 +9,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.item_card.view.*
 import kotlinx.android.synthetic.main.list_footer.view.*
-import kotlinx.android.synthetic.main.simplerow.view.*
 
 class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     // Local Const
@@ -55,7 +55,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
 
         when (viewType) {
             cParent -> {
-                val itemView = layoutInflater.inflate(R.layout.simplerow, parent, false)
+                val itemView = layoutInflater.inflate(R.layout.item_card, parent, false)
                 return ViewHolderOfCell(itemView)
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
             cChild->{
