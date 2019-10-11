@@ -1,5 +1,6 @@
 package com.example.voicesimpletodo
 
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -10,7 +11,8 @@ class FlexBoxAdaptor(val items:List<String>) :RecyclerView.Adapter<FlexBoxAdapto
         return items.size
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FlexBoxVH {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.flex_item, parent, false)
+        return FlexBoxVH(itemView)
     }
 
     override fun onBindViewHolder(holder: FlexBoxVH, position: Int) {

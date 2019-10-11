@@ -51,7 +51,7 @@ class DetailFragment : Fragment() {
         flexBoxLayoutManager.justifyContent = JustifyContent.FLEX_START
         flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
         detail_tag2.layoutManager = flexBoxLayoutManager
-        val flexAdaptor = FlexBoxAdaptor()
+        val flexAdaptor = FlexBoxAdaptor(vModel.tagSet.toList())
         detail_tag2.adapter = flexAdaptor
 
 

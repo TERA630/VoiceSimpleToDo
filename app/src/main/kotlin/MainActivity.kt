@@ -27,8 +27,7 @@ class  MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         vModel.init()
         constructViews(savedInstanceState)
-        val token = getAccessTokenFromPreference() ?: startWorker()
-
+   //     val token = getAccessTokenFromPreference() ?: startWorker()
     }
     override fun onPause() {
         super.onPause()
