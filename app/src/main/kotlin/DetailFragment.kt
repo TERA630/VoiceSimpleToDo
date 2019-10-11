@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import com.google.android.flexbox.*
 import kotlinx.android.synthetic.main.fragment_detail.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
@@ -43,6 +44,18 @@ class DetailFragment : Fragment() {
         arrayAdapter.addAll(vModel.tagSet)
         detail_tag.setText(item.tag)
         detail_tag.setAdapter(arrayAdapter)
+
+        val flexBoxLayoutManager = FlexboxLayoutManager(this.context)
+        flexBoxLayoutManager.flexDirection = FlexDirection.ROW
+        flexBoxLayoutManager.flexWrap = FlexWrap.WRAP
+        flexBoxLayoutManager.justifyContent = JustifyContent.FLEX_START
+        flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
+        detail_tag2.layoutManager = flexBoxLayoutManager
+        val flexAdaptor = FlexBoxAdaptor()
+        detail_tag2.adapter = flexAdaptor
+
+
+
         detail_description.setText(item.description)
         makeSpinner()
     }

@@ -12,9 +12,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
-/** We reuse an access token if its expiration time is longer than this.  */
 const val ACCESS_TOKEN_EXPIRATION_TOLERANCE = 30 * 60 * 1000 // thirty minutes
-/** We refresh the current access token before it expires.  */
 const val ACCESS_TOKEN_FETCH_MARGIN = 60 * 1000 // one minute
 const val HOSTNAME = "speech.googleapis.com"
 const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
