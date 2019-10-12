@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.flex_item.view.*
 
 class FlexBoxAdaptor(val items:List<String>) :RecyclerView.Adapter<FlexBoxAdaptor.FlexBoxVH>(){
 
@@ -16,7 +17,7 @@ class FlexBoxAdaptor(val items:List<String>) :RecyclerView.Adapter<FlexBoxAdapto
     }
 
     override fun onBindViewHolder(holder: FlexBoxVH, position: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        holder.itemView.item_name.text = items[position]
     }
     class FlexBoxVH(view: View):RecyclerView.ViewHolder(view)
 }

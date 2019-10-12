@@ -1,16 +1,12 @@
 package com.example.voicesimpletodo
 
-import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.work.Constraints
 import com.google.android.material.snackbar.Snackbar
-import com.google.auth.oauth2.AccessToken
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.*
 
 const val ACCESS_TOKEN_EXPIRATION_TOLERANCE = 30 * 60 * 1000 // thirty minutes
 const val ACCESS_TOKEN_FETCH_MARGIN = 60 * 1000 // one minute
@@ -27,7 +23,8 @@ class  MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         vModel.init()
         constructViews(savedInstanceState)
-   //     val token = getAccessTokenFromPreference() ?: startWorker()
+     //   val token = getAccessTokenFromPreference() ?: startWorker()
+
     }
     override fun onPause() {
         super.onPause()
@@ -72,7 +69,7 @@ class  MainActivity : AppCompatActivity() {
                 .setAction("Action", null).show()
         }
     }
-    private fun getAccessTokenFromPreference(): AccessToken? {
+/*    private fun getAccessTokenFromPreference(): AccessToken? {
         val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return null
 
         val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null)
@@ -84,13 +81,13 @@ class  MainActivity : AppCompatActivity() {
         else null
     }
 
-    private fun startWorker(){
-        val constraints = Constraints.Builder()
+      private fun startWorker(){
+       val constraints = Constraints.Builder()
             .setRequiresCharging(false)
             .build()
 
-    //    val request = PeriodicWorkRequestBuilder<ConfidenceWorker>(1,TimeUnit.HOURS)
-   //        .setConstraints(constraints)
-    //        .build()
-    }
+        val request = PeriodicWorkRequestBuilder<ConfidenceWorker>(1, TimeUnit.HOURS)
+           .setConstraints(constraints)
+            .build()
+    }*/
 }
