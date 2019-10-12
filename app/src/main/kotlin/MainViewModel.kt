@@ -10,7 +10,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
-    val tagSet = mutableSetOf<String>()
+    val currentTagSet = mutableSetOf<String>()
+    val tagHistroy:MutableSet<String> = mutableSetOf<String>()
     var currentId  = 1
 
     fun init() {
@@ -113,8 +114,9 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     }
     private fun updateTagAndList(_list:MutableList<ItemEntity>){
         val tagList = _list.distinctBy { it.tag }
-        tagSet.clear()
-        tagList.forEach { tagSet.add(it.tag) }
+        currentTagSet.clear()
+        tagList.forEach { currentTagSet.add(it.tag) }
+        tagHistroy.addAll(currentTagSet)
         listObservable.postValue(_list)
 
     }

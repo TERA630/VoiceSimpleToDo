@@ -93,7 +93,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     // lifecycle sub-routine
     private fun makeListToShow(_list: List<ItemEntity>){
         val listOfTagAndTopItemWithOpenedChild = mutableListOf<ItemWithViewType>()
-        vModel.tagSet.forEach{
+        vModel.currentTagSet.forEach{
             tag ->
                 listOfTagAndTopItemWithOpenedChild.add(ItemWithViewType(tag,cTag,0))
                 _list.forEach{ item->

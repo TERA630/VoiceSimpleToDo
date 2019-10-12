@@ -36,4 +36,8 @@ interface MyDao {
 @Database(entities = [ItemEntity::class], exportSchema = false, version = 2)
 abstract class MyDataBase : RoomDatabase() {
     abstract fun myDao(): MyDao
+
+    companion object {
+        private var instance: MyDataBase? = null
+    }
 }

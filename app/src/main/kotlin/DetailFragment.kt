@@ -41,7 +41,7 @@ class DetailFragment : Fragment() {
     private fun entityToView(item: ItemEntity){
         detail_title.setText(item.title)
         val arrayAdapter = ArrayAdapter<String>(this.context!!,android.R.layout.simple_list_item_1)
-        arrayAdapter.addAll(vModel.tagSet)
+        arrayAdapter.addAll(vModel.currentTagSet)
         detail_tag.setText(item.tag)
         detail_tag.setAdapter(arrayAdapter)
 
@@ -51,7 +51,7 @@ class DetailFragment : Fragment() {
         flexBoxLayoutManager.justifyContent = JustifyContent.FLEX_START
         flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
         detail_tag2.layoutManager = flexBoxLayoutManager
-        val flexAdaptor = FlexBoxAdaptor(vModel.tagSet.toList())
+        val flexAdaptor = FlexBoxAdaptor(vModel.currentTagSet.toList())
         detail_tag2.adapter = flexAdaptor
 
 
