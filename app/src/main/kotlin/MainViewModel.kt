@@ -30,7 +30,15 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
 
         }
     }
-
+    fun appendTag(text:String){
+        val item = currentItem()
+        val itemTags = currentItem().tag.split(",").toMutableList()
+        itemTags.add(text)
+        val buffer = StringBuilder()
+        val newTags = itemTags.joinTo(buffer,",")
+        item.tag = newTags.toString()
+        tagHistroy.add(text)
+    }
     fun appendList(item: ItemEntity) {
         val list = listObservable.value ?:  mutableListOf()
         list.add(item)

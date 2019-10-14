@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.flex_end.view.*
 import kotlinx.android.synthetic.main.flex_item.view.*
 
-class FlexBoxAdaptor(private val thisItemsTag:List<String>, private val tagsHistory:List<String>,viewModel: MainViewModel) :RecyclerView.Adapter<FlexBoxAdaptor.FlexBoxVH>(){
+class FlexBoxAdaptor(private val thisItemsTag:List<String>, private val tagsHistory:List<String>,private val viewModel: MainViewModel) :RecyclerView.Adapter<FlexBoxAdaptor.FlexBoxVH>(){
     private val cItem = 0
     private val cEnd = 1
     private lateinit var contextHere:Context
@@ -60,6 +60,7 @@ class FlexBoxAdaptor(private val thisItemsTag:List<String>, private val tagsHist
         iv.tag_add.setOnClickListener{
             iv.end_flipper.showNext()
         }
+        iv.tag_autocompleteAdd.threshold = 1
         iv.tag_autocompleteAdd.onItemSelectedListener= object :AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     val item = tagsHistory[position]
@@ -69,10 +70,13 @@ class FlexBoxAdaptor(private val thisItemsTag:List<String>, private val tagsHist
                 Log.i("flex_end","nothing selected..")
             }
         }
-        iv.tag_autocompleteAdd!!.text
-
-
-
+        iv.tag_autocompleteAdd!!.setOnEditorActionListener { v, actionId, event ->
+            if(v.text.isNullOrBlank()) return@setOnEditorActionListener false
+            val text = v.text
+                viewModel.appendTag()
+                return@setOnEditorActionListener true
+            }
+        }
     }
 
     class FlexBoxVH(view: View):RecyclerView.ViewHolder(view)
