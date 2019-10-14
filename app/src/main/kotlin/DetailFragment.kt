@@ -40,10 +40,7 @@ class DetailFragment : Fragment() {
     // lifecycle sub-routine
     private fun entityToView(item: ItemEntity){
         detail_title.setText(item.title)
-        val arrayAdapter = ArrayAdapter<String>(this.context!!,android.R.layout.simple_list_item_1)
-        arrayAdapter.addAll(vModel.currentTagSet)
-        detail_tag.setText(item.tag)
-        detail_tag.setAdapter(arrayAdapter)
+
 
         val flexBoxLayoutManager = FlexboxLayoutManager(this.context)
         flexBoxLayoutManager.flexDirection = FlexDirection.ROW
@@ -51,11 +48,8 @@ class DetailFragment : Fragment() {
         flexBoxLayoutManager.justifyContent = JustifyContent.FLEX_START
         flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
         detail_tag2.layoutManager = flexBoxLayoutManager
-        val flexAdaptor = FlexBoxAdaptor(vModel.currentTagSet.toList())
+        val flexAdaptor = FlexBoxAdaptor(vModel.tagHistroy.toList())
         detail_tag2.adapter = flexAdaptor
-
-
-
         detail_description.setText(item.description)
         makeSpinner()
     }
@@ -73,7 +67,6 @@ class DetailFragment : Fragment() {
     }
     private fun viewToEntity(item:ItemEntity){
         item.title = detail_title.text.toString()
-        item.tag = detail_tag.text.toString()
         val spinnerPosition = detail_parent.selectedItemPosition
         if(spinnerPosition == 0 ) {
             item.isChild = false
