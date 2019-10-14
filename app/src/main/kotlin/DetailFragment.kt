@@ -48,7 +48,10 @@ class DetailFragment : Fragment() {
         flexBoxLayoutManager.justifyContent = JustifyContent.FLEX_START
         flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
         detail_tag2.layoutManager = flexBoxLayoutManager
-        val flexAdaptor = FlexBoxAdaptor(vModel.tagHistroy.toList())
+
+        val tags = item.tag.split(",")
+
+        val flexAdaptor = FlexBoxAdaptor(tags,vModel.tagHistroy.toList())
         detail_tag2.adapter = flexAdaptor
         detail_description.setText(item.description)
         makeSpinner()

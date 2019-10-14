@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/end_flipper" android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+<androidx.appcompat.widget.AppCompatImageView
+    android:id="@+id/tag_add"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:padding="8dp"
+    android:src="@drawable/ic_add_box_black_24dp"/>
+    <AutoCompleteTextView android:id="@+id/tag_autocompleteAdd"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginStart="16dp" android:layout_marginTop="8dp"
+        android:hint="@string/hint_tag"
+        android:importantForAutofill="no"
+        android:inputType="text" />
+</ViewFlipper>
