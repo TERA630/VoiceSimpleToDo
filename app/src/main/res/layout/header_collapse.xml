@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="150dp"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
     android:orientation="vertical">
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:text="we will make flex box here \n if we could. \n if we can not that \n we have to make recycler view header \n
+however collapse is from window 0,0 \n it is trouble \n because toolbar always comes over this view"
+        android:textColor="@color/colorTan"/>
 </LinearLayout>

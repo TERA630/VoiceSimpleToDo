@@ -7,12 +7,11 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
     <!-- AppBarLayoutはDefaultで Behaviorはセット済みなため記述しない -->
-    <!-- サイズはMedium,Android.keicodeでも設定している｡-->
     <!-- ここからスクロール　-->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="@color/cardview_shadow_end_color"
+        android:layout_height="wrap_content"
+        android:background="@color/colorWheat"
         android:theme="@style/AppTheme.AppBarOverlay">
         <!-- enterAlwaysCollapsed 上までスクロールすると出てくる-->>
     <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -21,11 +20,7 @@
         android:fitsSystemWindows="true"
         app:expandedTitleGravity="top|center"
         app:layout_scrollFlags="scroll|enterAlwaysCollapsed">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:text="we will make flex box here \n if we could. \n if we can not that /n we have to make recycler view header"
-            android:textColor="@color/colorTan"/>
+        <!-- Toolbarと被る-->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -43,7 +38,8 @@
         android:layout_width="match_parent" android:layout_height="match_parent"
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:background="@color/colorTan" />
+        android:background="@color/colorTan">
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
