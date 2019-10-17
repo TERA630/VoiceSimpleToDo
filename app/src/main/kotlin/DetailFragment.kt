@@ -10,6 +10,11 @@ import com.google.android.flexbox.*
 import kotlinx.android.synthetic.main.fragment_detail.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
+// TODO
+// cancel時のTagの扱い
+//
+
+
 class DetailFragment : Fragment() {
 
     private val vModel by sharedViewModel<MainViewModel>()
@@ -19,7 +24,6 @@ class DetailFragment : Fragment() {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_detail, container, false)
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val item = vModel.currentItem()
@@ -41,7 +45,6 @@ class DetailFragment : Fragment() {
     private fun entityToView(item: ItemEntity){
         detail_title.setText(item.title)
 
-
         val flexBoxLayoutManager = FlexboxLayoutManager(this.context)
         flexBoxLayoutManager.flexDirection = FlexDirection.ROW
         flexBoxLayoutManager.flexWrap = FlexWrap.WRAP
@@ -49,9 +52,12 @@ class DetailFragment : Fragment() {
         flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
         detail_tag2.layoutManager = flexBoxLayoutManager
 
-        val tags = item.tag.split(",")
-
-        val flexAdaptor = FlexBoxAdaptor(tags,vModel.tagHistroy.toList(),vModel)
+        val thisTag = item.tag
+        val tags = if(thisTag == "") { // タグがなければFlexboxのアダプターにはEmptyListを渡す。
+            emptyList<String>().toMutableList()} else {
+            thisTag.split(",").toMutableList()
+        }
+        val flexAdaptor = FlexBoxAdaptor(tags,vModel.tagHistory.toList(),vModel)
         detail_tag2.adapter = flexAdaptor
         detail_description.setText(item.description)
         makeSpinner()
@@ -63,8 +69,10 @@ class DetailFragment : Fragment() {
         parentIdList.clear()
         parentIdList.add(0)
         list.forEach {
-            adaptor.add(it.title)
-            parentIdList.add((it.id))
+            if(it != vModel.currentItem()){
+                adaptor.add(it.title)
+                parentIdList.add((it.id))
+            }
         }
         detail_parent.adapter = adaptor
     }

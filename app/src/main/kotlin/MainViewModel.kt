@@ -11,7 +11,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
     val currentTagSet = mutableSetOf<String>()
-    val tagHistroy:MutableSet<String> = mutableSetOf<String>()
+    val tagHistory:MutableSet<String> = mutableSetOf()
     var currentId  = 1
 
     fun init() {
@@ -19,15 +19,8 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             val list  = withTimeoutOrNull(1000L){
                 myDao.findAll().toMutableList()
             }
-            val listFromDBOrDefault = if(list == null || list.size == 0){
-                Log.i("MainViewModel#init","Dummy list was fetched.")
-                makeDummyList()
-            } else {
-                Log.i("MainViewModel#init","list was fetched. number of list was ${list.size}")
-                list
-            }
+            val listFromDBOrDefault =  list?.takeIf { it.isEmpty() } ?:makeDummyList()
             updateTagAndList(listFromDBOrDefault)
-
         }
     }
     fun appendTag(text:String){
@@ -37,7 +30,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         val buffer = StringBuilder()
         val newTags = itemTags.joinTo(buffer,",")
         item.tag = newTags.toString()
-        tagHistroy.add(text)
+        tagHistory.add(text)
     }
     fun appendList(item: ItemEntity) {
         val list = listObservable.value ?:  mutableListOf()
@@ -50,14 +43,14 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         val idToGet = list.indexOfFirst { it.id == currentId }
         return list[idToGet]
     }
-    private fun getListValue():MutableList<ItemEntity>{
+    private fun getListValue():MutableList<ItemEntity>{ // non-null なリストを返す。　リストがNullなら空リストを返す。
         val list = listObservable.value
         return if (list.isNullOrEmpty()) {
             Log.w("MainViewModel","listObservable is Null or Empty.")
             mutableListOf()
         } else list
     }
-    fun lastIdOfItems():Int{
+    fun lastIdOfItems():Int{ // 現在のアイテムで最大のIdを返す。　アイテム追加時にIdが被らないように使用している。
         val list = getListValue()
         val lastItem = list.maxBy { s -> s.id }
         return lastItem!!.id
@@ -82,7 +75,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     }
     private fun makeDummyList(): MutableList<ItemEntity> {
         val result = mutableListOf<ItemEntity>()
-        result.add(ItemEntity(1, "靴下を履く", "まず腰を下ろす", "準備", isParent = true, isChild = false))
+        result.add(ItemEntity(1, "Wearing socks", "まず腰を下ろす", "準備,服装", isParent = true, isChild = false))
         result.add(ItemEntity(2, "天気を確認する", "スマホ", "準備", isParent = true, isChild = false))
         result.add(ItemEntity(3, "服に着替える", "自転車通勤か電車通勤か､研究会があるか", "準備", isParent = true, isChild = false))
         result.add(ItemEntity(4, "口を洗浄する", "うがい､歯磨き", tag = "準備", isParent = true, isOpened = false,isChild = false))
@@ -104,6 +97,14 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         list.removeAt(idToRemove)
         updateTagAndList(list)
     }
+    fun removeTag(textToRemove:String){
+        val item = currentItem()
+        val itemTags = currentItem().tag.split(",").toMutableList()
+        itemTags.remove(textToRemove)
+        val buffer = StringBuilder()
+        val newTags = itemTags.joinTo(buffer,",")
+        item.tag = newTags.toString()
+    }
     fun saveListToDB(){
         val list = getListValue()
         runBlocking {
@@ -124,9 +125,8 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         val tagList = _list.distinctBy { it.tag }
         currentTagSet.clear()
         tagList.forEach { currentTagSet.add(it.tag) }
-        tagHistroy.addAll(currentTagSet)
+        tagHistory.addAll(currentTagSet)
         listObservable.postValue(_list)
-
     }
 
 }

@@ -1,30 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- CoordinatorLayoutは　FrameLayoutの継承-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent" android:layout_height="match_parent"
     tools:context=".MainActivity">
-
+    <!-- AppBarLayoutはDefaultで Behaviorはセット済みなため記述しない -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:background="@color/colorSlightShadow"
         android:theme="@style/AppTheme.AppBarOverlay">
-
+        <!-- enterAlwaysCollapsed 上までスクロールすると出てくる-->>
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        app:layout_scrollFlags="scroll|enterAlwaysCollapsed">
+        <include layout="@layout/header_collapse"/>
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-    </com.google.android.material.appbar.AppBarLayout>
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:layout_scrollFlags="enterAlways" />
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
 
+    </com.google.android.material.appbar.AppBarLayout>
+    <!--　RecycleViewやNestedScroll Viewは　AppBarLayoutの外-->
+    <!-- AppBarLayoutと同じ振る舞いをするように同じBehavior(AppBarLayout$scrolling_view_behavior)をセットする-->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/activityFrame"
         android:layout_width="match_parent" android:layout_height="match_parent"
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:background="@color/colorTan"
-        />
+        android:background="@color/colorTan" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
