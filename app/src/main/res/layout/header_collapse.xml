@@ -5,7 +5,6 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:text="we will make flex box here \n if we could. \n if we can not that \n we have to make recycler view header \n
-however collapse is from window 0,0 \n it is trouble \n because toolbar always comes over this view"
+        android:text="@string/testDescription"
         android:textColor="@color/colorTan"/>
 </LinearLayout>
