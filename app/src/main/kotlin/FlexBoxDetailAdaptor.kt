@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.flex_end.view.*
 import kotlinx.android.synthetic.main.flex_item.view.*
 
-class FlexBoxAdaptor(private val thisItemsTag:MutableList<String>, private val tagsHistory:List<String>,private val viewModel: MainViewModel) :RecyclerView.Adapter<FlexBoxAdaptor.FlexBoxVH>(){
+class FlexBoxDetailAdaptor(private val thisItemsTag:MutableList<String>, private val tagsHistory:List<String>, private val viewModel: MainViewModel) :RecyclerView.Adapter<FlexBoxDetailAdaptor.FlexBoxVH>(){
     private val cItem = 0
     private val cEnd = 1
     private lateinit var contextHere:Context
@@ -98,6 +98,5 @@ class FlexBoxAdaptor(private val thisItemsTag:MutableList<String>, private val t
         notifyItemRangeChanged(position+1,1)
         return true
     }
-
 
 }

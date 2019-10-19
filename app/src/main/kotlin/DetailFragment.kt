@@ -57,7 +57,7 @@ class DetailFragment : Fragment() {
             emptyList<String>().toMutableList()} else {
             thisTag.split(",").toMutableList()
         }
-        val flexAdaptor = FlexBoxAdaptor(tags,vModel.tagHistory.toList(),vModel)
+        val flexAdaptor = FlexBoxDetailAdaptor(tags,vModel.tagHistory.toList(),vModel)
         detail_tag2.adapter = flexAdaptor
         detail_description.setText(item.description)
         makeSpinner()

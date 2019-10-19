@@ -13,6 +13,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val currentTagSet = mutableSetOf<String>()
     val tagHistory:MutableSet<String> = mutableSetOf()
     var currentId  = 1
+    val tagsDesiredToView = mutableSetOf<String>()
 
     fun init() {
         viewModelScope.launch {
