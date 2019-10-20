@@ -7,26 +7,26 @@
     <path
         android:pathData="M0,0 L64,0 M0,0 L0,32"
         android:strokeWidth="1"
-        android:strokeColor="@color/colorEdgeShadow"/>
+        android:strokeColor="@color/colorEdgeHighLight"/>
     <path
         android:pathData="M64,0 L64,32 L1,32 M0,0"
         android:strokeWidth="1"
-        android:strokeColor="@color/colorEdgeHighLight"/>
+        android:strokeColor="@color/colorEdgeShadow"/>
     <path
-        android:fillColor="@color/colorTan"
+        android:fillColor="@color/colorLightYellow"
         android:pathData="M0,0 L64,0 L64,64 L0,64Z"
-        android:strokeColor="@color/colorTan"
+        android:strokeColor="@color/colorLightYellow"
         />
     <path
         android:pathData="M4,12 L56,12 L56,4"
-        android:strokeColor="@color/colorEdgeShadow" />
+        android:strokeColor="@color/colorEdgeHighLight" />
 
     <path
         android:pathData="M4,12 L4,4 L56,4"
         android:strokeWidth="1"
-        android:strokeColor="@color/colorEdgeHighLight" />
+        android:strokeColor="@color/colorEdgeShadow" />
     <path
-        android:fillColor="@color/colorSpringGreen"
+        android:fillColor="@color/colorForestGreen"
         android:pathData="M4,4 L56,4 L56,12 L4,12z"
         android:strokeWidth="1" />
 </vector>

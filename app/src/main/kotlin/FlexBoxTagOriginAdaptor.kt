@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.flex_tagitem.view.*
 
 class FlexBoxTagOriginAdaptor(
-    private val mTags:List<String>,
+    private val mTags:MutableList<String>,
     private val viewModel: MainViewModel) :RecyclerView.Adapter<FlexBoxTagOriginAdaptor.FlexBoxVH>(){
 private lateinit var contextHere: Context
 
@@ -23,8 +23,8 @@ class FlexBoxVH(view: View): RecyclerView.ViewHolder(view)
     return mTags.size
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FlexBoxVH {
-    val view = LayoutInflater.from(parent.context).inflate(R.layout.flex_tagitem,parent,false)
-    return FlexBoxVH(view)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.flex_tagitem,parent,false)
+        return FlexBoxVH(view)
     }
 
     override fun onBindViewHolder(holder: FlexBoxVH, position: Int) {
@@ -40,10 +40,17 @@ class FlexBoxVH(view: View): RecyclerView.ViewHolder(view)
             val clickedTag = mTags[position]
             if(viewModel.tagsDesiredToView.contains(clickedTag)){
                 viewModel.tagsDesiredToView.remove(clickedTag)
+                notifyItemChanged(position)
             } else {
                 viewModel.tagsDesiredToView.add(clickedTag)
+                notifyItemChanged(position)
             }
         }
 
+    }
+    fun upDateTags(_list:List<String>){
+        mTags.clear()
+        mTags.addAll(_list)
+        notifyDataSetChanged()
     }
 }

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import com.google.android.flexbox.*
 import kotlinx.android.synthetic.main.fragment_origin.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
@@ -39,9 +40,18 @@ class OriginFragment:Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val flexBoxLayoutManager = FlexboxLayoutManager(this.context)
+        flexBoxLayoutManager.flexDirection = FlexDirection.ROW
+        flexBoxLayoutManager.flexWrap = FlexWrap.WRAP
+        flexBoxLayoutManager.justifyContent = JustifyContent.FLEX_START
+        flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
+        originTagList.layoutManager = flexBoxLayoutManager
+        val flexAdaptor = FlexBoxTagOriginAdaptor(vModel.currentTagSet.toMutableList(),vModel)
+        originTagList.adapter = flexAdaptor
         originList.adapter = mAdaptor
         vModel.listObservable.observe(this, Observer {
             mAdaptor.updateAllList(it)
+            flexAdaptor.upDateTags(vModel.currentTagSet.toMutableList())
         })
     }
 

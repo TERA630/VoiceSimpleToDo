@@ -125,9 +125,15 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     private fun updateTagAndList(_list:MutableList<ItemEntity>){
         val tagList = _list.distinctBy { it.tag }
         currentTagSet.clear()
-        tagList.forEach { currentTagSet.add(it.tag) }
+        tagList.forEach {
+            val oneTag = it.tag.split(",")
+            if (oneTag.size >= 2) {
+                currentTagSet.addAll(oneTag)
+            } else {
+                currentTagSet.add(it.tag)
+            }
+        }
         tagHistory.addAll(currentTagSet)
         listObservable.postValue(_list)
     }
-
 }
