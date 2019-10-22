@@ -17,7 +17,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     private val cParent = 1
     private val cChild =  2
     private val cFooter = 3
-    private val cTag = 4
 
     // local property
     private val listWithViewType = mutableListOf<ItemWithViewType>()
@@ -40,10 +39,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         })
         itemTouchHelper.attachToRecyclerView(recyclerView)
     }
-    override fun getItemCount(): Int {
-        val itemcount =  listWithViewType.size +1 // データ＋入力用フッタ
-        return itemcount
-    }
+    override fun getItemCount(): Int =  listWithViewType.size +1 // データ＋入力用フッタ
     override fun getItemViewType(position: Int): Int {
         return when (position) {
             in contentRange -> listWithViewType[position].viewType
@@ -60,10 +56,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
             cChild->{
                 val itemView = layoutInflater.inflate(R.layout.item_child,parent,false)
-                return ViewHolderOfCell(itemView)
-            }
-            cTag ->{
-                val itemView = LayoutInflater.from(parent.context).inflate(R.layout.tagrow, parent, false)
                 return ViewHolderOfCell(itemView)
             }
             else -> {
@@ -92,25 +84,20 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
 
     // lifecycle sub-routine
     private fun makeListToShow(_list: List<ItemEntity>){
-        val listOfItemWithOpenedChild = mutableListOf<ItemWithViewType>()
-        vModel.currentTagSet.forEach{
-            tag ->
-                listOfItemWithOpenedChild.add(ItemWithViewType(tag,cTag,0))
-                _list.forEach{ item->
-
-                if(item.tag == tag && item.isParent) {
-                    listOfItemWithOpenedChild.add(ItemWithViewType(item.title,cParent,item.id))
-                    if(item.isOpened ){
-                        val childList = _list.filter { it.isChild && it.isChildOf == item.id}
-                        childList.forEach {
-                            listOfItemWithOpenedChild.add(ItemWithViewType(it.title,cChild,it.id) )}
+        val withChildList = mutableListOf<ItemWithViewType>()
+        val list = vModel.getItemsTitleContainsTag(vModel.tagsDesiredToView.toList())
+         list.forEachIndexed { index, item->
+             withChildList.add(ItemWithViewType(item.title,cParent,item.id))
+             if(item.isOpened ){
+                 val childList = _list.filter { it.isChild && it.isChildOf == item.id}
+                    childList.forEach {childItem->
+                            withChildList.add(index,ItemWithViewType(childItem.title,cChild,childItem.id) )
                     }
+             }
 
-                }
-            }
-        }
+         }
         listWithViewType.clear()
-        listWithViewType.addAll(listOfItemWithOpenedChild)
+        listWithViewType.addAll(withChildList)
         contentRange = IntRange(0,listWithViewType.lastIndex)
         footerRange = listWithViewType.lastIndex +1
     }
@@ -152,7 +139,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     // event handler
     private fun appendRowItem(text:String,position: Int){
         val idToAppend = vModel.lastIdOfItems() + 1
-        vModel.appendList(ItemEntity(idToAppend,text,"text description","未分類",isParent = true,isChild = false))
+        vModel.appendList(ItemEntity(idToAppend,text,"text description", listOf(vModel.currentTagSet.last()),isParent = true,isChild = false))
     }
     private fun removeRowItem(position: Int){
         val idToReMove = listWithViewType[position].rootId

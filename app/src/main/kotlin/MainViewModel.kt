@@ -61,10 +61,9 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         list[idToFlip].isOpened = (!list[idToFlip].isOpened) // IsOpenedの反転
         listObservable.postValue(list)
     }
-    fun getItemsTitleContainsTag(_tag:String):List<String>{
-        val listwithTag = getListValue().filter { it.tag.contains(_tag) }
-        val titleList = List(listwithTag.size){ index-> listwithTag[index].title}
-        return titleList
+    fun getItemsTitleContainsTag(_tags:List<String>):MutableList<ItemEntity>{
+        val list =  getListValue().filter { it.tag.containsAll(_tags) }
+        return list.toMutableList()
     }
     fun idHasChild(itemId:Int):Boolean{
         val list = listObservable.value

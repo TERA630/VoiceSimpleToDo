@@ -52,12 +52,8 @@ class DetailFragment : Fragment() {
         flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
         detail_tag2.layoutManager = flexBoxLayoutManager
 
-        val thisTag = item.tag
-        val tags = if(thisTag == "") { // タグがなければFlexboxのアダプターにはEmptyListを渡す。
-            emptyList<String>().toMutableList()} else {
-            thisTag.split(",").toMutableList()
-        }
-        val flexAdaptor = FlexBoxDetailAdaptor(tags,vModel.tagHistory.toList(),vModel)
+        val thisTag = item.tag.toMutableList()
+        val flexAdaptor = FlexBoxDetailAdaptor(thisTag,vModel.tagHistory.toList(),vModel)
         detail_tag2.adapter = flexAdaptor
         detail_description.setText(item.description)
         makeSpinner()
