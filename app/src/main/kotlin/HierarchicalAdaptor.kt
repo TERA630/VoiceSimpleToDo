@@ -92,24 +92,25 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
 
     // lifecycle sub-routine
     private fun makeListToShow(_list: List<ItemEntity>){
-        val listOfTagAndTopItemWithOpenedChild = mutableListOf<ItemWithViewType>()
+        val listOfItemWithOpenedChild = mutableListOf<ItemWithViewType>()
         vModel.currentTagSet.forEach{
             tag ->
-                listOfTagAndTopItemWithOpenedChild.add(ItemWithViewType(tag,cTag,0))
+                listOfItemWithOpenedChild.add(ItemWithViewType(tag,cTag,0))
                 _list.forEach{ item->
+
                 if(item.tag == tag && item.isParent) {
-                    listOfTagAndTopItemWithOpenedChild.add(ItemWithViewType(item.title,cParent,item.id))
+                    listOfItemWithOpenedChild.add(ItemWithViewType(item.title,cParent,item.id))
                     if(item.isOpened ){
                         val childList = _list.filter { it.isChild && it.isChildOf == item.id}
                         childList.forEach {
-                            listOfTagAndTopItemWithOpenedChild.add(ItemWithViewType(it.title,cChild,it.id) )}
+                            listOfItemWithOpenedChild.add(ItemWithViewType(it.title,cChild,it.id) )}
                     }
 
                 }
             }
         }
         listWithViewType.clear()
-        listWithViewType.addAll(listOfTagAndTopItemWithOpenedChild)
+        listWithViewType.addAll(listOfItemWithOpenedChild)
         contentRange = IntRange(0,listWithViewType.lastIndex)
         footerRange = listWithViewType.lastIndex +1
     }

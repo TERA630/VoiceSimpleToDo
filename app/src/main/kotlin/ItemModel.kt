@@ -8,7 +8,9 @@ data class ItemEntity( // table within the database . field correspond to column
     var id: Int,        // 実際のアイテムIDは1から開始｡
     var title: String = "",
     var description: String = "",
+    @TypeConverters(StringListTypeConverter::class)
     var tag: List<String>,
+    var isParent:Boolean = true,
     var isOpened: Boolean = false,
     var isChild: Boolean = false,
     var isChildOf: Int = 0
