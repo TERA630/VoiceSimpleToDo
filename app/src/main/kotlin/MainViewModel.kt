@@ -121,7 +121,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         val tagList = _list.distinctBy { it.tag }
         currentTagSet.clear()
         tagList.forEach {
-            currentTagSet.add(it.tag[0])
+            currentTagSet.addAll(it.tag)
         }
         tagHistory.addAll(currentTagSet)
         listObservable.postValue(_list)
