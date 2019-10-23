@@ -20,7 +20,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             val list  = withTimeoutOrNull(1000L){
                 myDao.findAll().toMutableList()
             }
-            val listFromDBOrDefault =  list?.takeIf { it.isEmpty() } ?:makeDummyList()
+            val listFromDBOrDefault =  list?.takeUnless { it.isEmpty() } ?:makeDummyList()
             updateTagAndList(listFromDBOrDefault)
         }
     }

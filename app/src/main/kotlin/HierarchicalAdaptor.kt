@@ -70,7 +70,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
                 holder.itemView.rowText.text = listWithViewType[position].title
                 if(holder.itemViewType == cParent ){
                     if (vModel.idHasChild(listWithViewType[position].rootId) ) {
-                        bindContentsWithChildes(holder,position)
+                        bindContentsWithChildren(holder,position)
                     } else {
                         bindContents(holder,position)
                     }
@@ -87,21 +87,24 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         val withChildList = mutableListOf<ItemWithViewType>()
         val list = vModel.getItemsTitleContainsTag(vModel.tagsDesiredToView.toList())
          list.forEachIndexed { index, item->
-             withChildList.add(ItemWithViewType(item.title,cParent,item.id))
+             if(!item.isChild)  { withChildList.add(ItemWithViewType(item.title,cParent,item.id))}
              if(item.isOpened ){
                  val childList = _list.filter { it.isChild && it.isChildOf == item.id}
-                    childList.forEach {childItem->
-                            withChildList.add(index,ItemWithViewType(childItem.title,cChild,childItem.id) )
+                    childList.forEach { childItem ->
+                        if (index <= _list.lastIndex - 1) {
+                            withChildList.add(index + 1, ItemWithViewType(childItem.title, cChild, childItem.id))
+                        } else {
+                            withChildList.add(ItemWithViewType(childItem.title, cChild, childItem.id))
+                        }
                     }
              }
-
          }
         listWithViewType.clear()
         listWithViewType.addAll(withChildList)
         contentRange = IntRange(0,listWithViewType.lastIndex)
         footerRange = listWithViewType.lastIndex +1
     }
-    private  fun bindContentsWithChildes(holder: RecyclerView.ViewHolder, position:Int){
+    private  fun bindContentsWithChildren(holder: RecyclerView.ViewHolder, position:Int){
         holder.itemView.setOnClickListener {
             val id = listWithViewType[position].rootId
             vModel.flipOpenedItemHasId(id)
