@@ -39,7 +39,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         val idToGet = list.indexOfFirst { it.id == currentId }
         return list[idToGet]
     }
-    private fun getListValue():MutableList<ItemEntity>{ // non-null なリストを返す。　リストがNullなら空リストを返す。
+    fun getListValue():MutableList<ItemEntity>{ // non-null なリストを返す。　リストがNullなら空リストを返す。
         val list = listObservable.value
         return if (list.isNullOrEmpty()) {
             Log.w("MainViewModel","listObservable is Null or Empty.")
@@ -50,10 +50,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         val list = getListValue()
         val lastItem = list.maxBy { s -> s.id }
         return lastItem!!.id
-    }
-    fun findParents():List<ItemEntity>{
-        val list = getListValue()
-        return list.filter { it.isParent }
     }
     fun flipOpenedItemHasId(id:Int){
         val list = getListValue()
@@ -75,20 +71,20 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     }
     private fun makeDummyList(): MutableList<ItemEntity> {
         val result = mutableListOf<ItemEntity>()
-        result.add(ItemEntity(1, "Wearing socks", "まず腰を下ろす", listOf("準備","服装"), isParent = true, isChild = false))
-        result.add(ItemEntity(2, "天気を確認する", "スマホ", listOf("準備"), isParent = true, isChild = false))
-        result.add(ItemEntity(3, "服に着替える", "自転車通勤か電車通勤か､研究会があるか", listOf("準備"), isParent = true, isChild = false))
-        result.add(ItemEntity(4, "口を洗浄する", "うがい､歯磨き", listOf("準備"), isParent = true, isOpened = false,isChild = false))
-        result.add(ItemEntity(5,"洗口液","使えば無くなる",listOf("準備"),isParent = false,isChild = true,isChildOf = 4))
-        result.add(ItemEntity(6, "髪を整える", "しっかりと", listOf("準備"), isParent = true, isOpened = true,isChild = false))
-        result.add(ItemEntity(7,"櫛を入れる","",listOf("準備"),false,isChild = true,isChildOf = 6))
-        result.add(ItemEntity(8,"スプレーをする","かう",listOf("準備"),isParent = false,isChild = true,isChildOf = 6))
-        result.add(ItemEntity(9, "プロテインを作る", "3杯､可能なら牛乳を入れる", listOf("準備"), isParent = true, isChild = false))
-        result.add(ItemEntity(10,"自転車の空気を確かめる","どちらも",listOf("自転車"),isParent = true,isChild = false))
-        result.add(ItemEntity(11,"入金チェック","SBJ、スルガ、三井住友",listOf("財政"),isParent = true))
-        result.add(ItemEntity(12,"書類整備","クリアファイルに入れて整理",listOf("財政"),isParent = true))
-        result.add(ItemEntity(13,"股関節柔軟","BMCの動画",listOf("運動"),isParent = true))
-        result.add(ItemEntity(14,"踵寄せ","座位であぐらをかき､踵を股間に寄せる",listOf("運動"),isParent = false,isChild = true,isChildOf = 13))
+        result.add(ItemEntity(1, "Wearing socks", "まず腰を下ろす", listOf("準備","服装")))
+        result.add(ItemEntity(2, "天気を確認する", "スマホ", listOf("準備")))
+        result.add(ItemEntity(3, "服に着替える", "自転車通勤か電車通勤か､研究会があるか", listOf("準備")))
+        result.add(ItemEntity(4, "口を洗浄する", "うがい､歯磨き", listOf("準備")))
+        result.add(ItemEntity(5,"洗口液","使えば無くなる",listOf("準備"),isChildOf = 4))
+        result.add(ItemEntity(6, "髪を整える", "しっかりと", listOf("準備"), isOpened = true))
+        result.add(ItemEntity(7,"櫛を入れる","",listOf("準備"),isChildOf = 6))
+        result.add(ItemEntity(8,"スプレーをする","かう",listOf("準備"),isChildOf = 6))
+        result.add(ItemEntity(9, "プロテインを作る", "3杯､可能なら牛乳を入れる", listOf("準備")))
+        result.add(ItemEntity(10,"自転車の空気を確かめる","どちらも",listOf("自転車")))
+        result.add(ItemEntity(11,"入金チェック","SBJ、スルガ、三井住友",listOf("財政")))
+        result.add(ItemEntity(12,"書類整備","クリアファイルに入れて整理",listOf("財政")))
+        result.add(ItemEntity(13,"股関節柔軟","BMCの動画",listOf("運動")))
+        result.add(ItemEntity(14,"踵寄せ","座位であぐらをかき､踵を股間に寄せる",listOf("運動"),isChildOf = 13))
         return result
     }
     fun removeItemHasId(id:Int){

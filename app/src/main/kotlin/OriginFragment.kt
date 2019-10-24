@@ -50,7 +50,7 @@ class OriginFragment:Fragment(){
         originTagList.adapter = flexAdaptor
         originList.adapter = mAdaptor
         vModel.listObservable.observe(this, Observer {
-            mAdaptor.updateAllList(it)
+            mAdaptor.updateAllList()
             flexAdaptor.upDateTags(vModel.currentTagSet.toMutableList())
         })
     }

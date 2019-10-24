@@ -61,7 +61,7 @@ class DetailFragment : Fragment() {
     private fun makeSpinner(){
         val adaptor = ArrayAdapter<String>(this.context!!,android.R.layout.simple_spinner_item)
         adaptor.add("なし")
-        val list = vModel.findParents()
+        val list = vModel.getListValue()
         parentIdList.clear()
         parentIdList.add(0)
         list.forEach {
@@ -76,12 +76,8 @@ class DetailFragment : Fragment() {
         item.title = detail_title.text.toString()
         val spinnerPosition = detail_parent.selectedItemPosition
         if(spinnerPosition == 0 ) {
-            item.isChild = false
             item.isChildOf = 0
-            item.isParent = true
         } else {
-            item.isChild = true
-            item.isParent = false
             val id = parentIdList[spinnerPosition]
             item.isChildOf = id
         }
