@@ -26,11 +26,9 @@ class FlexBoxVH(view: View): RecyclerView.ViewHolder(view)
         val view = LayoutInflater.from(parent.context).inflate(R.layout.flex_tagitem,parent,false)
         return FlexBoxVH(view)
     }
-
     override fun onBindViewHolder(holder: FlexBoxVH, position: Int) {
 
         holder.itemView.tag_name.text = mTags[position]
-
         holder.itemView.tag_name.background  =  if(viewModel.tagsDesiredToView.contains(mTags[position])){
             contextHere.getDrawable(R.drawable.item_pressed)
             } else {

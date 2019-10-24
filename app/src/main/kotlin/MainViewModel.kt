@@ -14,6 +14,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val tagHistory:MutableSet<String> = mutableSetOf()
     var currentId  = 1
     val tagsDesiredToView = mutableSetOf<String>()
+    val tagObservable = MutableLiveData<MutableSet<String>>()
 
     fun init() {
         viewModelScope.launch {
@@ -120,5 +121,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         }
         tagHistory.addAll(currentTagSet)
         listObservable.postValue(_list)
+        tagObservable.postValue(currentTagSet)
     }
 }

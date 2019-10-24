@@ -53,6 +53,9 @@ class OriginFragment:Fragment(){
             mAdaptor.updateAllList()
             flexAdaptor.upDateTags(vModel.currentTagSet.toMutableList())
         })
+        vModel.tagObservable.observe(this, Observer {
+            mAdaptor.updateAllList()
+        })
     }
 
     interface EventToFragment {

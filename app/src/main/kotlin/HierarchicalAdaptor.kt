@@ -167,7 +167,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         this.mHandler = _handler
     }
 
-
 }
 class ItemWithViewType( val title:String,
                         val viewType:Int,
