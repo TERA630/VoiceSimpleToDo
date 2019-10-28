@@ -38,7 +38,7 @@ abstract class MyDataBase : RoomDatabase() {
     abstract fun myDao(): MyDao
 }
 
-class tagState(
+class TagState(
     val title: String,
-    val isVisible : Boolean = true,
-    val isCurrent :Boolean = true)
+    var isVisible : Boolean = true,
+    var isUsing :Boolean = true)

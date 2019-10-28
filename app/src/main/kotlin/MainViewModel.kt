@@ -10,12 +10,11 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
-    val currentTagSet = mutableSetOf<String>() // tagStageList.filter{it.using}
+    // tagStageList.filter{it.using}
     val tagHistory:MutableSet<String> = mutableSetOf()
     var currentId  = 1
-    val tagsDesiredToView = mutableSetOf<String>()
-    val tagObservable = MutableLiveData<MutableSet<tagState>>()
-    val tagStateList = mutableSetOf<tagState>()
+    val tagObservable = MutableLiveData<MutableSet<TagState>>()
+    val tagStateList = mutableSetOf<TagState>()
 
     fun init() {
         viewModelScope.launch {
@@ -26,9 +25,14 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             updateTagAndList(listFromDBOrDefault)
         }
     }
-    fun appendTag(text:String){
-        currentTagSet.add(text)
-        tagHistory.add(text)
+    fun appendTag(newTagTitle:String){
+        val sameNameTag = tagStateList.find{it.title == newTagTitle}
+        if(sameNameTag == null) { // 同名のタグが無い場合
+            val newTag = TagState(newTagTitle, isUsing = true)
+            tagStateList.add(newTag)
+        } else  { // すでにタグが存在する場合
+            sameNameTag.isUsing = true
+        }
     }
     fun appendList(item: ItemEntity) {
         val list = getListValue()
@@ -96,7 +100,12 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         updateTagAndList(list)
     }
     fun removeTag(textToRemove:String){
-        if(currentTagSet.contains(textToRemove)) { currentTagSet.remove(textToRemove) }
+        val sameNameTag = tagStateList.find{it.title == textToRemove}
+        if(sameNameTag == null) { // 同名のタグが無い場合
+            Log.w("MainViewModel","$textToRemove was not found at removeTag.")
+        } else  { // すでにタグが存在する場合
+            sameNameTag.isUsing = false
+        }
     }
     fun saveListToDB(){
         val list = getListValue()
@@ -115,13 +124,16 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         updateTagAndList(list)
     }
     private fun updateTagAndList(_list:MutableList<ItemEntity>){
-        val tagList = _list.distinctBy { it.tag }
-        currentTagSet.clear()
-        tagList.forEach {
-            currentTagSet.addAll(it.tag)
+
+        val newTagList = mutableListOf<String>()
+        _list.forEach {//現在の使用されているタグを列挙
+            newTagList.addAll(it.tag)
         }
-        tagHistory.addAll(currentTagSet)
+        newTagList.distinct() // 重複を排除
+        tagStateList.forEach {
+            it.isUsing = newTagList.contains(it.title) // 現在使用されているタグの中に含まれていればisUsingフラグをtrueにする｡
+        }
+        tagObservable.postValue(tagStateList)
         listObservable.postValue(_list)
-        tagObservable.postValue(currentTagSet)
     }
 }
