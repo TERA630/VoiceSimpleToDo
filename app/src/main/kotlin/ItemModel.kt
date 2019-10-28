@@ -37,3 +37,8 @@ interface MyDao {
 abstract class MyDataBase : RoomDatabase() {
     abstract fun myDao(): MyDao
 }
+
+class tagState(
+    val title: String,
+    val isVisible : Boolean = true,
+    val isCurrent :Boolean = true)

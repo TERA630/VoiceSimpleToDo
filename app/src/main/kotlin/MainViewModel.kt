@@ -10,11 +10,12 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
-    val currentTagSet = mutableSetOf<String>()
+    val currentTagSet = mutableSetOf<String>() // tagStageList.filter{it.using}
     val tagHistory:MutableSet<String> = mutableSetOf()
     var currentId  = 1
     val tagsDesiredToView = mutableSetOf<String>()
-    val tagObservable = MutableLiveData<MutableSet<String>>()
+    val tagObservable = MutableLiveData<MutableSet<tagState>>()
+    val tagStateList = mutableSetOf<tagState>()
 
     fun init() {
         viewModelScope.launch {
