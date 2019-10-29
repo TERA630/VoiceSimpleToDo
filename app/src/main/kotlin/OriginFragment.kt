@@ -55,6 +55,7 @@ class OriginFragment:Fragment(){
         })
         vModel.tagObservable.observe(this, Observer {
             mAdaptor.updateAllList()
+            flexAdaptor.upDateTags()
         })
     }
 

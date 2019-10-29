@@ -21,7 +21,8 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
                 myDao.findAll().toMutableList()
             }
             val listFromDBOrDefault =  list?.takeUnless { it.isEmpty() } ?:makeDummyList()
-            updateTagAndList(listFromDBOrDefault)
+            makeTagList(listFromDBOrDefault)
+            listObservable.postValue(listFromDBOrDefault)
         }
     }
     fun appendTag(newTagTitle:String){
@@ -147,15 +148,28 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         list[idToUpdate] = item
         updateTagAndList(list)
     }
-    private fun updateTagAndList(_list:MutableList<ItemEntity>){
-
+    private fun makeTagList(_list: MutableList<ItemEntity>){ // 初期化の時に1回呼ばれる
         val newTagList = mutableListOf<String>()
         _list.forEach {//現在の使用されているタグを列挙
             newTagList.addAll(it.tag)
         }
-        newTagList.distinct() // 重複を排除
+        val newTagSet = newTagList.distinct()
+        tagStateList.clear()
+        newTagSet.forEach {
+            val newTag = TagState(it,isVisible = true,isUsing = true)
+            tagStateList.add(newTag)
+        }
+        tagObservable.postValue(tagStateList)
+    }
+    private fun updateTagAndList(_list:MutableList<ItemEntity>){
+
+        val currentTagList = mutableListOf<String>()
+        _list.forEach {//現在の使用されているタグを列挙
+            currentTagList.addAll(it.tag)
+        }
+        val newTagSet = currentTagList.distinct() // 重複を排除
         tagStateList.forEach {
-            it.isUsing = newTagList.contains(it.title) // 現在使用されているタグの中に含まれていればisUsingフラグをtrueにする｡
+            it.isUsing = newTagSet.contains(it.title) // 現在使用されているタグの中に含まれていればisUsingフラグをtrueにする｡
         }
         tagObservable.postValue(tagStateList)
         listObservable.postValue(_list)
