@@ -46,12 +46,12 @@ class OriginFragment:Fragment(){
         flexBoxLayoutManager.justifyContent = JustifyContent.FLEX_START
         flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
         originTagList.layoutManager = flexBoxLayoutManager
-        val flexAdaptor = FlexBoxTagOriginAdaptor(vModel.currentTagSet.toMutableList(),vModel)
+        val flexAdaptor = FlexBoxTagOriginAdaptor(vModel)
         originTagList.adapter = flexAdaptor
         originList.adapter = mAdaptor
         vModel.listObservable.observe(this, Observer {
             mAdaptor.updateAllList()
-            flexAdaptor.upDateTags(vModel.currentTagSet.toMutableList())
+            flexAdaptor.upDateTags()
         })
         vModel.tagObservable.observe(this, Observer {
             mAdaptor.updateAllList()

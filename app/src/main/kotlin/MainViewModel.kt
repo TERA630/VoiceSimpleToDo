@@ -10,7 +10,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
-    // tagStageList.filter{it.using}
     val tagHistory:MutableSet<String> = mutableSetOf()
     var currentId  = 1
     val tagObservable = MutableLiveData<MutableSet<TagState>>()
@@ -45,6 +44,25 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         val idToGet = list.indexOfFirst { it.id == currentId }
         return list[idToGet]
     }
+    fun makeTagInvisibleByTitle(_title:String){
+        val tag = tagStateList.find { it.title == _title}
+        if(tag == null ){
+            Log.w("MainViewModel","tag was not found at makeTagInvisible..")
+            return
+        } else {
+            tag.isVisible = false
+        }
+    }
+    fun makeTagVisibleByTitle(_title:String) {
+        val tag = tagStateList.find { it.title == _title}
+        if(tag == null ){
+            Log.w("MainViewModel","tag was not found at makeTagVisible..")
+            return
+        } else {
+            tag.isVisible = true
+        }
+    }
+
     fun getListValue():MutableList<ItemEntity>{ // non-null なリストを返す。　リストがNullなら空リストを返す。
         val list = listObservable.value
         return if (list.isNullOrEmpty()) {
@@ -67,6 +85,12 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         val list =  getListValue().filter { it.tag.containsAll(_tags) }
         return list.toMutableList()
     }
+    fun getItemTitlesVisible():MutableList<ItemEntity>{
+        val tagStatesVisible = tagStateList.filter { it.isVisible }
+        val tagVisible = List(tagStatesVisible.size){index:Int-> tagStatesVisible[index].title}
+        return getItemsTitleContainsTag(tagVisible)
+    }
+
     fun idHasChild(itemId:Int):Boolean{
         val list = listObservable.value
         return if(list.isNullOrEmpty() || itemId == 0) false
