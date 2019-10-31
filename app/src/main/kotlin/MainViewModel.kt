@@ -12,8 +12,8 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
     val tagHistory:MutableSet<String> = mutableSetOf()
     var currentId  = 1
-    val tagObservable = MutableLiveData<MutableSet<TagState>>()
-    val tagStateList = mutableSetOf<TagState>()
+    val tagObservable = MutableLiveData<MutableList<TagState>>()
+    val tagStateList = mutableListOf<TagState>()
 
     fun init() {
         viewModelScope.launch {
@@ -25,15 +25,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             listObservable.postValue(listFromDBOrDefault)
         }
     }
-    fun appendTag(newTagTitle:String){
-        val sameNameTag = tagStateList.find{it.title == newTagTitle}
-        if(sameNameTag == null) { // 同名のタグが無い場合
-            val newTag = TagState(newTagTitle, isUsing = true)
-            tagStateList.add(newTag)
-        } else  { // すでにタグが存在する場合
-            sameNameTag.isUsing = true
-        }
-    }
+
     fun appendList(item: ItemEntity) {
         val list = getListValue()
         list.add(item)
@@ -45,25 +37,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         val idToGet = list.indexOfFirst { it.id == currentId }
         return list[idToGet]
     }
-    fun makeTagInvisibleByTitle(_title:String){
-        val tag = tagStateList.find { it.title == _title}
-        if(tag == null ){
-            Log.w("MainViewModel","tag was not found at makeTagInvisible..")
-            return
-        } else {
-            tag.isVisible = false
-        }
-    }
-    fun makeTagVisibleByTitle(_title:String) {
-        val tag = tagStateList.find { it.title == _title}
-        if(tag == null ){
-            Log.w("MainViewModel","tag was not found at makeTagVisible..")
-            return
-        } else {
-            tag.isVisible = true
-        }
-    }
-
     fun getListValue():MutableList<ItemEntity>{ // non-null なリストを返す。　リストがNullなら空リストを返す。
         val list = listObservable.value
         return if (list.isNullOrEmpty()) {
@@ -71,10 +44,13 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             mutableListOf()
         } else list
     }
-    fun lastIdOfItems():Int{ // 現在のアイテムで最大のIdを返す。　アイテム追加時にIdが被らないように使用している。
+    fun newIdOfItemList():Int{ // アイテムリストで新しいIdを生成する。
         val list = getListValue()
-        val lastItem = list.maxBy { s -> s.id }
-        return lastItem!!.id
+        var newIndex = list.size
+        while( list.any{ it.id == newIndex} ) {
+            newIndex++
+        }
+        return newIndex
     }
     fun flipOpenedItemHasId(id:Int){
         val list = getListValue()
@@ -82,16 +58,24 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         list[idToFlip].isOpened = (!list[idToFlip].isOpened) // IsOpenedの反転
         listObservable.postValue(list)
     }
-    fun getItemsTitleContainsTag(_tags:List<String>):MutableList<ItemEntity>{
-        val list =  getListValue().filter { it.tag.containsAll(_tags) }
-        return list.toMutableList()
-    }
-    fun getItemTitlesVisible():MutableList<ItemEntity>{
-        val tagStatesVisible = tagStateList.filter { it.isVisible }
-        val tagVisible = List(tagStatesVisible.size){index:Int-> tagStatesVisible[index].title}
-        return getItemsTitleContainsTag(tagVisible)
-    }
+    private fun getItemsTitleContainsTag(_tags:List<String>):MutableList<ItemEntity>{
+            if(_tags.isEmpty()) {
+                 return getListValue()
+            } else {         // いずれかのタグを含むリストを作成。
 
+                val result = mutableListOf<ItemEntity>()
+                _tags.forEach { tag ->
+                    val itemsWithTag = getListValue().filter { it.tag.contains(tag) }
+                    result.addAll(itemsWithTag)
+                }
+                return result
+            }
+    }
+    fun getItemTitlesSelected():MutableList<ItemEntity>
+        val tagsSelected = tagStateList.filter { it.isSelected }
+        val tagTitlesSelected = List(tagsSelected.size){ index:Int-> tagsSelected[index].title}
+        return getItemsTitleContainsTag(tagTitlesSelected)
+    }
     fun idHasChild(itemId:Int):Boolean{
         val list = listObservable.value
         return if(list.isNullOrEmpty() || itemId == 0) false
@@ -124,14 +108,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         list.removeAt(idToRemove)
         updateTagAndList(list)
     }
-    fun removeTag(textToRemove:String){
-        val sameNameTag = tagStateList.find{it.title == textToRemove}
-        if(sameNameTag == null) { // 同名のタグが無い場合
-            Log.w("MainViewModel","$textToRemove was not found at removeTag.")
-        } else  { // すでにタグが存在する場合
-            sameNameTag.isUsing = false
-        }
-    }
     fun saveListToDB(){
         val list = getListValue()
         runBlocking {
@@ -148,28 +124,62 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         list[idToUpdate] = item
         updateTagAndList(list)
     }
+    // List <TagState> の操作
+    fun appendTag(newTagTitle:String){
+        val sameNameTag = tagStateList.find{it.title == newTagTitle}
+        if(sameNameTag == null) { // 同名のタグが無い場合
+            // 重複しないIdを作成する。
+            var newTagIndex = tagStateList.size
+            while( tagStateList.any{ it.id == newTagIndex} ) {
+                newTagIndex++
+            }
+            val newTag = TagState(newTagIndex, newTagTitle, isSelected = false,isUsing = true)
+            tagStateList.add(newTag)
+        } else  { // すでにタグが存在する場合
+            sameNameTag.isUsing = true
+        }
+    }
+    fun getTagById(_idToGet:Int):TagState{
+        val destTag = tagStateList.find { it.id == _idToGet}
+        if(destTag != null) {
+            return destTag
+        } else {
+            Log.w("MainViewModel","$_idToGet was not found..")
+            val tag = tagStateList[0]
+            return tag // 異常ケースでは先頭アイテムを返す。
+        }
+    }
     private fun makeTagList(_list: MutableList<ItemEntity>){ // 初期化の時に1回呼ばれる
         val newTagList = mutableListOf<String>()
-        _list.forEach {//現在の使用されているタグを列挙
+        _list.forEach {//現在の使用されているタグを重複を含め、すべて列挙する。
             newTagList.addAll(it.tag)
         }
-        val newTagSet = newTagList.distinct()
+        val newTagSet = newTagList.distinct() //
         tagStateList.clear()
         newTagSet.forEach {
-            val newTag = TagState(it,isVisible = true,isUsing = true)
-            tagStateList.add(newTag)
+            appendTag(it)
         }
         tagObservable.postValue(tagStateList)
     }
-    private fun updateTagAndList(_list:MutableList<ItemEntity>){
+    fun removeTag(textToRemove:String){
+        val sameNameTag = tagStateList.find{ it.title == textToRemove }
+        if(sameNameTag == null) { // 同名のタグが無い場合
+            Log.w("MainViewModel","$textToRemove was not found at removeTag.")
+        } else  { // すでにタグが存在する場合
+            sameNameTag.isUsing = false
+        }
+    }
+
+    private fun updateTagAndList(_list:MutableList<ItemEntity>){ // アイテムに変更があった場合のタグ更新
 
         val currentTagList = mutableListOf<String>()
         _list.forEach {//現在の使用されているタグを列挙
             currentTagList.addAll(it.tag)
         }
         val newTagSet = currentTagList.distinct() // 重複を排除
+
         tagStateList.forEach {
-            it.isUsing = newTagSet.contains(it.title) // 現在使用されているタグの中に含まれていればisUsingフラグをtrueにする｡
+            it.isUsing = newTagSet.contains(it.title) // newTagSetに含まれていればisUsingフラグをtrueにする｡
         }
         tagObservable.postValue(tagStateList)
         listObservable.postValue(_list)

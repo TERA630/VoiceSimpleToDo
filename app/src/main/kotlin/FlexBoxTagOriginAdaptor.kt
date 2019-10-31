@@ -8,12 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.flex_tagitem.view.*
 
 class FlexBoxTagOriginAdaptor(
-    private val viewModel: MainViewModel) :RecyclerView.Adapter<FlexBoxTagOriginAdaptor.FlexBoxVH>(){
+    private val viewModel: MainViewModel ) :RecyclerView.Adapter<FlexBoxTagOriginAdaptor.FlexBoxVH>(){
     private lateinit var contextHere: Context
-    private var usingTagState = listOf<TagState>()
+    private var usingTagState = viewModel.tagStateList.filter { it.isUsing }
 
-//sub class
-class FlexBoxVH(view: View): RecyclerView.ViewHolder(view)
 // adaptor lifecycle
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
     super.onAttachedToRecyclerView(recyclerView)
@@ -25,29 +23,36 @@ class FlexBoxVH(view: View): RecyclerView.ViewHolder(view)
         val view = LayoutInflater.from(parent.context).inflate(R.layout.flex_tagitem,parent,false)
         return FlexBoxVH(view)
     }
+    //sub class useCaseのそばに置くとのこと。
+    class FlexBoxVH(view: View): RecyclerView.ViewHolder(view)
+
     override fun onBindViewHolder(holder: FlexBoxVH, position: Int) {
 
         holder.itemView.tag_name.text = usingTagState[position].title
-        holder.itemView.tag_name.background  =  if( usingTagState[position].isVisible) {
-            contextHere.getDrawable(R.drawable.item_pressed)
+        holder.itemView.tag_name.background  =
+            if( usingTagState[position].isSelected) {
+                contextHere.getDrawable(R.drawable.item_pressed)
             } else {
-            contextHere.getDrawable(R.drawable.item_unpressed)
-        }
+                contextHere.getDrawable(R.drawable.item_unpressed)
+            }
+
         holder.itemView.tag_name.setOnClickListener{
-            val clickedTag = usingTagState[position].title
-            if(usingTagState[position].isVisible){
-                usingTagState[position].isVisible = false
-                viewModel.makeTagInvisibleByTitle(clickedTag)
+            val clickedTagId = usingTagState[position].id
+            if(usingTagState[position].isSelected){
+                usingTagState[position].isSelected = false
+                viewModel.getTagById(clickedTagId).isSelected = false
+                viewModel.tagObservable.postValue(viewModel.tagStateList)
                 notifyItemChanged(position)
             } else {
-                usingTagState[position].isVisible = true
-                viewModel.makeTagVisibleByTitle(clickedTag)
+                usingTagState[position].isSelected = true
+                viewModel.getTagById(clickedTagId).isSelected = true
+                viewModel.tagObservable.postValue(viewModel.tagStateList)
                 notifyItemChanged(position)
             }
         }
-
     }
-    fun upDateTags(){
+    // Public method
+    fun upDateTags(){ // アイテムの追加や削除などがあれば呼ばれる。　現状で内部からタブの変更はない。
         usingTagState = viewModel.tagStateList.filter { it.isUsing }
         notifyDataSetChanged()
     }

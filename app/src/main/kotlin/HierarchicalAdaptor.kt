@@ -85,7 +85,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     // lifecycle sub-routine
     private fun makeListToShow(){
         val withChildList = mutableListOf<ItemWithViewType>()
-        val list = vModel.getItemTitlesVisible()
+        val list = vModel.getItemTitlesSelected()
          list.forEachIndexed { index, item->
              if(item.isChildOf == 0)  { withChildList.add(ItemWithViewType(item.title,cParent,item.id))}
              if(item.isOpened ){
@@ -137,7 +137,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
     // event handler
     private fun appendRowItem(text:String,position: Int){
-        val idToAppend = vModel.lastIdOfItems()
+        val idToAppend = vModel.newIdOfItemList()
         vModel.appendList(ItemEntity(idToAppend,text,"text description", listOf("未分類")))
     }
     private fun removeRowItem(position: Int){

@@ -39,6 +39,7 @@ abstract class MyDataBase : RoomDatabase() {
 }
 
 class TagState(
+    val id : Int,
     val title: String,
-    var isVisible : Boolean = true,
+    var isSelected : Boolean = true,
     var isUsing :Boolean = true)
