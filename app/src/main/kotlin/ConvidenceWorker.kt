@@ -8,6 +8,8 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.google.auth.oauth2.AccessToken
 import com.google.auth.oauth2.GoogleCredentials
+import io.grpc.internal.DnsNameResolverProvider
+import io.grpc.okhttp.OkHttpChannelProvider
 import java.io.IOException
 import java.util.*
 
@@ -18,9 +20,11 @@ private val SCOPE = Collections.singletonList("https://www.googleapis.com/auth/c
 class ConfidenceWorker(private val appContext: Context, workerParams: WorkerParameters)
     : Worker(appContext, workerParams) {
     // workerManagerはBackgroundで実行される
-
+    
+    private val googleHostName = "speech.googleapis.com"
     private val scopeOfGoogleAPI =
         Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
+    private val PortOfGoogleAPI = 443
 
     override fun doWork(): Result {
         Log.i("Worker","workerManager coming")
@@ -31,6 +35,12 @@ class ConfidenceWorker(private val appContext: Context, workerParams: WorkerPara
             saveTokenToPref(token)
             val googleCredentials = GoogleCredentials(token).createScoped(scopeOfGoogleAPI)
             val interceptor = GoogleCredentialsInterceptor(googleCredentials)
+
+            val channel = OkHttpChannelProvider()
+                .builderForAddress(googleHostName, PortOfGoogleAPI)
+                .nameResolverFactory(DnsNameResolverProvider())
+                .intercept(interceptor)
+                .build()
         } catch (e: Resources.NotFoundException){
             Log.e("accessToken", "Fail to get credential file")
             Result.failure()
