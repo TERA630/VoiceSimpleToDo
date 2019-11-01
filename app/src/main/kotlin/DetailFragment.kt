@@ -20,6 +20,7 @@ class DetailFragment : Fragment() {
     private val vModel by sharedViewModel<MainViewModel>()
     private val parentIdList = mutableListOf(0)
 
+    // Fragment lifecycle
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_detail, container, false)
@@ -34,6 +35,7 @@ class DetailFragment : Fragment() {
         }
         detail_cancel.setOnClickListener{ transitToOrigin() }
     }
+
     private fun transitToOrigin(){
         activity?.supportFragmentManager?.
             beginTransaction()?.
@@ -52,8 +54,7 @@ class DetailFragment : Fragment() {
         flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
         detail_tag2.layoutManager = flexBoxLayoutManager
 
-        val thisTag = item.tag.toMutableList()
-        val flexAdaptor = FlexBoxDetailAdaptor(thisTag,vModel.tagHistory.toList(),vModel)
+        val flexAdaptor = FlexBoxDetailAdaptor(vModel)
         detail_tag2.adapter = flexAdaptor
         detail_description.setText(item.description)
         makeSpinner()

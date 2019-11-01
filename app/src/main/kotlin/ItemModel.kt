@@ -9,7 +9,7 @@ data class ItemEntity( // table within the database . field correspond to column
     var title: String = "",
     var description: String = "",
     @TypeConverters(StringListTypeConverter::class)
-    var tag: List<String>,
+    var tag: MutableList<String>,
     var isOpened: Boolean = false,
     var isChildOf: Int = 0
 )
@@ -32,7 +32,7 @@ interface MyDao {
     suspend fun delete(item: ItemEntity)
 }
 
-@Database(entities = [ItemEntity::class], exportSchema = false, version = 4)
+@Database(entities = [ItemEntity::class], exportSchema = false, version = 5)
 @TypeConverters(StringListTypeConverter::class)
 abstract class MyDataBase : RoomDatabase() {
     abstract fun myDao(): MyDao

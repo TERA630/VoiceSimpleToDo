@@ -10,7 +10,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
-    val tagHistory:MutableSet<String> = mutableSetOf()
     var currentId  = 1
     val tagObservable = MutableLiveData<MutableList<TagState>>()
     val tagStateList = mutableListOf<TagState>()
@@ -71,7 +70,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
                 return result
             }
     }
-    fun getItemTitlesSelected():MutableList<ItemEntity>
+    fun getItemTitlesSelected():MutableList<ItemEntity>{
         val tagsSelected = tagStateList.filter { it.isSelected }
         val tagTitlesSelected = List(tagsSelected.size){ index:Int-> tagsSelected[index].title}
         return getItemsTitleContainsTag(tagTitlesSelected)
@@ -86,20 +85,20 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     }
     private fun makeDummyList(): MutableList<ItemEntity> {
         val result = mutableListOf<ItemEntity>()
-        result.add(ItemEntity(1, "Wearing socks", "まず腰を下ろす", listOf("準備","服装")))
-        result.add(ItemEntity(2, "天気を確認する", "スマホ", listOf("準備")))
-        result.add(ItemEntity(3, "服に着替える", "自転車通勤か電車通勤か､研究会があるか", listOf("準備")))
-        result.add(ItemEntity(4, "口を洗浄する", "うがい､歯磨き", listOf("準備")))
-        result.add(ItemEntity(5,"洗口液","使えば無くなる",listOf("準備"),isChildOf = 4))
-        result.add(ItemEntity(6, "髪を整える", "しっかりと", listOf("準備"), isOpened = true))
-        result.add(ItemEntity(7,"櫛を入れる","",listOf("準備"),isChildOf = 6))
-        result.add(ItemEntity(8,"スプレーをする","かう",listOf("準備"),isChildOf = 6))
-        result.add(ItemEntity(9, "プロテインを作る", "3杯､可能なら牛乳を入れる", listOf("準備")))
-        result.add(ItemEntity(10,"自転車の空気を確かめる","どちらも",listOf("自転車")))
-        result.add(ItemEntity(11,"入金チェック","SBJ、スルガ、三井住友",listOf("財政")))
-        result.add(ItemEntity(12,"書類整備","クリアファイルに入れて整理",listOf("財政")))
-        result.add(ItemEntity(13,"股関節柔軟","BMCの動画",listOf("運動")))
-        result.add(ItemEntity(14,"踵寄せ","座位であぐらをかき､踵を股間に寄せる",listOf("運動"),isChildOf = 13))
+        result.add(ItemEntity(1, "Wearing socks", "まず腰を下ろす", mutableListOf("準備","服装")))
+        result.add(ItemEntity(2, "天気を確認する", "スマホ", mutableListOf("準備")))
+        result.add(ItemEntity(3, "服に着替える", "自転車通勤か電車通勤か､研究会があるか", mutableListOf("準備")))
+        result.add(ItemEntity(4, "口を洗浄する", "うがい､歯磨き", mutableListOf("準備")))
+        result.add(ItemEntity(5,"洗口液","使えば無くなる",mutableListOf("準備"),isChildOf = 4))
+        result.add(ItemEntity(6, "髪を整える", "しっかりと", mutableListOf("準備"), isOpened = true))
+        result.add(ItemEntity(7,"櫛を入れる","",mutableListOf("準備"),isChildOf = 6))
+        result.add(ItemEntity(8,"スプレーをする","かう",mutableListOf("準備"),isChildOf = 6))
+        result.add(ItemEntity(9, "プロテインを作る", "3杯､可能なら牛乳を入れる", mutableListOf("準備")))
+        result.add(ItemEntity(10,"自転車の空気を確かめる","どちらも",mutableListOf("自転車")))
+        result.add(ItemEntity(11,"入金チェック","SBJ、スルガ、三井住友",mutableListOf("財政")))
+        result.add(ItemEntity(12,"書類整備","クリアファイルに入れて整理",mutableListOf("財政")))
+        result.add(ItemEntity(13,"股関節柔軟","BMCの動画",mutableListOf("運動")))
+        result.add(ItemEntity(14,"踵寄せ","座位であぐらをかき､踵を股間に寄せる",mutableListOf("運動"),isChildOf = 13))
         return result
     }
     fun removeItemHasId(id:Int){
@@ -125,6 +124,10 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         updateTagAndList(list)
     }
     // List <TagState> の操作
+    fun allTags():MutableList<String>{
+        val result = MutableList(tagStateList.size){index-> tagStateList[index].title}
+        return result
+    }
     fun appendTag(newTagTitle:String){
         val sameNameTag = tagStateList.find{it.title == newTagTitle}
         if(sameNameTag == null) { // 同名のタグが無い場合
@@ -149,6 +152,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             return tag // 異常ケースでは先頭アイテムを返す。
         }
     }
+
     private fun makeTagList(_list: MutableList<ItemEntity>){ // 初期化の時に1回呼ばれる
         val newTagList = mutableListOf<String>()
         _list.forEach {//現在の使用されているタグを重複を含め、すべて列挙する。

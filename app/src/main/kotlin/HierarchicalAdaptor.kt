@@ -86,7 +86,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     private fun makeListToShow(){
         val withChildList = mutableListOf<ItemWithViewType>()
         val list = vModel.getItemTitlesSelected()
-         list.forEachIndexed { index, item->
+         list.forEach {item->
              if(item.isChildOf == 0)  { withChildList.add(ItemWithViewType(item.title,cParent,item.id))}
              if(item.isOpened ){
                     val childList = vModel.getListValue().filter{ it.isChildOf == item.id}
@@ -138,7 +138,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     // event handler
     private fun appendRowItem(text:String,position: Int){
         val idToAppend = vModel.newIdOfItemList()
-        vModel.appendList(ItemEntity(idToAppend,text,"text description", listOf("未分類")))
+        vModel.appendList(ItemEntity(idToAppend,text,"text description", mutableListOf("未分類")))
     }
     private fun removeRowItem(position: Int){
         val idToReMove = listWithViewType[position].rootId

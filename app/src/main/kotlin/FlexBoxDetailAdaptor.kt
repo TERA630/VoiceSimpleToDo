@@ -13,7 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.flex_end.view.*
 import kotlinx.android.synthetic.main.flex_item.view.*
 
-class FlexBoxDetailAdaptor(private val thisItemsTag:MutableList<String>, private val tagsHistory:List<String>, private val viewModel: MainViewModel) :RecyclerView.Adapter<FlexBoxDetailAdaptor.FlexBoxVH>(){
+class FlexBoxDetailAdaptor(
+    private val viewModel: MainViewModel) :RecyclerView.Adapter<FlexBoxDetailAdaptor.FlexBoxVH>(){
     private val cItem = 0
     private val cEnd = 1
     private lateinit var contextHere:Context
@@ -26,11 +27,11 @@ class FlexBoxDetailAdaptor(private val thisItemsTag:MutableList<String>, private
         contextHere = recyclerView.context
     }
     override fun getItemCount(): Int {
-        return thisItemsTag.size+1
+        return viewModel.allTags().size
     }
     override fun getItemViewType(position: Int): Int {
         return when(position){
-            in  IntRange(0,thisItemsTag.lastIndex) ->{cItem}
+            in  IntRange(0,viewModel.allTags().lastIndex) ->{cItem}
             else->{ cEnd }
         }
     }
@@ -51,23 +52,25 @@ class FlexBoxDetailAdaptor(private val thisItemsTag:MutableList<String>, private
 
     // Lifecycle Sub-routine
     private fun bindItem(holder: FlexBoxVH,position: Int){ // position は thisItemsTagのIndexと一致
-        holder.itemView.item_name.text = thisItemsTag[position]
-        holder.itemView.item_erase.setOnClickListener {
-            viewModel.removeTag(textToRemove = thisItemsTag[position])
-            thisItemsTag.removeAt(position)
-            notifyItemRemoved(position)
+        val tagHere =  viewModel.allTags()[position]
+//        val tagHere = viewModel.currentItem().tag
+        holder.itemView.item_name.text = tagHere
+        if(viewModel.currentItem().tag.contains(tagHere)){
+            holder.itemView.item_name.setBackgroundColor(contextHere.getColor(R.color.colorLightYellow))
+        } else {
+            holder.itemView.item_name.setBackgroundColor(contextHere.getColor(R.color.colorSlightShadow))
         }
     }
     private fun bindEnd(holder: FlexBoxVH,position: Int){
         val iv = holder.itemView
         val autoCompleteCandidates = ArrayAdapter<String>(contextHere,android.R.layout.simple_list_item_1)
-        autoCompleteCandidates.addAll(tagsHistory)
+        autoCompleteCandidates.addAll(viewModel.allTags())
         iv.tag_autocompleteAdd.setAdapter(autoCompleteCandidates)
         iv.tag_autocompleteAdd.threshold = 1
         iv.tag_autocompleteAdd.onItemSelectedListener= object :AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    val item = tagsHistory[position]
-                Log.i("flex_end","$item was selected")
+                    val item = viewModel.allTags()[position]
+                    Log.i("flex_end","$item was selected")
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 Log.i("flex_end","nothing selected..")
@@ -93,7 +96,7 @@ class FlexBoxDetailAdaptor(private val thisItemsTag:MutableList<String>, private
         if(v.text.isNullOrBlank()) return false
         val newText = v.text.toString()
         viewModel.appendTag(newText)
-        thisItemsTag.add(newText)
+        viewModel.currentItem().tag.add(newText)
         notifyItemInserted(position)
         notifyItemRangeChanged(position+1,1)
         return true

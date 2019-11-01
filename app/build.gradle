@@ -30,8 +30,15 @@ android {
         test.java.srcDirs += 'src/test/'
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
     }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
     }
     protobuf {
         protoc { artifact = 'com.google.protobuf:protoc:3.7.1' }

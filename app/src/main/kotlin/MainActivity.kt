@@ -1,12 +1,17 @@
 package com.example.voicesimpletodo
 
+import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.work.Constraints
+import androidx.work.PeriodicWorkRequestBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.auth.oauth2.AccessToken
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.*
 
 const val ACCESS_TOKEN_EXPIRATION_TOLERANCE = 30 * 60 * 1000 // thirty minutes
 const val ACCESS_TOKEN_FETCH_MARGIN = 60 * 1000 // one minute
@@ -23,7 +28,7 @@ class  MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         vModel.init()
         constructViews(savedInstanceState)
-     //   val token = getAccessTokenFromPreference() ?: startWorker()
+        val token = getAccessTokenFromPreference() ?: startWorker()
 
     }
     override fun onPause() {
@@ -68,7 +73,7 @@ class  MainActivity : AppCompatActivity() {
                 .setAction("Action", null).show()
         }
     }
-/*    private fun getAccessTokenFromPreference(): AccessToken? {
+    private fun getAccessTokenFromPreference(): AccessToken? {
         val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return null
 
         val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null)
@@ -85,8 +90,9 @@ class  MainActivity : AppCompatActivity() {
             .setRequiresCharging(false)
             .build()
 
-        val request = PeriodicWorkRequestBuilder<ConfidenceWorker>(1, TimeUnit.HOURS)
-           .setConstraints(constraints)
+        val request = PeriodicWorkRequestBuilder<ConfidenceWorker>(1L, java.util.concurrent.TimeUnit.HOURS)
+            .setConstraints(constraints)
             .build()
-    }*/
+    }
+
 }
