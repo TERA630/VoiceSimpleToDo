@@ -55,10 +55,13 @@ class FlexBoxDetailAdaptor(
         val tagHere =  viewModel.allTags()[position]
 //        val tagHere = viewModel.currentItem().tag
         holder.itemView.item_name.text = tagHere
+        val iView = holder.itemView
         if(viewModel.currentItem().tag.contains(tagHere)){
-            holder.itemView.item_name.setBackgroundColor(contextHere.getColor(R.color.colorLightYellow))
+            iView.setBackgroundColor(contextHere.getColor(R.color.colorLightYellow))
+            iView.item_erase.visibility = View.VISIBLE
         } else {
-            holder.itemView.item_name.setBackgroundColor(contextHere.getColor(R.color.colorSlightShadow))
+            iView.setBackgroundColor(contextHere.getColor(R.color.colorSlightShadow))
+            iView.item_erase.visibility = View.GONE
         }
     }
     private fun bindEnd(holder: FlexBoxVH,position: Int){

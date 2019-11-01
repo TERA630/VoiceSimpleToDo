@@ -7,6 +7,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.Constraints
 import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.auth.oauth2.AccessToken
 import kotlinx.android.synthetic.main.activity_main.*
@@ -16,8 +17,8 @@ import java.util.*
 const val ACCESS_TOKEN_EXPIRATION_TOLERANCE = 30 * 60 * 1000 // thirty minutes
 const val ACCESS_TOKEN_FETCH_MARGIN = 60 * 1000 // one minute
 const val HOSTNAME = "speech.googleapis.com"
-const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
-const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
+
+
 const val PREFS = "SpeechService"
 class  MainActivity : AppCompatActivity() {
 
@@ -93,6 +94,7 @@ class  MainActivity : AppCompatActivity() {
         val request = PeriodicWorkRequestBuilder<ConfidenceWorker>(1L, java.util.concurrent.TimeUnit.HOURS)
             .setConstraints(constraints)
             .build()
+          WorkManager.getInstance(this).enqueue(request)
     }
 
 }
