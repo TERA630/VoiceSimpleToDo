@@ -4,14 +4,16 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Resources
 import android.util.Log
-import androidx.work.Worker
-import androidx.work.WorkerParameters
+import androidx.work.*
 import com.google.auth.oauth2.AccessToken
 import com.google.auth.oauth2.GoogleCredentials
+import com.google.cloud.speech.v1.SpeechGrpc
 import io.grpc.internal.DnsNameResolverProvider
 import io.grpc.okhttp.OkHttpChannelProvider
 import java.io.IOException
+import java.lang.Long.max
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
 const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
@@ -20,11 +22,12 @@ private val SCOPE = Collections.singletonList("https://www.googleapis.com/auth/c
 class ConfidenceWorker(private val appContext: Context, workerParams: WorkerParameters)
     : Worker(appContext, workerParams) {
     // workerManagerはBackgroundで実行される
-    
+
     private val googleHostName = "speech.googleapis.com"
     private val scopeOfGoogleAPI =
         Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
     private val PortOfGoogleAPI = 443
+    private lateinit var mApi:SpeechGrpc.SpeechStub
 
     override fun doWork(): Result {
         Log.i("Worker","workerManager coming")
@@ -36,11 +39,26 @@ class ConfidenceWorker(private val appContext: Context, workerParams: WorkerPara
             val googleCredentials = GoogleCredentials(token).createScoped(scopeOfGoogleAPI)
             val interceptor = GoogleCredentialsInterceptor(googleCredentials)
 
-            val channel = OkHttpChannelProvider()
-                .builderForAddress(googleHostName, PortOfGoogleAPI)
-                .nameResolverFactory(DnsNameResolverProvider())
-                .intercept(interceptor)
+            val channel = OkHttpChannelProvider() // io.grpc.ManegedChannelProviderの派生クラス
+                .builderForAddress(googleHostName, PortOfGoogleAPI) // hostとtargetURI(Address)を元にChannelを作る｡
+                .nameResolverFactory(DnsNameResolverProvider())     // resolverFactoryを設定する｡
+                .intercept(interceptor)                             // Channelが実際に呼ばれる前の前処置を設定する｡
                 .build()
+            mApi = SpeechGrpc.newStub(channel)
+            val fetchAgain = max(token.expirationTime.time -System.currentTimeMillis() - ACCESS_TOKEN_FETCH_MARGIN,
+                ACCESS_TOKEN_EXPIRATION_TOLERANCE.toLong())
+            val constraints = Constraints.Builder()
+                .build()
+
+            val request = OneTimeWorkRequestBuilder<ConfidenceWorker>()
+                .setConstraints(constraints)
+                .setInitialDelay(fetchAgain,TimeUnit.MILLISECONDS)
+
+                .build()
+            WorkManager.getInstance(appContext).enqueueUniqueWork("GetCredential",
+                ExistingWorkPolicy.KEEP,request)
+
+
         } catch (e: Resources.NotFoundException){
             Log.e("accessToken", "Fail to get credential file")
             Result.failure()

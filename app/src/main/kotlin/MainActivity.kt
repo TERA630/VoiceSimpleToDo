@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.work.Constraints
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import com.google.android.material.snackbar.Snackbar
 import com.google.auth.oauth2.AccessToken
 import kotlinx.android.synthetic.main.activity_main.*
@@ -91,10 +89,10 @@ class  MainActivity : AppCompatActivity() {
             .setRequiresCharging(false)
             .build()
 
-        val request = PeriodicWorkRequestBuilder<ConfidenceWorker>(1L, java.util.concurrent.TimeUnit.HOURS)
+        val request = OneTimeWorkRequestBuilder<ConfidenceWorker>()
             .setConstraints(constraints)
             .build()
-          WorkManager.getInstance(this).enqueue(request)
+          WorkManager.getInstance(this).enqueueUniqueWork("GetCredential",ExistingWorkPolicy.KEEP,request)
     }
 
 }
