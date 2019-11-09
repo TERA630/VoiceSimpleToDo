@@ -5,7 +5,7 @@ import com.google.cloud.speech.v1.*
 import io.grpc.ClientCall
 import io.grpc.stub.StreamObserver
 
-class SpeechStreaming{
+class SpeechStreaming(private val viewModel: MainViewModel){
     lateinit var mRequestObserver: StreamObserver<StreamingRecognizeRequest>
     lateinit var mResponseObserver:StreamObserver<StreamingRecognizeResponse>
     var mListeners = mutableListOf<Listener>()
@@ -52,8 +52,7 @@ class SpeechStreaming{
 
     }
     fun startRecognizing(sampleRate: Int) {
-        mApi?.let {
-            mRequestObserver = it.streamingRecognize(mResponseObserver)
+            mRequestObserver = viewModel.mApi.streamingRecognize(mResponseObserver)
             val recognitionConfig = RecognitionConfig.newBuilder()
                 .setLanguageCode("ja-JP")
                 .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
@@ -68,10 +67,6 @@ class SpeechStreaming{
                 .setStreamingConfig(streamingRecognitionConfig)
                 .build()
             mRequestObserver?.onNext(streamingRecognizeRequest)
-        } ?: run {
-            Log.w(mTag, "API not ready. Ignoring the request")
-            return
-        }
     }
     fun addListener(listener: Listener) = mListeners.add(listener)
     fun removeListener(listener: Listener) = mListeners.remove(listener)

@@ -19,15 +19,15 @@ const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
 const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
 private val SCOPE = Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
 
-class ConfidenceWorker(private val appContext: Context, workerParams: WorkerParameters)
+class ConfidenceWorker(private val appContext: Context, workerParams: WorkerParameters,private val vModel:MainViewModel)
     : Worker(appContext, workerParams) {
     // workerManagerはBackgroundで実行される
 
     private val googleHostName = "speech.googleapis.com"
     private val scopeOfGoogleAPI =
         Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
-    private val PortOfGoogleAPI = 443
-    private lateinit var mApi:SpeechGrpc.SpeechStub
+    private val portOfGoogleAPI = 443
+
 
     override fun doWork(): Result {
         Log.i("Worker","workerManager coming")
@@ -40,11 +40,11 @@ class ConfidenceWorker(private val appContext: Context, workerParams: WorkerPara
             val interceptor = GoogleCredentialsInterceptor(googleCredentials)
 
             val channel = OkHttpChannelProvider() // io.grpc.ManegedChannelProviderの派生クラス
-                .builderForAddress(googleHostName, PortOfGoogleAPI) // hostとtargetURI(Address)を元にChannelを作る｡
+                .builderForAddress(googleHostName, portOfGoogleAPI) // hostとtargetURI(Address)を元にChannelを作る｡
                 .nameResolverFactory(DnsNameResolverProvider())     // resolverFactoryを設定する｡
                 .intercept(interceptor)                             // Channelが実際に呼ばれる前の前処置を設定する｡
                 .build()
-            mApi = SpeechGrpc.newStub(channel)
+            vModel.mApi = SpeechGrpc.newStub(channel)
             val fetchAgain = max(token.expirationTime.time -System.currentTimeMillis() - ACCESS_TOKEN_FETCH_MARGIN,
                 ACCESS_TOKEN_EXPIRATION_TOLERANCE.toLong())
             val constraints = Constraints.Builder()
