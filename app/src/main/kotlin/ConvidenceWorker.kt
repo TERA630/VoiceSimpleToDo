@@ -33,6 +33,7 @@ class ConfidenceWorker(private val appContext: Context,
 
     override fun doWork(): Result {
         Log.i("Worker","workerManager coming")
+        val token = getAccessTokenFromPreference()
         try{
             val credentialIS = applicationContext.resources.openRawResource(R.raw.credential)
             val credentials = GoogleCredentials.fromStream(credentialIS).createScoped(SCOPE)
@@ -69,6 +70,17 @@ class ConfidenceWorker(private val appContext: Context,
         return Result.success()
     }
 
+    private fun getAccessTokenFromPreference(): AccessToken? {
+        val prefs = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return null
+
+        val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null) ?: return null
+        val expirationTime = prefs.getLong(PREF_ACCESS_TOKEN_EXPIRATION_TIME, -1L)
+
+        val token = tokenValue.takeUnless { it.isEmpty() || expirationTime < 0 }
+            .takeIf { expirationTime > System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TOLERANCE }
+
+        return token?.let{ AccessToken( it ,Date(expirationTime))}
+    }
     private fun saveTokenToPref(token: AccessToken) {
         val prefs: SharedPreferences = appContext.getSharedPreferences(PREF_ACCESS_TOKEN_VALUE, Context.MODE_PRIVATE)
         prefs.edit()

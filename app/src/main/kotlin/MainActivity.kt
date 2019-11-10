@@ -1,16 +1,13 @@
 package com.example.voicesimpletodo
 
-import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.*
-import com.google.auth.oauth2.AccessToken
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.*
 
 const val ACCESS_TOKEN_EXPIRATION_TOLERANCE = 30 * 60 * 1000 // thirty minutes
 const val ACCESS_TOKEN_FETCH_MARGIN = 60 * 1000 // one minute
@@ -86,17 +83,7 @@ class  MainActivity : AppCompatActivity() {
             }
         }
     }
-    private fun getAccessTokenFromPreference(): AccessToken? {
-        val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return null
 
-        val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null)
-        val expirationTime = prefs.getLong(PREF_ACCESS_TOKEN_EXPIRATION_TIME, -1L)
-
-        val token = tokenValue.takeUnless { it.isNullOrEmpty() || expirationTime < 0 }
-            .takeIf { expirationTime > System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TOLERANCE }
-
-        return token?.let{ AccessToken( it ,Date(expirationTime))}
-    }
 
       private fun startWorker(){
        val constraints = Constraints.Builder()
