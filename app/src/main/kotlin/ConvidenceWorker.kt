@@ -37,7 +37,7 @@ class ConfidenceWorker(private val appContext: Context,
             val credentialIS = applicationContext.resources.openRawResource(R.raw.credential)
             val credentials = GoogleCredentials.fromStream(credentialIS).createScoped(SCOPE)
             val token = credentials.refreshAccessToken()
-            saveTokenToPref(token)
+              saveTokenToPref(token)
             val googleCredentials = GoogleCredentials(token).createScoped(scopeOfGoogleAPI)
             val interceptor = GoogleCredentialsInterceptor(googleCredentials)
 
@@ -49,17 +49,14 @@ class ConfidenceWorker(private val appContext: Context,
             vModel.mApi = SpeechGrpc.newStub(channel)
             val fetchAgain = max(token.expirationTime.time -System.currentTimeMillis() - ACCESS_TOKEN_FETCH_MARGIN,
                 ACCESS_TOKEN_EXPIRATION_TOLERANCE.toLong())
-            val constraints = Constraints.Builder()
-                .build()
+            val constraints = Constraints.Builder().build()
 
             val request = OneTimeWorkRequestBuilder<ConfidenceWorker>()
                 .setConstraints(constraints)
                 .setInitialDelay(fetchAgain,TimeUnit.MILLISECONDS)
-
                 .build()
             WorkManager.getInstance(appContext).enqueueUniqueWork("GetCredential",
                 ExistingWorkPolicy.KEEP,request)
-
 
         } catch (e: Resources.NotFoundException){
             Log.e("accessToken", "Fail to get credential file")

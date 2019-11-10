@@ -22,6 +22,9 @@ class MyApplication:Application(){
             Room.databaseBuilder(androidContext(),MyDataBase::class.java,"myDatabase.db").build()
         }
         factory { get<MyDataBase>().myDao() }
+        single {
+            SpeechStreaming(get())
+        }
         viewModel { MainViewModel(get()) }
 
     }

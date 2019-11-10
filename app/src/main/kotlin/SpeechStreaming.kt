@@ -1,8 +1,10 @@
 package com.example.voicesimpletodo
 
 import android.util.Log
-import com.google.cloud.speech.v1.*
-import io.grpc.ClientCall
+import com.google.cloud.speech.v1.RecognitionConfig
+import com.google.cloud.speech.v1.StreamingRecognitionConfig
+import com.google.cloud.speech.v1.StreamingRecognizeRequest
+import com.google.cloud.speech.v1.StreamingRecognizeResponse
 import io.grpc.stub.StreamObserver
 
 class SpeechStreaming(private val viewModel: MainViewModel){
@@ -13,19 +15,18 @@ class SpeechStreaming(private val viewModel: MainViewModel){
 
     fun init(){
         mResponseObserver = object : StreamObserver<StreamingRecognizeResponse> {
-            override fun onNext(response: StreamingRecognizeResponse?) { // onNext:新しいデーターを受信したときのコールバック gRPC
-
-                // streamingRecognizeからの返答｡
+            override fun onNext(response: StreamingRecognizeResponse?) {
+                // streamingRecognizeから新しいデーターを受信したときのコールバック gRPC
                 // 何も認識されなければ single_utteranceがFalse､Messageは返らない｡
                 // results { alternatives { transcript : " to be " stability:0.01 }
-                // results { alternatives { transcript: "to be or not to be" confidence 0.92} is final true}
-                // 最終結果に含まれる認識結果には is final:true となる｡
+                // results { alternatives { transcript: "to be or not to be" confidence 0.92} isFinal true}
+                // 最終結果に含まれる認識結果には isFinal:true となる｡
                 // これらを全てつなぐと､最終認識結果となる｡
                 var text = ""
                 var isFinal = false
-                response?.let {
-                    if (it.resultsCount > 0) {
-                        val result = it.getResults(0)
+                if(response == null) return
+                if (response.resultsCount > 0) {
+                        val result = response.getResults(0)
                         isFinal = result.isFinal
                         if (result.alternativesCount > 0) {
                             val alternative =
@@ -38,7 +39,6 @@ class SpeechStreaming(private val viewModel: MainViewModel){
                             listener.onSpeechRecognized(text, isFinal)
                         }
                     }
-                }
             }
 
             override fun onCompleted() {
@@ -52,12 +52,14 @@ class SpeechStreaming(private val viewModel: MainViewModel){
 
     }
     fun startRecognizing(sampleRate: Int) {
-            mRequestObserver = viewModel.mApi.streamingRecognize(mResponseObserver)
+        if(viewModel.mApi == null ) return
+            mRequestObserver = viewModel.mApi!!.streamingRecognize(mResponseObserver)
             val recognitionConfig = RecognitionConfig.newBuilder()
                 .setLanguageCode("ja-JP")
                 .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
                 .setSampleRateHertz(sampleRate)
                 .build()
+            // 最初のリクエストは必ずstreamingRecognitionConfigのみで　AudioDataは含めない｡
             val streamingRecognitionConfig = StreamingRecognitionConfig.newBuilder()
                 .setConfig(recognitionConfig)
                 .setInterimResults(true)
@@ -66,8 +68,12 @@ class SpeechStreaming(private val viewModel: MainViewModel){
             val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
                 .setStreamingConfig(streamingRecognitionConfig)
                 .build()
-            mRequestObserver?.onNext(streamingRecognizeRequest)
+            mRequestObserver.onNext(streamingRecognizeRequest)
     }
+    fun finishRecognizing() {
+        mRequestObserver.onCompleted()
+    }
+
     fun addListener(listener: Listener) = mListeners.add(listener)
     fun removeListener(listener: Listener) = mListeners.remove(listener)
     interface Listener {
@@ -77,10 +83,3 @@ class SpeechStreaming(private val viewModel: MainViewModel){
     }
 
 }
-
-
-
-
-
-    // StreamingRecognizeResponseはGoogle.cloud.speech.v1
-    // first messageはStreaming_config､それ以降にAudio_contentを含む様にする｡

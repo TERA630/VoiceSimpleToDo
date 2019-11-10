@@ -29,12 +29,7 @@ class FlexBoxTagOriginAdaptor(
     override fun onBindViewHolder(holder: FlexBoxVH, position: Int) {
 
         holder.itemView.tag_name.text = usingTagState[position].title
-        holder.itemView.tag_name.background  =
-            if( usingTagState[position].isSelected) {
-                contextHere.getDrawable(R.drawable.item_pressed)
-            } else {
-                contextHere.getDrawable(R.drawable.item_unpressed)
-            }
+        holder.itemView.tag_name.isSelected = !usingTagState[position].isSelected
 
         holder.itemView.tag_name.setOnClickListener{
             val clickedTagId = usingTagState[position].id

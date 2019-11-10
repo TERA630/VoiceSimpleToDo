@@ -6,9 +6,9 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.*
-import com.google.android.material.snackbar.Snackbar
 import com.google.auth.oauth2.AccessToken
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
@@ -21,6 +21,7 @@ const val PREFS = "SpeechService"
 class  MainActivity : AppCompatActivity() {
 
     private val vModel by viewModel<MainViewModel>()
+    private val speechStreaming:SpeechStreaming by inject()
 
     // Activity Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,7 +30,7 @@ class  MainActivity : AppCompatActivity() {
         constructViews(savedInstanceState)
         val configuration = Configuration.Builder().setWorkerFactory(MyWorkerFactory(vModel)).build()
         WorkManager.initialize(this.applicationContext,configuration)
-        val token = getAccessTokenFromPreference() ?: startWorker()
+
 
     }
     override fun onPause() {
@@ -69,8 +70,20 @@ class  MainActivity : AppCompatActivity() {
         }
         setSupportActionBar(toolbar)
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+            if(vModel.isListening)  {
+                vModel.isListening =false
+                view.isSelected = false
+                speechStreaming.finishRecognizing()
+            } else {
+                vModel.isListening = true
+                view.isSelected = true
+              //   val sampleRate = mVoiceRecorder?.getSampleRate()
+                val token  = getAccessTokenFromPreference()
+                if(token == null ) startWorker()
+                vModel.mApi?.let {
+                    speechStreaming.startRecognizing(16000)
+                }
+            }
         }
     }
     private fun getAccessTokenFromPreference(): AccessToken? {
@@ -82,12 +95,7 @@ class  MainActivity : AppCompatActivity() {
         val token = tokenValue.takeUnless { it.isNullOrEmpty() || expirationTime < 0 }
             .takeIf { expirationTime > System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TOLERANCE }
 
-        return token?.let{ AccessToken( tokenValue ,Date(expirationTime))}
-
-//       return if (tokenValue.isNullOrEmpty() || expirationTime < 0) null
-//        else if (expirationTime > System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TOLERANCE)
-//            AccessToken(tokenValue, Date(expirationTime))
-//        else null
+        return token?.let{ AccessToken( it ,Date(expirationTime))}
     }
 
       private fun startWorker(){
@@ -100,5 +108,4 @@ class  MainActivity : AppCompatActivity() {
             .build()
           WorkManager.getInstance(this).enqueueUniqueWork("GetCredential",ExistingWorkPolicy.KEEP,request)
     }
-
 }
