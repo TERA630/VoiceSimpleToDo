@@ -49,18 +49,18 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
 
-        when (viewType) {
+        return when (viewType) {
             cParent -> {
                 val itemView = layoutInflater.inflate(R.layout.item_card, parent, false)
-                return ViewHolderOfCell(itemView)
+                ViewHolderOfCell(itemView)
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
             cChild->{
                 val itemView = layoutInflater.inflate(R.layout.item_child,parent,false)
-                return ViewHolderOfCell(itemView)
+                ViewHolderOfCell(itemView)
             }
             else -> {
                 val footerView = LayoutInflater.from(parent.context).inflate(R.layout.list_footer ,parent,false)
-                return ViewHolderOfCell(footerView)
+                ViewHolderOfCell(footerView)
             }   // Footer アイテム追加
         }
     }

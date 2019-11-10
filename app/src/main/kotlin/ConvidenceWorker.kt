@@ -19,8 +19,10 @@ const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
 const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
 private val SCOPE = Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
 
-class ConfidenceWorker(private val appContext: Context, workerParams: WorkerParameters,private val vModel:MainViewModel)
-    : Worker(appContext, workerParams) {
+class ConfidenceWorker(private val appContext: Context,
+                       workerParams: WorkerParameters,
+                       private val vModel:MainViewModel
+) : Worker(appContext, workerParams) {
     // workerManagerはBackgroundで実行される
 
     private val googleHostName = "speech.googleapis.com"
@@ -78,6 +80,19 @@ class ConfidenceWorker(private val appContext: Context, workerParams: WorkerPara
             .apply()
     }
 }
+class MyWorkerFactory(private val vModel: MainViewModel) : WorkerFactory() {
+    override fun createWorker(
+        appContext: Context,
+        workerClassName: String,
+        workerParameters: WorkerParameters ): ListenableWorker? {
+        return when (Class.forName(workerClassName)) {
+            ConfidenceWorker::class.java -> ConfidenceWorker(appContext, workerParameters, vModel)
+            else -> throw IllegalArgumentException("unknown worker class name: $workerClassName")
+        }
+    }
+}
+
+
 
 
 

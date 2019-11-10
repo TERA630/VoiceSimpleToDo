@@ -27,6 +27,8 @@ class  MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         vModel.init()
         constructViews(savedInstanceState)
+        val configuration = Configuration.Builder().setWorkerFactory(MyWorkerFactory(vModel)).build()
+        WorkManager.initialize(this.applicationContext,configuration)
         val token = getAccessTokenFromPreference() ?: startWorker()
 
     }
@@ -34,7 +36,6 @@ class  MainActivity : AppCompatActivity() {
         super.onPause()
         vModel.saveListToDB()
     }
-
     // Activity Event
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -78,10 +79,15 @@ class  MainActivity : AppCompatActivity() {
         val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null)
         val expirationTime = prefs.getLong(PREF_ACCESS_TOKEN_EXPIRATION_TIME, -1L)
 
-        return if (tokenValue.isNullOrEmpty() || expirationTime < 0) null
-        else if (expirationTime > System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TOLERANCE)
-            AccessToken(tokenValue, Date(expirationTime))
-        else null
+        val token = tokenValue.takeUnless { it.isNullOrEmpty() || expirationTime < 0 }
+            .takeIf { expirationTime > System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TOLERANCE }
+
+        return token?.let{ AccessToken( tokenValue ,Date(expirationTime))}
+
+//       return if (tokenValue.isNullOrEmpty() || expirationTime < 0) null
+//        else if (expirationTime > System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TOLERANCE)
+//            AccessToken(tokenValue, Date(expirationTime))
+//        else null
     }
 
       private fun startWorker(){

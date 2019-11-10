@@ -49,21 +49,31 @@ class FlexBoxDetailAdaptor(
             cEnd -> bindEnd(holder,position)
         }
     }
-
     // Lifecycle Sub-routine
     private fun bindItem(holder: FlexBoxVH,position: Int){ // position は thisItemsTagのIndexと一致
         val tagHere =  viewModel.allTags()[position]
-//        val tagHere = viewModel.currentItem().tag
         holder.itemView.item_name.text = tagHere
         val iView = holder.itemView
         if(viewModel.currentItem().tag.contains(tagHere)){
             iView.setBackgroundColor(contextHere.getColor(R.color.colorLightYellow))
+            iView.setOnClickListener { removeTagToItem(position,tagHere) }
             iView.item_erase.visibility = View.VISIBLE
         } else {
             iView.setBackgroundColor(contextHere.getColor(R.color.colorSlightShadow))
+            iView.item_name.setOnClickListener { appendTagToItem(position,tagHere) }
             iView.item_erase.visibility = View.GONE
         }
     }
+    private fun appendTagToItem(position: Int,newTag:String){
+        viewModel.currentItem().tag.add(newTag)
+        notifyItemChanged(position)
+    }
+    private fun removeTagToItem(position: Int,tagToRemove:String){
+        viewModel.currentItem().tag.remove(tagToRemove)
+        notifyItemChanged(position)
+    }
+
+
     private fun bindEnd(holder: FlexBoxVH,position: Int){
         val iv = holder.itemView
         val autoCompleteCandidates = ArrayAdapter<String>(contextHere,android.R.layout.simple_list_item_1)
@@ -94,7 +104,6 @@ class FlexBoxDetailAdaptor(
             iv.end_flipper.showNext()
         }
     }
-
     private fun onTagEditorEnd(v: TextView,position: Int):Boolean{
         if(v.text.isNullOrBlank()) return false
         val newText = v.text.toString()
