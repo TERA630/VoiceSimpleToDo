@@ -89,7 +89,7 @@ class  MainActivity : AppCompatActivity() {
             .setRequiresCharging(false)
             .build()
 
-        val request = OneTimeWorkRequestBuilder<ConfidenceWorker>()
+        val request = OneTimeWorkRequestBuilder<CredentialWorker>()
             .setConstraints(constraints)
             .build()
           WorkManager.getInstance(this).enqueueUniqueWork("GetCredential",ExistingWorkPolicy.KEEP,request)
