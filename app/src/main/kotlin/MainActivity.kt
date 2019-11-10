@@ -75,8 +75,7 @@ class  MainActivity : AppCompatActivity() {
                 vModel.isListening = true
                 view.isSelected = true
               //   val sampleRate = mVoiceRecorder?.getSampleRate()
-                val token  = getAccessTokenFromPreference()
-                if(token == null ) startWorker()
+                 startWorker()
                 vModel.mApi?.let {
                     speechStreaming.startRecognizing(16000)
                 }

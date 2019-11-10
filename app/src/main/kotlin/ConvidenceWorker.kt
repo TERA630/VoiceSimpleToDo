@@ -24,7 +24,7 @@ class ConfidenceWorker(private val appContext: Context,
                        private val vModel:MainViewModel
 ) : Worker(appContext, workerParams) {
     // workerManagerはBackgroundで実行される
-
+    private val mTag = "accessToken"
     private val googleHostName = "speech.googleapis.com"
     private val scopeOfGoogleAPI =
         Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
@@ -60,13 +60,15 @@ class ConfidenceWorker(private val appContext: Context,
                 ExistingWorkPolicy.KEEP,request)
 
         } catch (e: Resources.NotFoundException){
-            Log.e("accessToken", "Fail to get credential file")
+            Log.e(mTag, "Fail to get credential file")
             Result.failure()
         } catch (e:IOException){
-            Log.e("accessToken", "Fail to obtain access token $e")
+            Log.e(mTag, "Fail to obtain access token from InputStream or refresh at ${e.stackTrace}")
+            Result.failure()
+        } catch (e:Resources.NotFoundException){
+            Log.e(mTag,"raw File not found.")
             Result.failure()
         }
-        // Indicate whether the task finished successfully with the Result
         return Result.success()
     }
 
