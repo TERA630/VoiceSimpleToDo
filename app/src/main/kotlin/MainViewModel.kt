@@ -59,6 +59,13 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         list[idToFlip].isOpened = (!list[idToFlip].isOpened) // IsOpenedの反転
         listObservable.postValue(list)
     }
+    fun establishStreamingConnection(){
+        val speechStreaming = SpeechStreaming(this)
+
+    }
+    fun closeStreamingConnection(){
+
+    }
     private fun getItemsTitleContainsTag(_tags:List<String>):MutableList<ItemEntity>{
             if(_tags.isEmpty()) {
                  return getListValue()
@@ -190,4 +197,5 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         tagObservable.postValue(tagStateList)
         listObservable.postValue(_list)
     }
+
 }

@@ -1,13 +1,10 @@
 package com.example.voicesimpletodo
 
 import android.util.Log
-import com.google.cloud.speech.v1.RecognitionConfig
-import com.google.cloud.speech.v1.StreamingRecognitionConfig
-import com.google.cloud.speech.v1.StreamingRecognizeRequest
-import com.google.cloud.speech.v1.StreamingRecognizeResponse
+import com.google.cloud.speech.v1.*
 import io.grpc.stub.StreamObserver
 
-class SpeechStreaming(private val viewModel: MainViewModel){
+class SpeechStreaming(private val viewModel: MainViewModel,speechApi:SpeechGrpc.SpeechStub){
     lateinit var mRequestObserver: StreamObserver<StreamingRecognizeRequest>
     lateinit var mResponseObserver:StreamObserver<StreamingRecognizeResponse>
     var mListeners = mutableListOf<Listener>()
@@ -44,7 +41,6 @@ class SpeechStreaming(private val viewModel: MainViewModel){
             override fun onCompleted() {
                 Log.i(mTag, "API completed.")
             }
-
             override fun onError(t: Throwable?) {
                 Log.e(mTag, "Error calling the API.", t)
             }
