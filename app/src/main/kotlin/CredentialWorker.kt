@@ -52,7 +52,7 @@ class CredentialWorker(private val appContext: Context,
             .setConstraints(Constraints.Builder().build())
             .setInitialDelay(fetchAgain,TimeUnit.MILLISECONDS)
             .build()
-        WorkManager.getInstance(appContext).enqueueUniqueWork("GetCredential", ExistingWorkPolicy.KEEP,request)
+        WorkManager.getInstance(appContext).enqueueUniqueWork("GetCredential", ExistingWorkPolicy.APPEND,request)
         return Result.success()
     }
 
