@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit
 
 const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
 const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
-private val SCOPE = Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
 
 class CredentialWorker(private val appContext: Context,
                        workerParams: WorkerParameters,
@@ -32,25 +31,10 @@ class CredentialWorker(private val appContext: Context,
 
     override fun doWork(): Result {
         Log.i("Worker","workerManager coming")
-        val token = getAccessTokenFromPreference()
+        val token = getTokenFromPref() ?: fetchTokenFromCredentialKey()
         try{
-            val credentialIS = applicationContext.resources.openRawResource(R.raw.credential)
-            val credentials = GoogleCredentials.fromStream(credentialIS).createScoped(SCOPE)
-            val token = credentials.refreshAccessToken()
             saveTokenToPref(token)
             tokenToApi(token)
-
-            val fetchAgain = max(token.expirationTime.time -System.currentTimeMillis() - ACCESS_TOKEN_FETCH_MARGIN,
-                ACCESS_TOKEN_EXPIRATION_TOLERANCE.toLong())
-            val constraints = Constraints.Builder().build()
-
-            val request = OneTimeWorkRequestBuilder<CredentialWorker>()
-                .setConstraints(constraints)
-                .setInitialDelay(fetchAgain,TimeUnit.MILLISECONDS)
-                .build()
-            WorkManager.getInstance(appContext).enqueueUniqueWork("GetCredential",
-                ExistingWorkPolicy.KEEP,request)
-
         } catch (e: Resources.NotFoundException){
             Log.e(mTag, "Fail to get credential file")
             Result.failure()
@@ -61,7 +45,22 @@ class CredentialWorker(private val appContext: Context,
             Log.e(mTag,"raw File not found.")
             Result.failure()
         }
+        val fetchAgain = max(token.expirationTime.time -System.currentTimeMillis() - ACCESS_TOKEN_FETCH_MARGIN,
+            ACCESS_TOKEN_EXPIRATION_TOLERANCE.toLong())
+
+        val request = OneTimeWorkRequestBuilder<CredentialWorker>()
+            .setConstraints(Constraints.Builder().build())
+            .setInitialDelay(fetchAgain,TimeUnit.MILLISECONDS)
+            .build()
+        WorkManager.getInstance(appContext).enqueueUniqueWork("GetCredential", ExistingWorkPolicy.KEEP,request)
         return Result.success()
+    }
+
+    private fun fetchTokenFromCredentialKey():AccessToken{
+        val credentialIS = applicationContext.resources.openRawResource(R.raw.credential)
+        val credentials =
+            GoogleCredentials.fromStream(credentialIS).createScoped(scopeOfGoogleAPI)
+        return credentials.refreshAccessToken()
     }
     private fun tokenToApi(token: AccessToken){
         val googleCredentials = GoogleCredentials(token).createScoped(scopeOfGoogleAPI)
@@ -73,7 +72,7 @@ class CredentialWorker(private val appContext: Context,
             .build()
         vModel.mApi = SpeechGrpc.newStub(channel)
     }
-    private fun getAccessTokenFromPreference(): AccessToken? {
+    private fun getTokenFromPref(): AccessToken? {
         val prefs = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return null
 
         val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null) ?: return null
