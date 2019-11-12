@@ -4,17 +4,16 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.work.*
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 const val ACCESS_TOKEN_EXPIRATION_TOLERANCE = 30 * 60 * 1000 // thirty minutes
 const val ACCESS_TOKEN_FETCH_MARGIN = 60 * 1000 // one minute
-const val HOSTNAME = "speech.googleapis.com"
-
-
 const val PREFS = "SpeechService"
+
 class  MainActivity : AppCompatActivity() {
 
     private val vModel by viewModel<MainViewModel>()
@@ -27,8 +26,6 @@ class  MainActivity : AppCompatActivity() {
         constructViews(savedInstanceState)
         val configuration = Configuration.Builder().setWorkerFactory(MyWorkerFactory(vModel)).build()
         WorkManager.initialize(this.applicationContext,configuration)
-
-
     }
     override fun onPause() {
         super.onPause()
@@ -75,23 +72,8 @@ class  MainActivity : AppCompatActivity() {
                 vModel.isListening = true
                 view.isSelected = true
               //   val sampleRate = mVoiceRecorder?.getSampleRate()
-                 startWorker()
-                vModel.mApi?.let {
-                    speechStreaming.startRecognizing(16000)
-                }
             }
         }
     }
 
-
-      private fun startWorker(){
-       val constraints = Constraints.Builder()
-            .setRequiresCharging(false)
-            .build()
-
-        val request = OneTimeWorkRequestBuilder<CredentialWorker>()
-            .setConstraints(constraints)
-            .build()
-          WorkManager.getInstance(this).enqueueUniqueWork("GetCredential",ExistingWorkPolicy.KEEP,request)
-    }
 }

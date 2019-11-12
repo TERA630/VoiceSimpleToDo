@@ -18,9 +18,12 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     var isListening:Boolean = false
     fun init() {
         viewModelScope.launch {
-            val list  = withTimeoutOrNull(1000L){
+            val list  = runBlocking{
+                withTimeoutOrNull(1000L){
                 myDao.findAll().toMutableList()
+                }
             }
+
             val listFromDBOrDefault =  list?.takeUnless { it.isEmpty() } ?:makeDummyList()
             makeTagList(listFromDBOrDefault)
             listObservable.postValue(listFromDBOrDefault)
@@ -58,13 +61,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         val idToFlip = list.indexOfFirst { it.id == id }
         list[idToFlip].isOpened = (!list[idToFlip].isOpened) // IsOpenedの反転
         listObservable.postValue(list)
-    }
-    fun establishStreamingConnection(){
-        val speechStreaming = SpeechStreaming(this)
-
-    }
-    fun closeStreamingConnection(){
-
     }
     private fun getItemsTitleContainsTag(_tags:List<String>):MutableList<ItemEntity>{
             if(_tags.isEmpty()) {
