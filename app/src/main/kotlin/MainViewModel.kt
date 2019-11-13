@@ -14,8 +14,11 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     var currentId  = 1
     val tagObservable = MutableLiveData<MutableList<TagState>>()
     val tagStateList = mutableListOf<TagState>()
-    var mApi: SpeechGrpc.SpeechStub? = null
+
+    lateinit var speechStreaming:SpeechStreaming
+    var speechApi:SpeechGrpc.SpeechStub?= null
     var isSpeechStubAvailable:Boolean = false
+
     fun init() {
         viewModelScope.launch {
             val list  = runBlocking{
@@ -28,6 +31,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             makeTagList(listFromDBOrDefault)
             listObservable.postValue(listFromDBOrDefault)
         }
+        speechStreaming = SpeechStreaming(this)
     }
 
     fun appendList(item: ItemEntity) {

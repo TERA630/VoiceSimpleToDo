@@ -1,27 +1,25 @@
 package com.example.voicesimpletodo
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import androidx.work.*
-import com.google.cloud.speech.v1.*
+import com.google.cloud.speech.v1.RecognitionConfig
+import com.google.cloud.speech.v1.StreamingRecognitionConfig
+import com.google.cloud.speech.v1.StreamingRecognizeRequest
+import com.google.cloud.speech.v1.StreamingRecognizeResponse
 import io.grpc.stub.StreamObserver
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class SpeechStreaming(private val viewModel: MainViewModel){
-
-    var isSpeechAvailable:Boolean = false
+class SpeechStreaming(private val vModel: MainViewModel){
 
     private lateinit var mRequestObserver: StreamObserver<StreamingRecognizeRequest>
     private lateinit var mResponseObserver:StreamObserver<StreamingRecognizeResponse>
-    lateinit var mSpeechApi:SpeechGrpc.SpeechStub
     var mListeners = mutableListOf<Listener>()
     val mTag = "SpeechStreaming"
-    private lateinit var mWorkStatus : LiveData<WorkInfo>
-
 
     fun init(context:Context){
-        startWorker(context)
+
+
         mResponseObserver = object : StreamObserver<StreamingRecognizeResponse> {
             override fun onNext(response: StreamingRecognizeResponse?) {
                 // streamingRecognizeから新しいデーターを受信したときのコールバック gRPC
@@ -54,28 +52,35 @@ class SpeechStreaming(private val viewModel: MainViewModel){
             }
         }
     }
-    fun startRecognizing(sampleRate: Int) {
-            mRequestObserver = mSpeechApi.streamingRecognize(mResponseObserver)
-            val recognitionConfig = RecognitionConfig.newBuilder()
-                .setLanguageCode("ja-JP")
-                .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
-                .setSampleRateHertz(sampleRate)
-                .build()
-            // 最初のリクエストは必ずstreamingRecognitionConfigのみで　AudioDataは含めない｡
-            val streamingRecognitionConfig = StreamingRecognitionConfig.newBuilder()
-                .setConfig(recognitionConfig)
-                .setInterimResults(true)
-                .setSingleUtterance(true)
-                .build()
-            val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
-                .setStreamingConfig(streamingRecognitionConfig)
-                .build()
-            mRequestObserver.onNext(streamingRecognizeRequest)
+    fun startRecognizing(context: Context,sampleRate:Int) {
+            val scope = CoroutineScope(Dispatchers.IO)
+            scope.launch {
+                val api = credentialToApi(context,vModel) ?: return@launch
+
+                mRequestObserver = api.streamingRecognize(mResponseObserver)
+                val recognitionConfig = RecognitionConfig.newBuilder()
+                    .setLanguageCode("ja-JP")
+                    .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
+                    .setSampleRateHertz(sampleRate)
+                    .build()
+                // 最初のリクエストは必ずstreamingRecognitionConfigのみで　AudioDataは含めない｡
+                val streamingRecognitionConfig = StreamingRecognitionConfig.newBuilder()
+                    .setConfig(recognitionConfig)
+                    .setInterimResults(true)
+                    .setSingleUtterance(true)
+                    .build()
+                val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
+                    .setStreamingConfig(streamingRecognitionConfig)
+                    .build()
+                mRequestObserver.onNext(streamingRecognizeRequest)
+            }
+
     }
+
     fun finishRecognizing() {
         mRequestObserver.onCompleted()
     }
-    private fun startWorker(context: Context){
+/*    private fun startWorker(context: Context){
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
@@ -87,11 +92,10 @@ class SpeechStreaming(private val viewModel: MainViewModel){
         workManager.enqueueUniqueWork("GetCredential",
             ExistingWorkPolicy.REPLACE,request)
         mWorkStatus = workManager.getWorkInfoByIdLiveData(request.id)
-        mWorkStatus.observe(context as LifecycleOwner, Observer{
-            if(it.state == WorkInfo.State.SUCCEEDED) {viewModel.isSpeechStabAvailabile}
-        })
+        mWorkStatus.observe(context as MainActivity, Observer{
+            vModel.isSpeechStubAvailable = it.state == WorkInfo.State.SUCCEEDED
+        })*/
 
-    }
     fun addListener(listener: Listener) = mListeners.add(listener)
     fun removeListener(listener: Listener) = mListeners.remove(listener)
     interface Listener {

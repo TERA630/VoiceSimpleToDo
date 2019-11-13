@@ -70,7 +70,7 @@ class CredentialWorker(private val appContext: Context,
             .nameResolverFactory(DnsNameResolverProvider())     // resolverFactoryを設定する｡
             .intercept(interceptor)                             // Channelが実際に呼ばれる前の前処置を設定する｡
             .build()
-        vModel.mApi = SpeechGrpc.newStub(channel)
+        vModel.speechApi= SpeechGrpc.newStub(channel)
     }
     private fun getTokenFromPref(): AccessToken? {
         val prefs = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return null
