@@ -1,6 +1,7 @@
 package com.example.voicesimpletodo
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.work.*
@@ -86,8 +87,8 @@ class SpeechStreaming(private val viewModel: MainViewModel){
         workManager.enqueueUniqueWork("GetCredential",
             ExistingWorkPolicy.REPLACE,request)
         mWorkStatus = workManager.getWorkInfoByIdLiveData(request.id)
-        mWorkStatus.observe(owner, Observer{
-            if(it.state == WorkInfo.State.SUCCEEDED) {isSpeechAvailable == true}
+        mWorkStatus.observe(context as LifecycleOwner, Observer{
+            if(it.state == WorkInfo.State.SUCCEEDED) {viewModel.isSpeechStabAvailabile}
         })
 
     }
