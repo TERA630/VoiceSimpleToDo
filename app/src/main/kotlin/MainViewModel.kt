@@ -15,7 +15,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val tagObservable = MutableLiveData<MutableList<TagState>>()
     val tagStateList = mutableListOf<TagState>()
     var mApi: SpeechGrpc.SpeechStub? = null
-    var isSpeechStubAvailable:Boolean = false
+    var isSpeechStabAvailabile:Boolean = false
     fun init() {
         viewModelScope.launch {
             val list  = runBlocking{
