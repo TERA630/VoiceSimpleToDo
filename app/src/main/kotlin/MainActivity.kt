@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import kotlinx.android.synthetic.main.activity_main.*
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 const val ACCESS_TOKEN_EXPIRATION_TOLERANCE = 30 * 60 * 1000 // thirty minutes
@@ -17,7 +16,6 @@ const val PREFS = "SpeechService"
 class  MainActivity : AppCompatActivity() {
 
     private val vModel by viewModel<MainViewModel>()
-    private val speechStreaming:SpeechStreaming by inject()
 
     // Activity Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,14 +62,13 @@ class  MainActivity : AppCompatActivity() {
         }
         setSupportActionBar(toolbar)
         fab.setOnClickListener { view ->
-            if(vModel.isListening)  {
-                vModel.isListening =false
+            if(view.isSelected)  {
                 view.isSelected = false
-                speechStreaming.finishRecognizing()
+                vModel.speechStreaming.finishRecognizing()
             } else {
-                vModel.isListening = true
                 view.isSelected = true
               //   val sampleRate = mVoiceRecorder?.getSampleRate()
+                vModel.speechStreaming.init(context = this)
             }
         }
     }
