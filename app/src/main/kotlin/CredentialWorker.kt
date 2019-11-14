@@ -1,3 +1,4 @@
+/*
 package com.example.voicesimpletodo
 
 import android.content.Context
@@ -15,8 +16,6 @@ import java.lang.Long.max
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
-const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
 
 class CredentialWorker(private val appContext: Context,
                        workerParams: WorkerParameters,
@@ -106,6 +105,7 @@ class MyWorkerFactory(private val vModel: MainViewModel) : WorkerFactory() {
 
 
 
+*/
 
 
 

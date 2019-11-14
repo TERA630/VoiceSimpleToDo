@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.work.Configuration
-import androidx.work.WorkManager
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -18,12 +16,13 @@ class  MainActivity : AppCompatActivity() {
     private val vModel by viewModel<MainViewModel>()
 
     // Activity Lifecycle
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vModel.init()
         constructViews(savedInstanceState)
-        val configuration = Configuration.Builder().setWorkerFactory(MyWorkerFactory(vModel)).build()
-        WorkManager.initialize(this.applicationContext,configuration)
+//        val configuration = Configuration.Builder().setWorkerFactory(MyWorkerFactory(vModel)).build()
+//        WorkManager.initialize(this.applicationContext,configuration)
     }
     override fun onPause() {
         super.onPause()
@@ -52,6 +51,7 @@ class  MainActivity : AppCompatActivity() {
         }
     }
     // Lifecycle sub-routine
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     private fun constructViews(savedInstanceState: Bundle?){
         setContentView(R.layout.activity_main)
         if(savedInstanceState == null) {
@@ -68,7 +68,8 @@ class  MainActivity : AppCompatActivity() {
             } else {
                 view.isSelected = true
               //   val sampleRate = mVoiceRecorder?.getSampleRate()
-                vModel.speechStreaming.init(context = this)
+
+                vModel.speechStreaming.startRecognizing(this,16000)
             }
         }
     }

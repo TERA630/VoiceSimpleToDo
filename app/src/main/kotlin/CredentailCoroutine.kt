@@ -10,7 +10,6 @@ import com.google.cloud.speech.v1.SpeechGrpc
 import io.grpc.internal.DnsNameResolverProvider
 import io.grpc.okhttp.OkHttpChannelProvider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import java.io.IOException
 import java.util.*
@@ -19,30 +18,31 @@ const val mTag = "accessToken"
 const val googleHostName = "speech.googleapis.com"
 const val portOfGoogleAPI = 443
 
+const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
+const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
 
-suspend fun credentialToApi(appContext: Context,vModel:MainViewModel) : SpeechGrpc.SpeechStub?{
-    val scope = CoroutineScope(Dispatchers.IO)
-    val deferred = scope.async {
-    val scopeOfGoogleAPI  = Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
-
-    val token = getTokenFromPref(appContext) ?: fetchTokenFromCredentialKey(appContext,scopeOfGoogleAPI)
-        try{
+suspend fun credentialToApi(appContext: Context,vModel:MainViewModel,scope:CoroutineScope) : SpeechGrpc.SpeechStub? =
+    scope.async {
+        val scopeOfGoogleAPI  = Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
+        val token = getTokenFromPref(appContext) ?: fetchTokenFromCredentialKey(appContext,scopeOfGoogleAPI)
+        return@async try{
             saveTokenToPref(token,appContext)
             tokenToApi(token,scopeOfGoogleAPI,vModel)
         } catch (e: Resources.NotFoundException){
             Log.e(mTag, "Fail to get credential file")
+            null
         } catch (e: IOException){
             Log.e(mTag, "Fail to obtain access token from InputStream or refresh at ${e.stackTrace}")
+            null
         } catch (e: Resources.NotFoundException){
             Log.e(mTag,"raw File not found.")
+                null
         }
-        null
-    }
+    }.await()
 //    val fetchAgain = Long.max(
 //        token.expirationTime.time - System.currentTimeMillis() - ACCESS_TOKEN_FETCH_MARGIN,
 //        ACCESS_TOKEN_EXPIRATION_TOLERANCE.toLong()
 
-}
 
     private fun fetchTokenFromCredentialKey(appContext: Context,scope:MutableList<String>): AccessToken {
         val credentialIS = appContext.resources.openRawResource(R.raw.credential)

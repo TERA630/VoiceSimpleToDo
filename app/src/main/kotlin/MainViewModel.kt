@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.cloud.speech.v1.SpeechGrpc
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
@@ -14,10 +13,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     var currentId  = 1
     val tagObservable = MutableLiveData<MutableList<TagState>>()
     val tagStateList = mutableListOf<TagState>()
-
     lateinit var speechStreaming:SpeechStreaming
-    var speechApi:SpeechGrpc.SpeechStub?= null
-    var isSpeechStubAvailable:Boolean = false
 
     fun init() {
         viewModelScope.launch {
@@ -31,6 +27,9 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             makeTagList(listFromDBOrDefault)
             listObservable.postValue(listFromDBOrDefault)
         }
+        speechStreaming = SpeechStreaming(this@MainViewModel)
+        speechStreaming.init()
+
         speechStreaming = SpeechStreaming(this)
     }
 

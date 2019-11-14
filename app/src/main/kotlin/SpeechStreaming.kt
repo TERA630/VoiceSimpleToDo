@@ -8,6 +8,7 @@ import com.google.cloud.speech.v1.StreamingRecognizeResponse
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
 class SpeechStreaming(private val vModel: MainViewModel){
@@ -16,10 +17,10 @@ class SpeechStreaming(private val vModel: MainViewModel){
     private lateinit var mResponseObserver:StreamObserver<StreamingRecognizeResponse>
     var mListeners = mutableListOf<Listener>()
     val mTag = "SpeechStreaming"
+    private val coroutineChannel = Channel<String>(capacity = 1)
+    private var isRequestServerEstablished = false
 
-    fun init(context:Context){
-
-
+    fun init(){
         mResponseObserver = object : StreamObserver<StreamingRecognizeResponse> {
             override fun onNext(response: StreamingRecognizeResponse?) {
                 // streamingRecognizeから新しいデーターを受信したときのコールバック gRPC
@@ -52,33 +53,46 @@ class SpeechStreaming(private val vModel: MainViewModel){
             }
         }
     }
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun startRecognizing(context: Context,sampleRate:Int) {
-            val scope = CoroutineScope(Dispatchers.IO)
-            scope.launch {
-                val api = credentialToApi(context,vModel) ?: return@launch
 
-                mRequestObserver = api.streamingRecognize(mResponseObserver)
-                val recognitionConfig = RecognitionConfig.newBuilder()
-                    .setLanguageCode("ja-JP")
-                    .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
-                    .setSampleRateHertz(sampleRate)
-                    .build()
+
+        val scope = CoroutineScope(Dispatchers.IO)
+            if (coroutineChannel.isEmpty) {
+                scope.launch {
+                    coroutineChannel.send("using")
+                    val api = credentialToApi(context,vModel,scope)
+                    if(api == null) {
+                        isRequestServerEstablished = false
+                        coroutineChannel.receive()
+                        return@launch
+                    } else {
+
+                        mRequestObserver = api.streamingRecognize(mResponseObserver)
+                        val recognitionConfig = RecognitionConfig.newBuilder()
+                            .setLanguageCode("ja-JP")
+                            .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
+                            .setSampleRateHertz(sampleRate)
+                            .build()
                 // 最初のリクエストは必ずstreamingRecognitionConfigのみで　AudioDataは含めない｡
-                val streamingRecognitionConfig = StreamingRecognitionConfig.newBuilder()
-                    .setConfig(recognitionConfig)
-                    .setInterimResults(true)
-                    .setSingleUtterance(true)
-                    .build()
-                val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
-                    .setStreamingConfig(streamingRecognitionConfig)
-                    .build()
-                mRequestObserver.onNext(streamingRecognizeRequest)
-            }
-
+                        val streamingRecognitionConfig = StreamingRecognitionConfig.newBuilder()
+                            .setConfig(recognitionConfig)
+                            .setInterimResults(true)
+                            .setSingleUtterance(true)
+                            .build()
+                        val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
+                        .setStreamingConfig(streamingRecognitionConfig)
+                        .build()
+                        mRequestObserver.onNext(streamingRecognizeRequest)
+                        isRequestServerEstablished = true
+                        coroutineChannel.receive()
+                    }
+                }
+        }
     }
 
     fun finishRecognizing() {
-        mRequestObserver.onCompleted()
+        if(isRequestServerEstablished) mRequestObserver.onCompleted()
     }
 /*    private fun startWorker(context: Context){
         val constraints = Constraints.Builder()
@@ -104,3 +118,4 @@ class SpeechStreaming(private val vModel: MainViewModel){
         fun onSpeechRecognized(text: String, isFinal: Boolean)
     }
 }
+
