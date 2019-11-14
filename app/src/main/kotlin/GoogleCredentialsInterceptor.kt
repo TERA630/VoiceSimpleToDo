@@ -9,7 +9,7 @@ import java.net.URISyntaxException
 class GoogleCredentialsInterceptor( private val mCredentials: Credentials ) : ClientInterceptor {
     //　ここではCredentialsを受け取り､InterceptCall(Channelから来るClientCallをまずキャッチするところ)を定義する｡
 
-    private lateinit var mLastMetadata: Map<String, List<String>>
+    private var mLastMetadata: Map<String, List<String>>? = null
     private lateinit var mCached: Metadata
 
     override fun <ReqT, RespT> interceptCall(
@@ -31,10 +31,9 @@ class GoogleCredentialsInterceptor( private val mCredentials: Credentials ) : Cl
                     val uri = serviceUri(next, method)  // Authenticateされているかどうか､URIが適切かどうかを検証｡
                     synchronized(this) {
                         val latestMetadata = getRequestMetadata(uri)
-
-                        if (mLastMetadata != latestMetadata) {
+                        if(mLastMetadata == null || mLastMetadata != latestMetadata) {
                             mLastMetadata = latestMetadata
-                            mCached = toHeaders(mLastMetadata)
+                            mCached = toHeaders(latestMetadata)
                         }
                         cachedSaved = mCached
                     }

@@ -1,24 +1,26 @@
 package com.example.voicesimpletodo
+
 import android.content.Context
 import android.util.Log
-import com.google.cloud.speech.v1.RecognitionConfig
-import com.google.cloud.speech.v1.StreamingRecognitionConfig
-import com.google.cloud.speech.v1.StreamingRecognizeRequest
-import com.google.cloud.speech.v1.StreamingRecognizeResponse
+import com.google.cloud.speech.v1.*
+import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 class SpeechStreaming(private val vModel: MainViewModel){
 
     private lateinit var mRequestObserver: StreamObserver<StreamingRecognizeRequest>
     private lateinit var mResponseObserver:StreamObserver<StreamingRecognizeResponse>
+    var mApi:SpeechGrpc.SpeechStub? = null
     var mListeners = mutableListOf<Listener>()
     val mTag = "SpeechStreaming"
     private val coroutineChannel = Channel<String>(capacity = 1)
-    private var isRequestServerEstablished = false
+    var isRequestServerEstablished = false
+
 
     fun init(){
         mResponseObserver = object : StreamObserver<StreamingRecognizeResponse> {
@@ -40,10 +42,11 @@ class SpeechStreaming(private val vModel: MainViewModel){
                         }
                     }
                     if (text.isNotEmpty()) {
-                        for (listener in mListeners) {
-                            listener.onSpeechRecognized(text, isFinal)
-                        }
+           //             for (listener in mListeners) {
+           //                 listener.onSpeechRecognized(text, isFinal)
+                       // }
                     }
+                    Log.i("Voice","$text")
             }
             override fun onCompleted() {
                 Log.i(mTag, "API completed.")
@@ -52,6 +55,8 @@ class SpeechStreaming(private val vModel: MainViewModel){
                 Log.e(mTag, "Error calling the API.", t)
             }
         }
+
+
     }
     @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun startRecognizing(context: Context,sampleRate:Int) {
@@ -61,14 +66,13 @@ class SpeechStreaming(private val vModel: MainViewModel){
             if (coroutineChannel.isEmpty) {
                 scope.launch {
                     coroutineChannel.send("using")
-                    val api = credentialToApi(context,vModel,scope)
-                    if(api == null) {
+                    mApi = credentialToApi(context,vModel,scope)
+                    if(mApi == null) {
                         isRequestServerEstablished = false
                         coroutineChannel.receive()
                         return@launch
                     } else {
-
-                        mRequestObserver = api.streamingRecognize(mResponseObserver)
+                        mRequestObserver = mApi!!.streamingRecognize(mResponseObserver)
                         val recognitionConfig = RecognitionConfig.newBuilder()
                             .setLanguageCode("ja-JP")
                             .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
@@ -93,6 +97,17 @@ class SpeechStreaming(private val vModel: MainViewModel){
 
     fun finishRecognizing() {
         if(isRequestServerEstablished) mRequestObserver.onCompleted()
+        mApi?.let {
+            val channel = it.channel as ManagedChannel
+            if (channel.isShutdown) {
+                try {
+                    channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
+                } catch (e: InterruptedException) {
+                    Log.e(mTag, "Error shutting down the gRPC channel. $e")
+                }
+            }
+        }
+
     }
 /*    private fun startWorker(context: Context){
         val constraints = Constraints.Builder()

@@ -68,8 +68,7 @@ class  MainActivity : AppCompatActivity() {
             } else {
                 view.isSelected = true
               //   val sampleRate = mVoiceRecorder?.getSampleRate()
-
-                vModel.speechStreaming.startRecognizing(this,16000)
+                    vModel.speechStreaming.startRecognizing(this,16000)
             }
         }
     }

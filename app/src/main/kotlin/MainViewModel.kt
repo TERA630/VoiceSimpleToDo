@@ -29,8 +29,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         }
         speechStreaming = SpeechStreaming(this@MainViewModel)
         speechStreaming.init()
-
-        speechStreaming = SpeechStreaming(this)
     }
 
     fun appendList(item: ItemEntity) {
