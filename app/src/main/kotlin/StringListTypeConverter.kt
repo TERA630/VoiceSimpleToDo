@@ -15,7 +15,6 @@ class StringListTypeConverter {
     @TypeConverter
     fun toStringList(string:String?):List<String>?{
         if(string == null ) return null
-        val result = string.split(",")
-        return result
+        return  string.split(",")
     }
 }
