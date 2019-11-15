@@ -45,8 +45,9 @@ class SpeechStreaming(private val vModel: MainViewModel){
            //             for (listener in mListeners) {
            //                 listener.onSpeechRecognized(text, isFinal)
                        // }
+                        Log.i("Voice","$text is $isFinal")
                     }
-                    Log.i("Voice","$text")
+
             }
             override fun onCompleted() {
                 Log.i(mTag, "API completed.")
@@ -60,8 +61,6 @@ class SpeechStreaming(private val vModel: MainViewModel){
     }
     @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun startRecognizing(context: Context,sampleRate:Int) {
-
-
         val scope = CoroutineScope(Dispatchers.IO)
             if (coroutineChannel.isEmpty) {
                 scope.launch {
