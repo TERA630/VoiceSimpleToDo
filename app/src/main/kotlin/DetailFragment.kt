@@ -12,7 +12,6 @@ import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 // TODO
 // cancel時のTagの扱い
-//
 
 
 class DetailFragment : Fragment() {
