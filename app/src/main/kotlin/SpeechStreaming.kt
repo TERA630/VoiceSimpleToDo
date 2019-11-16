@@ -11,16 +11,16 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-class SpeechStreaming(private val vModel: MainViewModel){
+class SpeechStreaming(private val vModel: MainViewModel,
+                      private val availableSampleRate: Int){
 
     private lateinit var mRequestObserver: StreamObserver<StreamingRecognizeRequest>
     private lateinit var mResponseObserver:StreamObserver<StreamingRecognizeResponse>
     var mApi:SpeechGrpc.SpeechStub? = null
-    var mListeners = mutableListOf<Listener>()
     val mTag = "SpeechStreaming"
-    private val coroutineChannel = Channel<String>(capacity = 1)
+    var isAccessingServer = false
     var isRequestServerEstablished = false
-
+    var audioDataChannel:Channel<VoiceRawData> = Channel()
 
     fun init(){
         mResponseObserver = object : StreamObserver<StreamingRecognizeResponse> {
@@ -57,40 +57,37 @@ class SpeechStreaming(private val vModel: MainViewModel){
             }
         }
 
-
     }
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
-    fun startRecognizing(context: Context,sampleRate:Int) {
+    fun startRecognizing(context: Context) {
         val scope = CoroutineScope(Dispatchers.IO)
-            if (coroutineChannel.isEmpty) {
+            if (!isAccessingServer) { // 複数のAPIアクセスを避ける｡
                 scope.launch {
-                    coroutineChannel.send("using")
-                    mApi = credentialToApi(context,vModel,scope)
-                    if(mApi == null) {
-                        isRequestServerEstablished = false
-                        coroutineChannel.receive()
-                        return@launch
-                    } else {
-                        mRequestObserver = mApi!!.streamingRecognize(mResponseObserver)
-                        val recognitionConfig = RecognitionConfig.newBuilder()
+                    isAccessingServer = true
+                    mApi = credentialToApi(context,vModel,scope) ?: run {
+                            // Speech APIにアクセスできなかったケース
+                            isRequestServerEstablished = false
+                            isAccessingServer =false
+                            return@launch
+                            }
+                    mRequestObserver = mApi!!.streamingRecognize(mResponseObserver)
+                    val recognitionConfig = RecognitionConfig.newBuilder()
                             .setLanguageCode("ja-JP")
                             .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
-                            .setSampleRateHertz(sampleRate)
+                            .setSampleRateHertz(availableSampleRate)
                             .build()
                 // 最初のリクエストは必ずstreamingRecognitionConfigのみで　AudioDataは含めない｡
-                        val streamingRecognitionConfig = StreamingRecognitionConfig.newBuilder()
+                    val streamingRecognitionConfig = StreamingRecognitionConfig.newBuilder()
                             .setConfig(recognitionConfig)
                             .setInterimResults(true)
                             .setSingleUtterance(true)
                             .build()
-                        val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
+                    val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
                         .setStreamingConfig(streamingRecognitionConfig)
                         .build()
                         mRequestObserver.onNext(streamingRecognizeRequest)
                         isRequestServerEstablished = true
-                        coroutineChannel.receive()
-                    }
-                }
+                        isAccessingServer = false
+            }
         }
     }
 
@@ -123,13 +120,5 @@ class SpeechStreaming(private val vModel: MainViewModel){
         mWorkStatus.observe(context as MainActivity, Observer{
             vModel.isSpeechStubAvailable = it.state == WorkInfo.State.SUCCEEDED
         })*/
-
-    fun addListener(listener: Listener) = mListeners.add(listener)
-    fun removeListener(listener: Listener) = mListeners.remove(listener)
-    interface Listener {
-        // called when a new piece of text was recognized by the CloudSpeechAPI
-        // @param isFinal when the API finished processing audio.
-        fun onSpeechRecognized(text: String, isFinal: Boolean)
-    }
 }
 

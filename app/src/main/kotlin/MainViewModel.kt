@@ -14,6 +14,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val tagObservable = MutableLiveData<MutableList<TagState>>()
     val tagStateList = mutableListOf<TagState>()
     lateinit var speechStreaming:SpeechStreaming
+    lateinit var voiceRecorder:VoiceRecorder
 
     fun init() {
         viewModelScope.launch {
@@ -27,8 +28,13 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             makeTagList(listFromDBOrDefault)
             listObservable.postValue(listFromDBOrDefault)
         }
-        speechStreaming = SpeechStreaming(this@MainViewModel)
-        speechStreaming.init()
+        voiceRecorder = VoiceRecorder(viewModelScope,this)
+        val sampleRate = voiceRecorder.createAudioRecord()
+        if(voiceRecorder.isAudioRecordEnabled && sampleRate != 0)  {
+            speechStreaming = SpeechStreaming(this@MainViewModel,sampleRate)
+            speechStreaming.init()
+        }
+        else Log.i("viewModel","voiceRecorder was not initialized so SpeechStreaming doesn't work")
     }
 
     fun appendList(item: ItemEntity) {

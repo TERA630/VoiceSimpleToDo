@@ -1,6 +1,7 @@
 package com.example.voicesimpletodo
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -64,11 +65,10 @@ class  MainActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             if(view.isSelected)  {
                 view.isSelected = false
-                vModel.speechStreaming.finishRecognizing()
             } else {
                 view.isSelected = true
               //   val sampleRate = mVoiceRecorder?.getSampleRate()
-                    vModel.speechStreaming.startRecognizing(this,16000)
+                Log.i("mainActivity","is Selected.")
             }
         }
     }
