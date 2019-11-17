@@ -1,4 +1,5 @@
-# VoiceSimpleToDo
+NULLチェックはLet?.{　}?:　でもいいが､ネストが深くなりそうなら異常ケースは　早期リターン
+
 
 .gitignore
 .ida/vcs.xml, misc.xmlはGitに入れないでおく｡
@@ -25,13 +26,6 @@ Applicaitonクラスを継承したMyApplicaitonクラスで
                 //　DAOはFactoryとしておく｡
         factory { get<MyDataBase>().myDao() }
         viewModel { MainViewModel(get()) }　　//　こうしておくと､ViewModelが初期化されたときに一致する引数がFactoryから自動的に渡される
-##Room＋coroutine＋ViewModel
-  
- viewModelScope.launch{
-    val list = withTimeoutOrNull( 失敗と判断するまでの時間(ms):1000L){
-        myDao.findALL()
-    }
-  }
 
 ##FlexboxLayout
 ViewGroup
@@ -39,7 +33,6 @@ W3cのFlexboxと一緒｡
 wrapとすると折り返してくれる｡
 アイテムをたくさん追加するとメモリを圧迫するので､Recylcer viewをつかう｡
 普通にRecycleviewを作って､LayoutmanagerをFlexboxLayoutManagerにするとよい｡
-
 
 XMLの設定だとこんなもの
 
