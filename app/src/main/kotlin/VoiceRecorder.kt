@@ -19,6 +19,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     var isAudioRecordEnabled = false
 
     private var mVoiceStartedMillis = 0L
+    private var mLastVoiceHeardMillis = Long.MAX_VALUE
 
     fun createAudioRecord():Int{ // 使用できるサンプルレートを列挙して返す｡
         for(sampleRate in cSampleRateCandidates){
@@ -44,7 +45,10 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                 val size = mAudioRecord.read(mBuffer, 0, mBuffer.size) // size は　AudioRecordで得られたデータ数
                 val now = System.currentTimeMillis()
                 if(isHearingVoice(mBuffer,size)){
-                    mVoiceStartedMillis = now
+                    if(mLastVoiceHeardMillis == Long.MAX_VALUE) {
+                            mVoiceStartedMillis = now
+                            vModel.speechStreaming.startRecognizing()
+                    }
                     val voiceRawData = VoiceRawData(mBuffer,size)
                     vModel.speechStreaming.audioDataChannel.send(voiceRawData)
                 }

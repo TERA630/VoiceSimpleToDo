@@ -2,6 +2,7 @@ package com.example.voicesimpletodo
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import com.google.cloud.speech.v1.*
 import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
@@ -9,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 class SpeechStreaming(private val vModel: MainViewModel,
@@ -22,7 +24,7 @@ class SpeechStreaming(private val vModel: MainViewModel,
     var isRequestServerEstablished = false
     var audioDataChannel:Channel<VoiceRawData> = Channel()
 
-    fun init(){
+    fun init(appContext:Context){
         mResponseObserver = object : StreamObserver<StreamingRecognizeResponse> {
             override fun onNext(response: StreamingRecognizeResponse?) {
                 // streamingRecognizeから新しいデーターを受信したときのコールバック gRPC
@@ -56,19 +58,21 @@ class SpeechStreaming(private val vModel: MainViewModel,
                 Log.e(mTag, "Error calling the API.", t)
             }
         }
-
+        val scope = vModel.viewModelScope
+            scope.launch{
+                mApi = withContext(Dispatchers.IO) { credentialToApi(appContext,vModel,scope) } ?: run {
+            // Speech APIにアクセスできなかったケース
+                    isRequestServerEstablished = false
+                    isAccessingServer =false
+                    return@launch
+                }
+            }
     }
-    fun startRecognizing(context: Context) {
+    fun startRecognizing() {
         val scope = CoroutineScope(Dispatchers.IO)
             if (!isAccessingServer) { // 複数のAPIアクセスを避ける｡
                 scope.launch {
                     isAccessingServer = true
-                    mApi = credentialToApi(context,vModel,scope) ?: run {
-                            // Speech APIにアクセスできなかったケース
-                            isRequestServerEstablished = false
-                            isAccessingServer =false
-                            return@launch
-                            }
                     mRequestObserver = mApi!!.streamingRecognize(mResponseObserver)
                     val recognitionConfig = RecognitionConfig.newBuilder()
                             .setLanguageCode("ja-JP")

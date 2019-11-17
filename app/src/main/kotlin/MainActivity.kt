@@ -17,10 +17,9 @@ class  MainActivity : AppCompatActivity() {
     private val vModel by viewModel<MainViewModel>()
 
     // Activity Lifecycle
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vModel.init()
+        vModel.init(this.applicationContext)
         constructViews(savedInstanceState)
 //        val configuration = Configuration.Builder().setWorkerFactory(MyWorkerFactory(vModel)).build()
 //        WorkManager.initialize(this.applicationContext,configuration)
@@ -44,7 +43,6 @@ class  MainActivity : AppCompatActivity() {
                 true
             }
             R.id.restoreItems->{
-                vModel.init()
                 true
             }
             R.id.action_settings -> true
@@ -52,7 +50,6 @@ class  MainActivity : AppCompatActivity() {
         }
     }
     // Lifecycle sub-routine
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     private fun constructViews(savedInstanceState: Bundle?){
         setContentView(R.layout.activity_main)
         if(savedInstanceState == null) {

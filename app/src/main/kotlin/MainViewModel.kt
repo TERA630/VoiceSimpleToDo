@@ -1,12 +1,11 @@
 package com.example.voicesimpletodo
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
@@ -16,23 +15,20 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     lateinit var speechStreaming:SpeechStreaming
     lateinit var voiceRecorder:VoiceRecorder
 
-    fun init() {
+    fun init(appContext:Context) {
         viewModelScope.launch {
-            val list  = runBlocking{
-                withTimeoutOrNull(1000L){
+            val list  = withContext(Dispatchers.Default) {
                 myDao.findAll().toMutableList()
                 }
-            }
-
-            val listFromDBOrDefault =  list?.takeUnless { it.isEmpty() } ?:makeDummyList()
+            val listFromDBOrDefault =  list.takeUnless { it.isEmpty() } ?: makeDummyList()
             makeTagList(listFromDBOrDefault)
             listObservable.postValue(listFromDBOrDefault)
-        }
+            }
         voiceRecorder = VoiceRecorder(viewModelScope,this)
         val sampleRate = voiceRecorder.createAudioRecord()
         if(voiceRecorder.isAudioRecordEnabled && sampleRate != 0)  {
             speechStreaming = SpeechStreaming(this@MainViewModel,sampleRate)
-            speechStreaming.init()
+            speechStreaming.init(appContext)
         }
         else Log.i("viewModel","voiceRecorder was not initialized so SpeechStreaming doesn't work")
     }
