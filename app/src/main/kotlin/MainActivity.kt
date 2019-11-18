@@ -1,11 +1,14 @@
 package com.example.voicesimpletodo
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.AttributeSet
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -30,6 +33,11 @@ class  MainActivity : AppCompatActivity() {
 //        val configuration = Configuration.Builder().setWorkerFactory(MyWorkerFactory(vModel)).build()
 //        WorkManager.initialize(this.applicationContext,configuration)
     }
+    override fun onStart(){
+        super.onStart()
+        if(vModel.mUserRequireAudio)  fab.show()
+        else fab.hide()
+    }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -40,9 +48,11 @@ class  MainActivity : AppCompatActivity() {
         if(vModel.mUserRequireAudio) {
             useAudioMenu?.isVisible = false
             notUseAudioMenu?.isVisible = true
+            fab.show()
         } else {
             useAudioMenu?.isVisible = true
             notUseAudioMenu?.isVisible = false
+            fab.hide()
         }
         return super.onPrepareOptionsMenu(menu)
     }
@@ -67,10 +77,12 @@ class  MainActivity : AppCompatActivity() {
             R.id.useAudioRecognition->{
                 vModel.mUserRequireAudio = true
                 audioPermissionCheck()
+                fab.show()
                 true
             }
             R.id.notUseAudioRecognition->{
                 vModel.mUserRequireAudio = false
+                fab.hide()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -103,8 +115,7 @@ class  MainActivity : AppCompatActivity() {
                 view.isSelected = false
             } else {
                 view.isSelected = true
-              //   val sampleRate = mVoiceRecorder?.getSampleRate()
-                Log.i("mainActivity","is Selected.")
+                vModel.voiceRecorder.processVoice()
             }
         }
     }

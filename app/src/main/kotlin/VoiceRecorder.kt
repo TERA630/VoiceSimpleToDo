@@ -3,6 +3,7 @@ package com.example.voicesimpletodo
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.util.Log
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -12,8 +13,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     private val coroutineContext : CoroutineContext
         get()= SupervisorJob() + Dispatchers.Default
     private val cSampleRateCandidates = intArrayOf(16000, 11025, 22050, 44100)
-    private val cChannel = AudioFormat.CHANNEL_IN_MONO
-    private val cEncoding = AudioFormat.ENCODING_PCM_16BIT
+
 
     private lateinit var mBuffer: ByteArray
     private lateinit var mAudioRecord: AudioRecord
@@ -23,9 +23,9 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
 
     fun createAudioRecord():Int{ // 使用できるサンプルレートを列挙して返す｡
         for(sampleRate in cSampleRateCandidates){
-            val sizeInBytes = AudioRecord.getMinBufferSize(sampleRate,cChannel,cEncoding)
+            val sizeInBytes = AudioRecord.getMinBufferSize(sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT)
             if(sizeInBytes == AudioRecord.ERROR_BAD_VALUE) continue
-            val audioRecord = AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,cChannel,cEncoding,sizeInBytes)
+            val audioRecord = AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT,sizeInBytes)
             if(audioRecord.state == AudioRecord.STATE_INITIALIZED){
                 mBuffer = ByteArray(sizeInBytes)
                 mAudioRecord = audioRecord
@@ -43,6 +43,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         scope.launch{
             while (isActive){
                 val size = mAudioRecord.read(mBuffer, 0, mBuffer.size) // size は　AudioRecordで得られたデータ数
+                Log.i("AudioRecord","$size was read")
                 val now = System.currentTimeMillis()
                 if(isHearingVoice(mBuffer,size)){
                     if(mLastVoiceHeardMillis == Long.MAX_VALUE) {
