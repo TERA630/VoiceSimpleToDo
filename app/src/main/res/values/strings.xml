@@ -9,7 +9,10 @@
     <string name="itemDeleteMessage">行を削除しますか</string>
     <string name="yes">はい</string>
     <string name="no">いいえ</string>
-    <string name="requireAudioPermission">このアプリの利用には音声の録音を許可してください</string>
+    <string name="requireAudioPermission">音声認識の利用には音声の録音を許可してください</string>
+    <string name="useAudioRecognition">音声認識を使用する</string>
+    <string name="notUseAudioRecognition">音声認識を使用しない</string>
+
     <string name="hearing">認識中</string>
     <string name="listening">listening..</string>
     <string name="inputOK">確定</string>
@@ -26,6 +29,5 @@
     <string name="hint_tag">分類などタグを入力</string>
     <string name="hint_parent">親アイテムを選択します</string>
     <string name="hint_description">アイテムの詳細を入力</string>
-<string name="testDescription">however collapse is from window 0,0 \n it is trouble \n because toolbar always comes over this view"
-</string>
+
 </resources>

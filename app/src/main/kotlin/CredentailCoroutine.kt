@@ -9,8 +9,8 @@ import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.speech.v1.SpeechGrpc
 import io.grpc.internal.DnsNameResolverProvider
 import io.grpc.okhttp.OkHttpChannelProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.*
 
@@ -21,13 +21,13 @@ const val portOfGoogleAPI = 443
 const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
 const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
 
-suspend fun credentialToApi(appContext: Context,vModel:MainViewModel,scope:CoroutineScope) : SpeechGrpc.SpeechStub? =
-    scope.async {
+suspend fun credentialToApi(appContext: Context,vModel:MainViewModel) : SpeechGrpc.SpeechStub? =
+    withContext(Dispatchers.IO) {
         val scopeOfGoogleAPI  = Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
-        val token = getTokenFromPref(appContext) ?: fetchTokenFromCredentialKey(appContext,scopeOfGoogleAPI)
-        return@async try{
+        try{
+            val token = getTokenFromPref(appContext) ?: fetchTokenFromCredentialKey(appContext,scopeOfGoogleAPI)
             saveTokenToPref(token,appContext)
-            tokenToApi(token,scopeOfGoogleAPI,vModel)
+            tokenToApi(token,scopeOfGoogleAPI)
         } catch (e: Resources.NotFoundException){
             Log.e(mTag, "Fail to get credential file")
             null
@@ -36,9 +36,9 @@ suspend fun credentialToApi(appContext: Context,vModel:MainViewModel,scope:Corou
             null
         } catch (e: Resources.NotFoundException){
             Log.e(mTag,"raw File not found.")
-                null
+            null
         }
-    }.await()
+    }
 //    val fetchAgain = Long.max(
 //        token.expirationTime.time - System.currentTimeMillis() - ACCESS_TOKEN_FETCH_MARGIN,
 //        ACCESS_TOKEN_EXPIRATION_TOLERANCE.toLong()
@@ -49,7 +49,7 @@ suspend fun credentialToApi(appContext: Context,vModel:MainViewModel,scope:Corou
         val credentials = GoogleCredentials.fromStream(credentialIS).createScoped(scope)
         return credentials.refreshAccessToken()
     }
-    private fun tokenToApi(token: AccessToken, scope: MutableList<String>, vModel: MainViewModel):SpeechGrpc.SpeechStub{
+    private fun tokenToApi(token: AccessToken, scope: MutableList<String>):SpeechGrpc.SpeechStub{
         val googleCredentials = GoogleCredentials(token).createScoped(scope)
         val interceptor = GoogleCredentialsInterceptor(googleCredentials)
         val channel = OkHttpChannelProvider() // io.grpc.ManegedChannelProviderの派生クラス
@@ -59,7 +59,6 @@ suspend fun credentialToApi(appContext: Context,vModel:MainViewModel,scope:Corou
             .build()
         return SpeechGrpc.newStub(channel)
     }
-
     private fun getTokenFromPref(appContext: Context): AccessToken? {
         val prefs = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return null
         val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null) ?: return null

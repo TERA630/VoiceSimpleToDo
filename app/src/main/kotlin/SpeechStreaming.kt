@@ -60,7 +60,7 @@ class SpeechStreaming(private val vModel: MainViewModel,
         }
         val scope = vModel.viewModelScope
             scope.launch{
-                mApi = withContext(Dispatchers.IO) { credentialToApi(appContext,vModel,scope) } ?: run {
+                mApi = credentialToApi(appContext,vModel)  ?: run {
             // Speech APIにアクセスできなかったケース
                     isRequestServerEstablished = false
                     isAccessingServer =false
@@ -69,6 +69,7 @@ class SpeechStreaming(private val vModel: MainViewModel,
             }
     }
     fun startRecognizing() {
+        if(mApi == null) return
         val scope = CoroutineScope(Dispatchers.IO)
             if (!isAccessingServer) { // 複数のAPIアクセスを避ける｡
                 scope.launch {
@@ -125,4 +126,3 @@ class SpeechStreaming(private val vModel: MainViewModel,
             vModel.isSpeechStubAvailable = it.state == WorkInfo.State.SUCCEEDED
         })*/
 }
-

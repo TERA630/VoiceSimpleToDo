@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -20,44 +21,36 @@ const val PREFS = "SpeechService"
 class  MainActivity : AppCompatActivity() {
 
     private val vModel by viewModel<MainViewModel>()
-    private val mRequestCodeRecord = 1
+    private val mRequestCodeAudioPermission = 1
     // Activity Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vModel.init(this.applicationContext)
+        vModel.init()
         constructViews(savedInstanceState)
 //        val configuration = Configuration.Builder().setWorkerFactory(MyWorkerFactory(vModel)).build()
 //        WorkManager.initialize(this.applicationContext,configuration)
     }
-
-    override fun onStart() {
-        super.onStart()
-        val audioPermission = ContextCompat.checkSelfPermission(this.baseContext, Manifest.permission.RECORD_AUDIO)
-        when {
-            audioPermission == PackageManager.PERMISSION_GRANTED -> {
-                startVoiceRecorder()
-            }
-            shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) -> {
-                AlertDialog.Builder(this)
-                    .setTitle("permission")
-                    .setMessage("このアプリの利用には音声の録音を許可してください.")
-                Log.w("test", "permission request was disabled")
-            }
-            else -> {
-                Log.w("test", "this app has no permission yet.")
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), mRequestCodeRecord)
-            }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        val useAudioMenu = menu?.findItem(R.id.useAudioRecognition)
+        val notUseAudioMenu = menu?.findItem(R.id.notUseAudioRecognition)
+        if(vModel.mUserRequireAudio) {
+            useAudioMenu?.isVisible = false
+            notUseAudioMenu?.isVisible = true
+        } else {
+            useAudioMenu?.isVisible = true
+            notUseAudioMenu?.isVisible = false
         }
+        return super.onPrepareOptionsMenu(menu)
     }
     override fun onPause() {
         super.onPause()
         vModel.saveListToDB()
     }
     // Activity Event
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -71,7 +64,28 @@ class  MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_settings -> true
+            R.id.useAudioRecognition->{
+                vModel.mUserRequireAudio = true
+                audioPermissionCheck()
+                true
+            }
+            R.id.notUseAudioRecognition->{
+                vModel.mUserRequireAudio = false
+                true
+            }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED) {
+            // AUDIO RECORD Permission Granted
+            vModel.recognitionInit(applicationContext)
+        } else if (shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+            Log.w("test", "permission request was disabled")
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        } else {
+            Log.w("test", "permission was refused by request")
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
     // Lifecycle sub-routine
@@ -94,5 +108,24 @@ class  MainActivity : AppCompatActivity() {
             }
         }
     }
+    private fun audioPermissionCheck(){
+        val audioPermission = ContextCompat.checkSelfPermission(this.baseContext, Manifest.permission.RECORD_AUDIO)
+        when {
+            audioPermission == PackageManager.PERMISSION_GRANTED -> {
+                vModel.recognitionInit(applicationContext)
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) -> {
+                AlertDialog.Builder(this)
+                    .setTitle("permission")
+                    .setMessage(R.string.requireAudioPermission)
+                Log.w("test", "permission request was disabled")
+            }
+            else -> {
+                Log.w("test", "this app has no permission yet.")
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), mRequestCodeAudioPermission)
+            }
+        }
+    }
+
 
 }

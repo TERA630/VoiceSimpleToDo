@@ -14,16 +14,19 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val tagStateList = mutableListOf<TagState>()
     lateinit var speechStreaming:SpeechStreaming
     lateinit var voiceRecorder:VoiceRecorder
+    var mUserRequireAudio:Boolean = false
 
-    fun init(appContext:Context) {
+    fun init() {
         viewModelScope.launch {
-            val list  = withContext(Dispatchers.Default) {
+            val list = withContext(Dispatchers.Default) {
                 myDao.findAll().toMutableList()
-                }
-            val listFromDBOrDefault =  list.takeUnless { it.isEmpty() } ?: makeDummyList()
+            }
+            val listFromDBOrDefault = list.takeUnless { it.isEmpty() } ?: makeDummyList()
             makeTagList(listFromDBOrDefault)
             listObservable.postValue(listFromDBOrDefault)
-            }
+        }
+    }
+    fun recognitionInit(appContext: Context){
         voiceRecorder = VoiceRecorder(viewModelScope,this)
         val sampleRate = voiceRecorder.createAudioRecord()
         if(voiceRecorder.isAudioRecordEnabled && sampleRate != 0)  {

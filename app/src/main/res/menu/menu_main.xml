@@ -13,4 +13,10 @@
     <item
         android:id="@+id/saveItems"
         android:title="@string/saveCurrentFile"/>
+    <item
+        android:id="@+id/useAudioRecognition"
+        android:title="@string/useAudioRecognition"/>
+    <item
+        android:id="@+id/notUseAudioRecognition"
+        android:title="@string/notUseAudioRecognition"/>
 </menu>

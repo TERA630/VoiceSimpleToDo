@@ -5,6 +5,5 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:text="@string/testDescription"
         android:textColor="@color/colorTan"/>
 </LinearLayout>
