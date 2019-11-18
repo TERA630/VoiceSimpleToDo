@@ -4,8 +4,9 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
+
+const val MAX_SPEECH_LENGTH_MILLIS = 30 * 1000
 
 class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     private val coroutineContext : CoroutineContext
@@ -17,7 +18,6 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     private lateinit var mBuffer: ByteArray
     private lateinit var mAudioRecord: AudioRecord
     var isAudioRecordEnabled = false
-
     private var mVoiceStartedMillis = 0L
     private var mLastVoiceHeardMillis = Long.MAX_VALUE
 
@@ -49,14 +49,17 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                             mVoiceStartedMillis = now
                             vModel.speechStreaming.startRecognizing()
                     }
+                    mLastVoiceHeardMillis = now
                     val voiceRawData = VoiceRawData(mBuffer,size)
                     vModel.speechStreaming.audioDataChannel.send(voiceRawData)
+                    if(now - mVoiceStartedMillis > MAX_SPEECH_LENGTH_MILLIS) {
+                        mLastVoiceHeardMillis = Long.MAX_VALUE
+                        vModel.speechStreaming.finishRecognizing()
+                    }
+                    delay(10L)
                 }
             }
-
         }
-
-
     }
 
     private fun isHearingVoice(buffer: ByteArray, size: Int): Boolean {
