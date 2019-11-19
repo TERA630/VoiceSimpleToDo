@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -35,7 +36,7 @@ class  MainActivity : AppCompatActivity() {
     }
     override fun onStart(){
         super.onStart()
-        if(vModel.mUserRequireAudio)  fab.show()
+        if(vModel.mUserRequireAudio && vModel.speechStreaming.isRequestServerEstablished && vModel.voiceRecorder.isAudioRecordEnabled )  fab.show()
         else fab.hide()
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -114,8 +115,12 @@ class  MainActivity : AppCompatActivity() {
             if(view.isSelected)  {
                 view.isSelected = false
             } else {
-                view.isSelected = true
-                vModel.voiceRecorder.processVoice()
+                if(vModel.voiceRecorder.isAudioRecordEnabled || vModel.speechStreaming.isApiEstablished) {
+                    view.isSelected = true
+                    vModel.voiceRecorder.processVoice()
+                } else {
+                    Toast.makeText(this,R.string.audioRecognitionUnavailable,Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -137,6 +142,4 @@ class  MainActivity : AppCompatActivity() {
             }
         }
     }
-
-
 }

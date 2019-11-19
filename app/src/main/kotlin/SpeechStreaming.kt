@@ -18,10 +18,13 @@ class SpeechStreaming(private val vModel: MainViewModel,
 
     private lateinit var mRequestObserver: StreamObserver<StreamingRecognizeRequest>
     private lateinit var mResponseObserver:StreamObserver<StreamingRecognizeResponse>
-    var mApi:SpeechGrpc.SpeechStub? = null
+    private var mApi:SpeechGrpc.SpeechStub? = null
     val mTag = "SpeechStreaming"
-    var isAccessingServer = false
+    private var isAccessingServer = false
+
+    var isApiEstablished = false
     var isRequestServerEstablished = false
+
     var audioDataChannel:Channel<VoiceRawData> = Channel()
 
     fun init(appContext:Context){
@@ -60,12 +63,8 @@ class SpeechStreaming(private val vModel: MainViewModel,
         }
         val scope = vModel.viewModelScope
             scope.launch{
-                mApi = credentialToApi(appContext,vModel)  ?: run {
-            // Speech APIにアクセスできなかったケース
-                    isRequestServerEstablished = false
-                    isAccessingServer =false
-                    return@launch
-                }
+                mApi = credentialToApi(appContext,vModel)
+                isApiEstablished = mApi != null
             }
     }
     fun startRecognizing() {
