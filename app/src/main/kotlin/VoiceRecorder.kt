@@ -5,13 +5,15 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.util.Log
 import kotlinx.coroutines.*
-import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 const val MAX_SPEECH_LENGTH_MILLIS = 30 * 1000
 const val SPEECH_TIMEOUT_MILLIS = 2000
 
+// Dependence  MainViewModel, SpeechStreaming (InitずみでResponseServerが建っている｡)
+
 class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
+
     private val coroutineContext : CoroutineContext
         get()= SupervisorJob() + Dispatchers.Default
     private val cSampleRateCandidates = intArrayOf(16000, 11025, 22050, 44100)
@@ -35,6 +37,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                 // AudioRecordが取得できない場合　(Ex. permissionがない..)
                 audioRecord.release()
                 isAudioRecordEnabled = false
+                Log.w("AudioRecord","error in instantiating AudioRecord ${audioRecord.state}")
             } else {
                 mBuffer = ByteArray(sizeInBytes)
                 audioRecord.positionNotificationPeriod = oneFrameDataCount
@@ -60,18 +63,21 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         }
         return 0
     }
+
     fun processVoice(){
         if(!isAudioRecordEnabled) return
         mStartSteamRecognizingmills = 0
         scope.launch{
             mAudioRecord.startRecording()
+            vModel.speechStreaming.startReceivingAudioData()
+
             while (isActive){
                 val size = mAudioRecord.read(mBuffer, 0, mBuffer.size) // size は　AudioRecordで得られたデータ数
                 val now = System.currentTimeMillis()
                 if(isHearingVoice(mBuffer,size)){
                     if(mLastVoiceHeardMillis == Long.MAX_VALUE) { // 声が大きくなったループ初回
                             mStartSteamRecognizingmills = now
-                            vModel.speechStreaming.startRecognizing()
+                            vModel.speechStreaming.buildRequestServer()
                     }
                     mLastVoiceHeardMillis = now
                     val voiceRawData = VoiceRawData(mBuffer,size)
@@ -79,20 +85,20 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                     Log.i("VoiceRecorder","$size was send to recognize")
                     if(now - mStartSteamRecognizingmills > MAX_SPEECH_LENGTH_MILLIS) {
                         mLastVoiceHeardMillis = Long.MAX_VALUE
-                        vModel.speechStreaming.finishRecognizing()
+                        vModel.speechStreaming.closeRequestServer()
                     } else if(now - mStartSteamRecognizingmills > SPEECH_TIMEOUT_MILLIS){
                         mLastVoiceHeardMillis = Long.MAX_VALUE
-                        vModel.speechStreaming.finishRecognizing()
+                        vModel.speechStreaming.closeRequestServer()
                     }
-                    delay(10L)
                 }
             }
+            mAudioRecord.stop()
         }
     }
     private fun isHearingVoice(buffer: ByteArray, size: Int): Boolean {
         for (i in 0 until size - 1 step 2) { // Android writing out big endian  ex. 0x0c0f →　0x0f0c
             var upperByte = buffer[i + 1].toInt() // Little endian  上位バイト　　　　　　  ex.  s = 00ff 00cc 0048 2001 0005
-                    //                   閾値が1500  0x05dc 計算の単純化のために-> 0x05 00
+            if(upperByte<0) upperByte *= -1                                                //                   閾値が1500  0x05dc 計算の単純化のために-> 0x05 00
             if(upperByte>=0x05) return true
         }
         return false

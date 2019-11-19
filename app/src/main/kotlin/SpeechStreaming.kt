@@ -4,13 +4,13 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.google.cloud.speech.v1.*
+import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 class SpeechStreaming(private val vModel: MainViewModel,
@@ -67,11 +67,9 @@ class SpeechStreaming(private val vModel: MainViewModel,
                 isApiEstablished = mApi != null
             }
     }
-    fun startRecognizing() {
+    fun buildRequestServer() {
         if(mApi == null) return
-        val scope = CoroutineScope(Dispatchers.IO)
             if (!isAccessingServer) { // 複数のAPIアクセスを避ける｡
-                scope.launch {
                     isAccessingServer = true
                     mRequestObserver = mApi!!.streamingRecognize(mResponseObserver)
                     val recognitionConfig = RecognitionConfig.newBuilder()
@@ -91,11 +89,22 @@ class SpeechStreaming(private val vModel: MainViewModel,
                         mRequestObserver.onNext(streamingRecognizeRequest)
                         isRequestServerEstablished = true
                         isAccessingServer = false
-            }
         }
     }
+    fun startReceivingAudioData(){
+        val scope = vModel.viewModelScope
+        scope.launch {
+            val rawAudioData = audioDataChannel.receive()
+            val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
+                .setAudioContent(ByteString.copyFrom(rawAudioData.buffer,0,rawAudioData.size))
+                .build()
+            mRequestObserver.onNext(streamingRecognizeRequest)
+        }
 
-    fun finishRecognizing() {
+    }
+
+
+    fun closeRequestServer() {
         if(isRequestServerEstablished) mRequestObserver.onCompleted()
         mApi?.let {
             val channel = it.channel as ManagedChannel
