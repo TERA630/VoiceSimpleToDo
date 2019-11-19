@@ -22,7 +22,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     private var mStartSteamRecognizingmills = 0L
     private var mLastVoiceHeardMillis = Long.MAX_VALUE
 
-    fun createAudioRecord():Int{ // AudioRecordの初期化、メンバ変数への代入。
+    fun createAudioRecord():Int{ // AudioRecordの初期化、メンバ変数への代入。 異常ケースでは0を返す。
         for(sampleRate in cSampleRateCandidates){
             val sizeInBytes = AudioRecord.getMinBufferSize(sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT)
             if(sizeInBytes == AudioRecord.ERROR_BAD_VALUE) continue // このサンプリングレートで動作しない場合は次の候補に移る。
@@ -43,23 +43,26 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                     override fun onPeriodicNotification(recorder: AudioRecord?) {
                         // Frameごとの処理()
                         recorder?.read(mBuffer,0,oneFrameDataCount)
+                        val now = System.currentTimeMillis()
+                        Log.i("AudioRecorder","on Periodic at $now")
                     }
                     override fun onMarkerReached(recorder: AudioRecord?) {
                         // Marker Timingでの処理
-                        recorder?.read(mBuffer,0,oneFrameDataCount)}
-
+                        recorder?.read(mBuffer,0,oneFrameDataCount)
+                        val now = System.currentTimeMillis()
+                        Log.i("AudioRecorder","on MarkerReached at $now")
+                    }
                 })
-
                 mAudioRecord = audioRecord
-
                 isAudioRecordEnabled = true
                 return sampleRate
+            }
         }
         return 0
     }
     fun processVoice(){
         if(!isAudioRecordEnabled) return
-+        mStartSteamRecognizingmills = 0
+        mStartSteamRecognizingmills = 0
         scope.launch{
             mAudioRecord.startRecording()
             while (isActive){
