@@ -69,7 +69,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         mStartSteamRecognizingmills = 0
         scope.launch{
             mAudioRecord.startRecording()
-            vModel.speechStreaming.startReceivingAudioData()
+            vModel.speechStreaming.buildRequestServer()
 
             while (isActive){
                 val size = mAudioRecord.read(mBuffer, 0, mBuffer.size) // size は　AudioRecordで得られたデータ数
@@ -77,7 +77,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                 if(isHearingVoice(mBuffer,size)){
                     if(mLastVoiceHeardMillis == Long.MAX_VALUE) { // 声が大きくなったループ初回
                             mStartSteamRecognizingmills = now
-                            vModel.speechStreaming.buildRequestServer()
+                            vModel.speechStreaming.startReceivingAudioData()
                     }
                     mLastVoiceHeardMillis = now
                     val voiceRawData = VoiceRawData(mBuffer,size)
