@@ -70,26 +70,29 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         scope.launch{
             mAudioRecord.startRecording()
             while (isActive){
-                val size = mAudioRecord.read(mBuffer, 0, mBuffer.size) // size は　AudioRecordで得られたデータ数
+                delay(100)
+//                val size = mAudioRecord.read(mBuffer, 0, mBuffer.size) // size は　AudioRecordで得られたデータ数
                 val now = System.currentTimeMillis()
-                if(isHearingVoice(mBuffer,size)){
-                    if(mLastVoiceHeardMillis == Long.MAX_VALUE) { // 声が大きくなったループ初回
-                            mStartSteamRecognizingmills = now
-                            vModel.speechStreaming.buildRequestServer()
-                            vModel.speechStreaming.startReceivingAudioData()
-                    }
-                    mLastVoiceHeardMillis = now
-                    val voiceRawData = VoiceRawData(mBuffer,size)
-                    vModel.speechStreaming.audioDataChannel.send(voiceRawData)
-                    Log.i("VoiceRecorder","$size was send to recognize")
-                    if(now - mStartSteamRecognizingmills > MAX_SPEECH_LENGTH_MILLIS) {
-                        mLastVoiceHeardMillis = Long.MAX_VALUE
-                        vModel.speechStreaming.closeRequestServer()
-                    } else if(now - mStartSteamRecognizingmills > SPEECH_TIMEOUT_MILLIS){
-                        mLastVoiceHeardMillis = Long.MAX_VALUE
-                        vModel.speechStreaming.closeRequestServer()
-                    }
-                }
+                Log.i("AudioRecord","now is $now")
+//                if(isHearingVoice(mBuffer,size)){
+//                    if(mLastVoiceHeardMillis == Long.MAX_VALUE) { // 声が大きくなったループ初
+//                            mStartSteamRecognizingmills = now
+//                            vModel.speechStreaming.buildRequestServer()
+//                            vModel.speechStreaming.startReceivingAudioData()
+//                    }
+//                    mLastVoiceHeardMillis = now
+//                    vModel.speechStreaming.recognize(mBuffer,size)
+//                    val voiceRawData = VoiceRawData(mBuffer,size)
+//                    vModel.speechStreaming.audioDataChannel.send(voiceRawData)
+//                    if(now - mStartSteamRecognizingmills > MAX_SPEECH_LENGTH_MILLIS) {
+//                        mLastVoiceHeardMillis = Long.MAX_VALUE
+//                        vModel.speechStreaming.closeRequestServer()
+//                    } else if(now - mStartSteamRecognizingmills > SPEECH_TIMEOUT_MILLIS){
+//                        mLastVoiceHeardMillis = Long.MAX_VALUE
+//                        vModel.speechStreaming.closeRequestServer()
+//                        vModel.speechStreaming.closeRequestServer()
+//                    }
+//                }
             }
             mAudioRecord.stop()
         }
@@ -103,8 +106,3 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         return false
     }
 }
-
-class VoiceRawData(
-    var buffer:ByteArray,
-    var size:Int
-)
