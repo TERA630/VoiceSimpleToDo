@@ -33,16 +33,16 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
             val oneFrameSizeByte = oneFrameDataCount * 2
 
             val audioRecord = AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT,sizeInBytes)
-            if(audioRecord.state != AudioRecord.STATE_INITIALIZED) {
-                // AudioRecordが取得できない場合　(Ex. permissionがない..)
+            if(audioRecord.state != AudioRecord.STATE_INITIALIZED) { // AudioRecordが取得できない場合　(Ex. permissionがない..)
                 audioRecord.release()
                 isAudioRecordEnabled = false
                 Log.w("AudioRecord","error in instantiating AudioRecord ${audioRecord.state}")
             } else {
                 mBuffer = ByteArray(sizeInBytes)
-                audioRecord.positionNotificationPeriod = oneFrameDataCount
-                audioRecord.notificationMarkerPosition = 40000
-                audioRecord.setRecordPositionUpdateListener(object :AudioRecord.OnRecordPositionUpdateListener{
+                mAudioRecord = audioRecord
+                mAudioRecord.positionNotificationPeriod = oneFrameDataCount
+                mAudioRecord.notificationMarkerPosition = 40000
+                mAudioRecord.setRecordPositionUpdateListener(object :AudioRecord.OnRecordPositionUpdateListener{
                     override fun onPeriodicNotification(recorder: AudioRecord?) {
                         // Frameごとの処理()
                         recorder?.read(mBuffer,0,oneFrameDataCount)
@@ -56,7 +56,6 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                         Log.i("AudioRecorder","on MarkerReached at $now")
                     }
                 })
-                mAudioRecord = audioRecord
                 isAudioRecordEnabled = true
                 return sampleRate
             }
@@ -73,7 +72,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                 delay(100)
 //                val size = mAudioRecord.read(mBuffer, 0, mBuffer.size) // size は　AudioRecordで得られたデータ数
                 val now = System.currentTimeMillis()
-                Log.i("AudioRecord","now is $now")
+                Log.i("AudioRecorder","now is $now")
 //                if(isHearingVoice(mBuffer,size)){
 //                    if(mLastVoiceHeardMillis == Long.MAX_VALUE) { // 声が大きくなったループ初
 //                            mStartSteamRecognizingmills = now
