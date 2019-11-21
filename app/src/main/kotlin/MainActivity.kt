@@ -78,6 +78,7 @@ class  MainActivity : AppCompatActivity() {
             R.id.useAudioRecognition->{
                 vModel.mUserRequireAudio = true
                 audioPermissionCheck()
+                vModel.recognitionInit(applicationContext)
                 fab.show()
                 true
             }
@@ -114,8 +115,9 @@ class  MainActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             if(view.isSelected)  {
                 view.isSelected = false
+                vModel.voiceRecorder.stopProcessVoice()
             } else {
-                if(vModel.voiceRecorder.isAudioRecordEnabled || vModel.speechStreaming.isApiEstablished) {
+                if(vModel.voiceRecorder.isAudioRecordEnabled && vModel.speechStreaming.isApiEstablished) {
                     view.isSelected = true
                     vModel.voiceRecorder.processVoice()
                 } else {

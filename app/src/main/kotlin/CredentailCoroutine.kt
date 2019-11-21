@@ -11,6 +11,7 @@ import io.grpc.internal.DnsNameResolverProvider
 import io.grpc.okhttp.OkHttpChannelProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
 import java.util.*
 
@@ -21,28 +22,34 @@ const val portOfGoogleAPI = 443
 const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
 const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
 
-suspend fun credentialToApi(appContext: Context,vModel:MainViewModel) : SpeechGrpc.SpeechStub? =
-    withContext(Dispatchers.IO) {
+suspend fun credentialToApi(appContext: Context,vModel:MainViewModel) : SpeechGrpc.SpeechStub? {
         val scopeOfGoogleAPI  = Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
         try{
-            val token = getTokenFromPref(appContext) ?: fetchTokenFromCredentialKey(appContext,scopeOfGoogleAPI)
-            saveTokenToPref(token,appContext)
-            tokenToApi(token,scopeOfGoogleAPI)
+            val tokenFromPref = getTokenFromPref(appContext)
+            val token = if (tokenFromPref == null ){
+                Log.i("credentialCoroutine","Token is from net.")
+                val tokenFromRemote = withContext(Dispatchers.IO) {  fetchTokenFromCredentialKey(appContext,scopeOfGoogleAPI) }
+                saveTokenToPref(tokenFromRemote,appContext)
+                tokenFromRemote
+            } else {
+                Log.i("CredentialCoroutine","Token is from preference.")
+                tokenFromPref
+            }
+            return tokenToApi(token,scopeOfGoogleAPI)
         } catch (e: Resources.NotFoundException){
             Log.e(mTag, "Fail to get credential file")
-            null
+            return null
         } catch (e: IOException){
             Log.e(mTag, "Fail to obtain access token from InputStream or refresh at ${e.stackTrace}")
-            null
+            return null
         } catch (e: Resources.NotFoundException){
             Log.e(mTag,"raw File not found.")
-            null
+            return null
         }
-    }
+}
 //    val fetchAgain = Long.max(
 //        token.expirationTime.time - System.currentTimeMillis() - ACCESS_TOKEN_FETCH_MARGIN,
 //        ACCESS_TOKEN_EXPIRATION_TOLERANCE.toLong()
-
 
     private fun fetchTokenFromCredentialKey(appContext: Context,scope:MutableList<String>): AccessToken {
         val credentialIS = appContext.resources.openRawResource(R.raw.credential)
@@ -61,7 +68,8 @@ suspend fun credentialToApi(appContext: Context,vModel:MainViewModel) : SpeechGr
     }
     private fun getTokenFromPref(appContext: Context): AccessToken? {
         val prefs = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return null
-        val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null) ?: return null
+        val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null)
+        if(tokenValue == null) return null
         val expirationTime = prefs.getLong(PREF_ACCESS_TOKEN_EXPIRATION_TIME, -1L)
 
         val token = tokenValue.takeUnless { it.isEmpty() || expirationTime < 0 }

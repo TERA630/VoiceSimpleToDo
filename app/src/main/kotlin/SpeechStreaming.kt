@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
 class SpeechStreaming(private val vModel: MainViewModel,
@@ -62,15 +63,21 @@ class SpeechStreaming(private val vModel: MainViewModel,
             }
         }
         val scope = vModel.viewModelScope
-            scope.launch{
-                mApi = credentialToApi(appContext,vModel)
-                isApiEstablished = mApi != null
+            scope.launch {
+            mApi = credentialToApi(appContext, vModel)
+            if (mApi == null) {
+                Log.w("SpeechStreaming", "fail to access Speech API")
+                isApiEstablished = false
+            } else {
+                Log.i("SpeechStreaming","success to access Speech API")
+                isApiEstablished = true
             }
+        }
     }
     fun buildRequestServer() {
         if(mApi == null) return
-            if (!isAccessingServer) { // 複数のAPIアクセスを避ける｡
-                    isAccessingServer = true
+        if (!isAccessingServer) { // 複数のAPIアクセスを避ける｡
+                isAccessingServer = true
                     mRequestObserver = mApi!!.streamingRecognize(mResponseObserver)
                     val recognitionConfig = RecognitionConfig.newBuilder()
                             .setLanguageCode("ja-JP")
@@ -111,13 +118,17 @@ class SpeechStreaming(private val vModel: MainViewModel,
 
     fun closeRequestServer() {
         if(isRequestServerEstablished) mRequestObserver.onCompleted()
-        mApi?.let {
+        var isApiAccessed = false
+        if(! isApiAccessed) mApi?.let {
+            isApiAccessed = true
             val channel = it.channel as ManagedChannel
             if (channel.isShutdown) {
                 try {
                     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
+                    isApiAccessed = false
                 } catch (e: InterruptedException) {
                     Log.e(mTag, "Error shutting down the gRPC channel. $e")
+                    isApiAccessed = false
                 }
             }
         }
