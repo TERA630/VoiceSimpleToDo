@@ -40,24 +40,8 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                 isAudioRecordEnabled = false
                 Log.w("AudioRecord","error in instantiating AudioRecord ${audioRecord.state}")
             } else {
-                mBuffer = ByteArray(oneFrameSizeByte)
+                mBuffer = ByteArray(sizeInBytes)
                 mAudioRecord = audioRecord
-                mAudioRecord.positionNotificationPeriod = oneFrameDataCount
-                mAudioRecord.notificationMarkerPosition = 40000
-                mAudioRecord.setRecordPositionUpdateListener(object :AudioRecord.OnRecordPositionUpdateListener{
-                    override fun onPeriodicNotification(recorder: AudioRecord?) {
-                        // Frameごとの処理()
-                        recorder?.read(mBuffer,0,oneFrameDataCount*2)
-                        val now = System.currentTimeMillis()
-//                        Log.i("AudioRecorder","on Periodic at $now")
-                    }
-                    override fun onMarkerReached(recorder: AudioRecord?) {
-                        // Marker Timingでの処理
-                        recorder?.read(mBuffer,0,oneFrameDataCount*2)
-                        val now = System.currentTimeMillis()
-                        Log.i("AudioRecorder","on MarkerReached at $now")
-                    }
-                })
                 isAudioRecordEnabled = true
                 return sampleRate
             }
@@ -76,9 +60,10 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                 if (isHearingVoice(mBuffer, size)) loudVoiceProcess(size)
                 else if((mStartSteamRecognizingmills > 0) && (now - mStartSteamRecognizingmills > SPEECH_TIMEOUT_MILLIS)) { // 無音
                     mLastVoiceHeardMillis = Long.MAX_VALUE
-                    vModel.speechStreaming.closeRequestServer()
+                    break
                 }
             }
+            vModel.speechStreaming.closeRequestServer()
             mAudioRecord.stop()
         }
     }
@@ -105,8 +90,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         for (i in 0 until size - 1 step 2) { // Android writing out big endian  ex. 0x0c0f →　0x0f0c
             var upperByte = buffer[i + 1].toInt() // Little endian  上位バイト　　　　　　  ex.  s = 00ff 00cc 0048 2001 0005
             if(upperByte<0) upperByte *= -1                                                // 閾値が1500  0x05dc 計算の単純化のために-> 0x05 00
-            if(upperByte>=0x05) {
-                Log.i("AudioRecord","UpperByte is $upperByte")
+            if(upperByte>=0x06) {
                 return true
             }
         }

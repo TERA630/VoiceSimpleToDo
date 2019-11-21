@@ -7,11 +7,8 @@ import com.google.cloud.speech.v1.*
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
 
 class SpeechStreaming(private val vModel: MainViewModel,
@@ -22,6 +19,7 @@ class SpeechStreaming(private val vModel: MainViewModel,
     private var mApi:SpeechGrpc.SpeechStub? = null
     val mTag = "SpeechStreaming"
     private var isAccessingServer = false
+    private var isApiShuttingDown = false
 
     var isApiEstablished = false
     var isRequestServerEstablished = false
@@ -118,17 +116,19 @@ class SpeechStreaming(private val vModel: MainViewModel,
 
     fun closeRequestServer() {
         if(isRequestServerEstablished) mRequestObserver.onCompleted()
-        var isApiAccessed = false
-        if(! isApiAccessed) mApi?.let {
-            isApiAccessed = true
+        if(! isApiShuttingDown) mApi?.let {
+            isApiShuttingDown = true
             val channel = it.channel as ManagedChannel
             if (channel.isShutdown) {
                 try {
                     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
-                    isApiAccessed = false
+                    isApiShuttingDown = false
                 } catch (e: InterruptedException) {
                     Log.e(mTag, "Error shutting down the gRPC channel. $e")
-                    isApiAccessed = false
+                    isApiShuttingDown = false
+                } catch (e:IllegalStateException){
+                    Log.e(mTag, "Error shutting down the gRPC channel. $e")
+                    isApiShuttingDown = false
                 }
             }
         }
