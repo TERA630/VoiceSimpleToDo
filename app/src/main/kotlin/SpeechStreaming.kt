@@ -8,6 +8,7 @@ import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
 
@@ -17,7 +18,7 @@ class SpeechStreaming(private val vModel: MainViewModel,
     private lateinit var mRequestObserver: StreamObserver<StreamingRecognizeRequest>
     private lateinit var mResponseObserver:StreamObserver<StreamingRecognizeResponse>
     private var mApi:SpeechGrpc.SpeechStub? = null
-    val mTag = "SpeechStreaming"
+    private val mTag = "SpeechStreaming"
     private var isAccessingServer = false
     private var isApiShuttingDown = false
 
@@ -44,14 +45,11 @@ class SpeechStreaming(private val vModel: MainViewModel,
                                 result.getAlternatives(0) // もっとも正確性(confidence)の高いものをalternativeとする｡
                             text = alternative.transcript
                         }
+                    if (text.isNotEmpty() && isFinal) {
+                        //                  if(isFinal)  vModel.viewModelScope.launch { vModel.voiceChannel.send(text)
+                        Log.i(mTag,"$text was recognized")
                     }
-                    if (text.isNotEmpty()) {
-           //             for (listener in mListeners) {
-           //                 listener.onSpeechRecognized(text, isFinal)
-                       // }
-                        Log.i("Voice","$text is $isFinal")
-                    }
-
+                }
             }
             override fun onCompleted() {
                 Log.i(mTag, "API completed.")

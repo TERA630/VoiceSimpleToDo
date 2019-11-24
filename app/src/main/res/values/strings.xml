@@ -13,7 +13,7 @@
     <string name="useAudioRecognition">音声認識を使用する</string>
     <string name="notUseAudioRecognition">音声認識を使用しない</string>
     <string name="audioRecognitionUnavailable">音声認識は使用できない状態でした</string>
-
+    <string name="audioRecognitionAvailable">音声認識は使用可能です｡</string>
     <string name="hearing">認識中</string>
     <string name="listening">listening..</string>
     <string name="inputOK">確定</string>

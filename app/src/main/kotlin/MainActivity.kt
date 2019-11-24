@@ -1,14 +1,11 @@
 package com.example.voicesimpletodo
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.AttributeSet
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -115,13 +112,15 @@ class  MainActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             if(view.isSelected)  {
                 view.isSelected = false
-                vModel.voiceRecorder.stopProcessVoice()
+                vModel.voiceRecorder.stopProcessVoiceCoroutine()
             } else {
                 if(vModel.voiceRecorder.isAudioRecordEnabled && vModel.speechStreaming.isApiEstablished) {
                     view.isSelected = true
+                    Toast.makeText(this,R.string.audioRecognitionAvailable,Toast.LENGTH_SHORT).show()
                     vModel.voiceRecorder.processVoice()
                 } else {
                     Toast.makeText(this,R.string.audioRecognitionUnavailable,Toast.LENGTH_SHORT).show()
+                    view.isSelected = false
                 }
             }
         }

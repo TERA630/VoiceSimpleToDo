@@ -1,4 +1,4 @@
-package com.example.voicesimpletodo
+package com.example.voicesimpletodo // Packageは小文字のみか　camelCase
 
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -13,7 +13,7 @@ const val SPEECH_TIMEOUT_MILLIS = 2000
 // Dependence  MainViewModel, SpeechStreaming (InitずみでResponseServerが建っている｡)
 
 class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
-
+    val mTag = "VoiceRecorder"
     private val coroutineContext : CoroutineContext
         get()= SupervisorJob() + Dispatchers.Default
     private val cSampleRateCandidates = intArrayOf(16000, 11025, 22050, 44100)
@@ -21,7 +21,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     private lateinit var mBuffer: ByteArray
     private lateinit var mAudioRecord: AudioRecord
     var isAudioRecordEnabled = false
-    private var mStartSteamRecognizingmills = 0L
+    private var mStartSteamRecognizingMills = 0L
     private var mLastVoiceHeardMillis = Long.MAX_VALUE
     private var processVoiceJob:Job = Job()
 
@@ -50,38 +50,42 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     }
 
     fun processVoice(){
-        mStartSteamRecognizingmills = 0
+        mStartSteamRecognizingMills = 0
+   //     vModel.voiceToAppendList()
         processVoiceJob = scope.launch {
             mAudioRecord.startRecording()
             while (isActive) {
                 val size = mAudioRecord.read(mBuffer, 0, mBuffer.size) // size は　AudioRecordで得られたデータ数
                 val now = System.currentTimeMillis()
-//                Log.i("AudioRecord", "now is $now")
                 if (isHearingVoice(mBuffer, size)) loudVoiceProcess(size)
-                else if((mStartSteamRecognizingmills > 0) && (now - mStartSteamRecognizingmills > SPEECH_TIMEOUT_MILLIS)) { // 無音
-                    mLastVoiceHeardMillis = Long.MAX_VALUE
-                    break
+                else if((mStartSteamRecognizingMills > 0) && (now - mStartSteamRecognizingMills > SPEECH_TIMEOUT_MILLIS)) { // 無音
+                    stopRecognizing()
                 }
             }
-            vModel.speechStreaming.closeRequestServer()
+
             mAudioRecord.stop()
         }
     }
-    fun stopProcessVoice(){
+    fun stopProcessVoiceCoroutine(){
         if(processVoiceJob.isActive) processVoiceJob.cancel()
+    }
+    private fun stopRecognizing(){
+        if(mStartSteamRecognizingMills >0 )vModel.speechStreaming.closeRequestServer()
+        mLastVoiceHeardMillis = Long.MAX_VALUE
+        mStartSteamRecognizingMills = 0
     }
 
     private fun loudVoiceProcess(size:Int){
         val now = System.currentTimeMillis()
         if(mLastVoiceHeardMillis == Long.MAX_VALUE) { // 閾値以上のAudioDataが得られたとき
-            mStartSteamRecognizingmills = now
+            mStartSteamRecognizingMills = now
             vModel.speechStreaming.buildRequestServer()
+            Log.i(mTag,"Request Sever is Built")
         }
         mLastVoiceHeardMillis = now
         vModel.speechStreaming.recognize(mBuffer,size)
-        if(now - mStartSteamRecognizingmills > MAX_SPEECH_LENGTH_MILLIS) {
-            mLastVoiceHeardMillis = Long.MAX_VALUE
-            vModel.speechStreaming.closeRequestServer()
+        if(now - mStartSteamRecognizingMills > MAX_SPEECH_LENGTH_MILLIS) {
+            stopRecognizing()
         }
     }
 

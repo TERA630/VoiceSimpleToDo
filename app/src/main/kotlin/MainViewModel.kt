@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
@@ -15,6 +16,8 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     lateinit var speechStreaming:SpeechStreaming
     lateinit var voiceRecorder:VoiceRecorder
     var mUserRequireAudio:Boolean = false
+
+    var voiceChannel = Channel<String>()
 
     fun init() {
         viewModelScope.launch {
@@ -41,6 +44,10 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         list.add(item)
         updateTagAndList(list)
         return
+    }
+    fun voiceToAppendList() = viewModelScope.launch {
+        val text = voiceChannel.receive()
+        appendList(ItemEntity(newIdOfItemList(),title = text,tag = mutableListOf("voice"),description = "douana",isChildOf = 0,isOpened = true ))
     }
     fun currentItem()  : ItemEntity{
         val list = getListValue()
