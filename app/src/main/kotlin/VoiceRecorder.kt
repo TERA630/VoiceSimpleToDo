@@ -51,7 +51,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
 
     fun processVoice(){
         mStartSteamRecognizingMills = 0
-   //     vModel.voiceToAppendList()
+     //   vModel.voiceToAppendList()
         processVoiceJob = scope.launch {
             mAudioRecord.startRecording()
             while (isActive) {
@@ -68,6 +68,8 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     }
     fun stopProcessVoiceCoroutine(){
         if(processVoiceJob.isActive) processVoiceJob.cancel()
+     //   if(vModel.mReceiveJob.isActive) vModel.mReceiveJob.cancel()
+        Log.i(mTag,"Jobs are canceled")
     }
     private fun stopRecognizing(){
         if(mStartSteamRecognizingMills >0 )vModel.speechStreaming.closeRequestServer()

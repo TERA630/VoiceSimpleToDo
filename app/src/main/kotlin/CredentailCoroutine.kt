@@ -11,16 +11,15 @@ import io.grpc.internal.DnsNameResolverProvider
 import io.grpc.okhttp.OkHttpChannelProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
 import java.util.*
 
-const val mTag = "accessToken"
-const val googleHostName = "speech.googleapis.com"
-const val portOfGoogleAPI = 443
+private const val mTag = "accessToken"
+private const val GOOGLE_HOST_NAME = "speech.googleapis.com"
+private const val portOfGoogleAPI = 443
 
-const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
-const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
+private const val PREF_ACCESS_TOKEN_EXPIRATION_TIME = "access_token_expiration_time"
+private const val PREF_ACCESS_TOKEN_VALUE = "access_token_value"
 
 suspend fun credentialToApi(appContext: Context,vModel:MainViewModel) : SpeechGrpc.SpeechStub? {
         val scopeOfGoogleAPI  = Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")
@@ -60,7 +59,7 @@ suspend fun credentialToApi(appContext: Context,vModel:MainViewModel) : SpeechGr
         val googleCredentials = GoogleCredentials(token).createScoped(scope)
         val interceptor = GoogleCredentialsInterceptor(googleCredentials)
         val channel = OkHttpChannelProvider() // io.grpc.ManegedChannelProviderの派生クラス
-            .builderForAddress(googleHostName, portOfGoogleAPI) // hostとtargetURI(Address)を元にChannelを作る｡
+            .builderForAddress(GOOGLE_HOST_NAME, portOfGoogleAPI) // hostとtargetURI(Address)を元にChannelを作る｡
             .nameResolverFactory(DnsNameResolverProvider())     // resolverFactoryを設定する｡
             .intercept(interceptor)                             // Channelが実際に呼ばれる前の前処置を設定する｡
             .build()
@@ -68,8 +67,7 @@ suspend fun credentialToApi(appContext: Context,vModel:MainViewModel) : SpeechGr
     }
     private fun getTokenFromPref(appContext: Context): AccessToken? {
         val prefs = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return null
-        val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null)
-        if(tokenValue == null) return null
+        val tokenValue = prefs.getString(PREF_ACCESS_TOKEN_VALUE, null) ?: return null
         val expirationTime = prefs.getLong(PREF_ACCESS_TOKEN_EXPIRATION_TIME, -1L)
 
         val token = tokenValue.takeUnless { it.isEmpty() || expirationTime < 0 }
@@ -83,5 +81,3 @@ suspend fun credentialToApi(appContext: Context,vModel:MainViewModel) : SpeechGr
             .putLong(PREF_ACCESS_TOKEN_EXPIRATION_TIME, token.expirationTime.time)
             .apply()
     }
-
-

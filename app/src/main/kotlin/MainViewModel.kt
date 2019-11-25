@@ -18,6 +18,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     var mUserRequireAudio:Boolean = false
 
     var voiceChannel = Channel<String>()
+    lateinit var mReceiveJob:Job
 
     fun init() {
         viewModelScope.launch {
@@ -45,10 +46,15 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         updateTagAndList(list)
         return
     }
-    fun voiceToAppendList() = viewModelScope.launch {
-        val text = voiceChannel.receive()
-        appendList(ItemEntity(newIdOfItemList(),title = text,tag = mutableListOf("voice"),description = "douana",isChildOf = 0,isOpened = true ))
+    fun voiceToAppendList() {
+        val scope = viewModelScope
+        mReceiveJob = scope.launch(Dispatchers.Default) {
+            val text = voiceChannel.receive()
+            appendList(ItemEntity(newIdOfItemList(),title = text,tag = mutableListOf("voice"),description = "douana",isChildOf = 0,isOpened = true ))
+        }
+
     }
+
     fun currentItem()  : ItemEntity{
         val list = getListValue()
         val idToGet = list.indexOfFirst { it.id == currentId }

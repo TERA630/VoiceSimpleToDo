@@ -46,8 +46,10 @@ class SpeechStreaming(private val vModel: MainViewModel,
                             text = alternative.transcript
                         }
                     if (text.isNotEmpty() && isFinal) {
-                        //                  if(isFinal)  vModel.viewModelScope.launch { vModel.voiceChannel.send(text)
-                        Log.i(mTag,"$text was recognized")
+                        if(isFinal)  vModel.viewModelScope.launch {
+//                            vModel.voiceChannel.send(text)
+                            Log.i(mTag, "$text was recognized")
+                        }
                     }
                 }
             }
