@@ -7,6 +7,7 @@ import com.google.cloud.speech.v1.*
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
@@ -31,26 +32,19 @@ class SpeechStreaming(private val vModel: MainViewModel,
         mResponseObserver = object : StreamObserver<StreamingRecognizeResponse> {
             override fun onNext(response: StreamingRecognizeResponse?) {
                 // streamingRecognizeから新しいデーターを受信したときのコールバック gRPC
-                // results { alternatives { transcript : " to be " stability:0.01 }
                 // results { alternatives { transcript: "to be or not to be" confidence 0.92} isFinal true}
                 // 最終結果に含まれる認識結果には isFinal:true となる｡ これらを全てつなぐと､最終認識結果となる｡
-                var text = ""
-                var isFinal = false
                 if(response == null) return
-                if (response.resultsCount > 0) {
-                        val result = response.getResults(0)
-                        isFinal = result.isFinal
-                        if (result.alternativesCount > 0) {
-                            val alternative =
-                                result.getAlternatives(0) // もっとも正確性(confidence)の高いものをalternativeとする｡
-                            text = alternative.transcript
-                        }
-                    if (text.isNotEmpty() && isFinal) {
-                        if(isFinal)  vModel.viewModelScope.launch {
-//                            vModel.voiceChannel.send(text)
-                            Log.i(mTag, "$text was recognized")
-                        }
-                    }
+                val result = response.takeIf{it.resultsCount>0}?.getResults(0) ?: return
+                val isFinal = result.isFinal
+                val text = if (result.alternativesCount > 0) {
+                        result.getAlternatives(0).transcript // もっとも正確性(confidence)の高いものをalternativeとする｡
+                } else {
+                        ""
+                }
+                if (text.isNotEmpty() && isFinal) {
+                    vModel.appendList(ItemEntity(id = vModel.newIdOfItemList(), title = text,tag = mutableListOf("From Voice")))
+                    Log.i(mTag, "$text was recognized")
                 }
             }
             override fun onCompleted() {
@@ -61,7 +55,7 @@ class SpeechStreaming(private val vModel: MainViewModel,
             }
         }
         val scope = vModel.viewModelScope
-            scope.launch {
+            scope.launch(Dispatchers.Default){
             mApi = credentialToApi(appContext, vModel)
             if (mApi == null) {
                 Log.w("SpeechStreaming", "fail to access Speech API")
@@ -72,46 +66,35 @@ class SpeechStreaming(private val vModel: MainViewModel,
             }
         }
     }
-    fun buildRequestServer() {
+    fun buildRequestServer() { // VoiceRecorderから基準以上の音量が得られた場合に呼ばれる。
         if(mApi == null) return
         if (!isAccessingServer) { // 複数のAPIアクセスを避ける｡
-                isAccessingServer = true
-                    mRequestObserver = mApi!!.streamingRecognize(mResponseObserver)
-                    val recognitionConfig = RecognitionConfig.newBuilder()
-                            .setLanguageCode("ja-JP")
-                            .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
-                            .setSampleRateHertz(availableSampleRate)
-                            .build()
-                // 最初のリクエストは必ずstreamingRecognitionConfigのみで　AudioDataは含めない｡
-                    val streamingRecognitionConfig = StreamingRecognitionConfig.newBuilder()
-                            .setConfig(recognitionConfig)
-                            .setInterimResults(true)
-                            .setSingleUtterance(true)
-                            .build()
-                    val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
-                        .setStreamingConfig(streamingRecognitionConfig)
-                        .build()
-                        mRequestObserver.onNext(streamingRecognizeRequest)
-                        isRequestServerEstablished = true
-                        isAccessingServer = false
-        }
-    }
-/*    fun startReceivingAudioData(){
-        val scope = vModel.viewModelScope
-        scope.launch {
-          val rawAudioData = audioDataChannel.receive()
+            isAccessingServer = true
+            mRequestObserver = mApi!!.streamingRecognize(mResponseObserver)
+            val recognitionConfig = RecognitionConfig.newBuilder()
+                .setLanguageCode("ja-JP")
+                .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
+                .setSampleRateHertz(availableSampleRate)
+                .build()
+            // 最初のリクエストは必ずstreamingRecognitionConfigのみで　AudioDataは含めない｡
+            val streamingRecognitionConfig = StreamingRecognitionConfig.newBuilder()
+                .setConfig(recognitionConfig)
+                .setInterimResults(true)
+                .setSingleUtterance(true)
+                .build()
             val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
-                .setAudioContent(ByteString.copyFrom(rawAudioData.buffer,0,rawAudioData.size))
+                .setStreamingConfig(streamingRecognitionConfig)
                 .build()
             mRequestObserver.onNext(streamingRecognizeRequest)
+            isRequestServerEstablished = true
+            isAccessingServer = false
         }
-    }*/
-
+    }
     fun recognize(buffer:ByteArray,size:Int){
         val streamingRecognizeRequest = StreamingRecognizeRequest.newBuilder()
             .setAudioContent(ByteString.copyFrom(buffer,0,size))
             .build()
-            mRequestObserver.onNext(streamingRecognizeRequest)
+        mRequestObserver.onNext(streamingRecognizeRequest)
     }
 
     fun closeRequestServer() {

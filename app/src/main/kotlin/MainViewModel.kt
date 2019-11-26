@@ -21,6 +21,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     lateinit var mReceiveJob:Job
 
     fun init() {
+
         viewModelScope.launch {
             val list = withContext(Dispatchers.Default) {
                 myDao.findAll().toMutableList()
@@ -46,15 +47,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         updateTagAndList(list)
         return
     }
-    fun voiceToAppendList() {
-        val scope = viewModelScope
-        mReceiveJob = scope.launch(Dispatchers.Default) {
-            val text = voiceChannel.receive()
-            appendList(ItemEntity(newIdOfItemList(),title = text,tag = mutableListOf("voice"),description = "douana",isChildOf = 0,isOpened = true ))
-        }
-
-    }
-
     fun currentItem()  : ItemEntity{
         val list = getListValue()
         val idToGet = list.indexOfFirst { it.id == currentId }
