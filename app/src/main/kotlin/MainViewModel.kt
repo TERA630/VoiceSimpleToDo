@@ -28,7 +28,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     fun recognitionInit(appContext: Context){
         voiceRecorder = VoiceRecorder(viewModelScope,this)
         val sampleRate = voiceRecorder.createAudioRecord()
-        if(voiceRecorder.isAudioRecordEnabled && sampleRate != 0)  {
+        if(voiceRecorder.isAudioRecordEnabled && sampleRate != 0)   {
             speechStreaming = SpeechStreaming(this@MainViewModel,sampleRate)
             speechStreaming.init(appContext)
         }

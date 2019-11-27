@@ -6,14 +6,16 @@ import android.media.MediaRecorder
 import android.util.Log
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
+import kotlin.experimental.and
 
+const val AUDIO_BUFFER_SIZE = 16 * 100 * 2  // sampling per ms * 100 ms
 const val MAX_SPEECH_LENGTH_MILLIS = 30 * 1000
 const val SPEECH_TIMEOUT_MILLIS = 2000
 
 // Dependence  MainViewModel, SpeechStreaming (InitずみでResponseServerが建っている｡)
 
 class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
-    val mTag = "VoiceRecorder"
+    private val mTag = "VoiceRecorder"
     private val coroutineContext : CoroutineContext
         get()= SupervisorJob() + Dispatchers.Default
     private val cSampleRateCandidates = intArrayOf(16000, 11025, 22050, 44100)
@@ -29,9 +31,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         for(sampleRate in cSampleRateCandidates){
             val sizeInBytes = AudioRecord.getMinBufferSize(sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT)
             if(sizeInBytes == AudioRecord.ERROR_BAD_VALUE) continue // このサンプリングレートで動作しない場合は次の候補に移る。
-            // Bufferの大きさはFrameRateから算出していたが、あまり認識精度がよくない。
-            // Mono, 
-            val audioRecord = AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT,1024)
+            val audioRecord = AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT, sizeInBytes)
             if(audioRecord.state != AudioRecord.STATE_INITIALIZED) {
                 // AudioRecordが取得できない場合　(Ex. permissionがない..)
                 audioRecord.release()
@@ -53,9 +53,13 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
             while (isActive) {
                 val size = mAudioRecord.read(mBuffer, 0, mBuffer.size) // size は　AudioRecordで得られたデータ数
                 val now = System.currentTimeMillis()
-                if (isHearingVoice(mBuffer, size)) loudVoiceProcess(size)
-                else if((mStartSteamRecognizingMills > 0) && (now - mStartSteamRecognizingMills > SPEECH_TIMEOUT_MILLIS)) { // 無音
-                    finishRecognizing()
+                if (isHearingVoice(mBuffer, size)) {
+                    loudVoiceProcess(size,looptime = now)
+                } else if(mLastVoiceHeardMillis != Long.MAX_VALUE) { // 無音かつ一度有音があった場合
+                    vModel.speechStreaming.recognize(mBuffer,size)
+                    if(now - mLastVoiceHeardMillis > SPEECH_TIMEOUT_MILLIS){ // 無音期間がタイムアウト以上になった場合
+                        finishRecognizing()
+                    }
                 }
                 delay(10)
             }
@@ -67,30 +71,26 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         Log.i(mTag,"Jobs are canceled")
     }
     private fun finishRecognizing(){
-        if(mStartSteamRecognizingMills >0 )vModel.speechStreaming.closeRequestServer()
+        vModel.speechStreaming.closeRequestServer()
         mLastVoiceHeardMillis = Long.MAX_VALUE
-        mStartSteamRecognizingMills = 0
     }
 
-    private fun loudVoiceProcess(size:Int){
-        val now = System.currentTimeMillis()
+    private fun loudVoiceProcess(size:Int,looptime:Long){
         if(mLastVoiceHeardMillis == Long.MAX_VALUE) { // 閾値以上のAudioDataが得られたとき
-            mStartSteamRecognizingMills = now
+            mStartSteamRecognizingMills = looptime
             vModel.speechStreaming.buildRequestServer()
         }
-        mLastVoiceHeardMillis = now
         vModel.speechStreaming.recognize(mBuffer,size)
-        if(now - mStartSteamRecognizingMills > MAX_SPEECH_LENGTH_MILLIS) {
+        mLastVoiceHeardMillis = looptime
+        if(looptime - mStartSteamRecognizingMills > MAX_SPEECH_LENGTH_MILLIS) {
             finishRecognizing()
         }
     }
     private fun isHearingVoice(buffer: ByteArray, size: Int): Boolean {
         for (i in 0 until size - 1 step 2) { // Android writing out big endian  ex. 0x0c0f →　0x0f0c
-            var upperByte = buffer[i + 1].toInt() // Little endian  上位バイト　　　　　　  ex.  s = 00ff 00cc 0048 2001 0005
-            if(upperByte<0) upperByte *= -1                                                // オリジナルの閾値が1500
-            if(upperByte>=0x06) {
-                return true
-            }
+            var upperByte = buffer[i + 1] // Little endian  上位バイト　　　　　　  ex.  s = 00ff 00cc 0048 2001 0005
+            upperByte = upperByte and ( 0x07)                                           // オリジナルの閾値が1500 = 0x05dc
+            if(upperByte>=0x07) return true
         }
         return false
     }

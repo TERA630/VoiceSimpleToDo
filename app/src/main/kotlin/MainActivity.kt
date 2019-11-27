@@ -129,7 +129,8 @@ class  MainActivity : AppCompatActivity() {
         val audioPermission = ContextCompat.checkSelfPermission(this.baseContext, Manifest.permission.RECORD_AUDIO)
         when {
             audioPermission == PackageManager.PERMISSION_GRANTED -> {
-                vModel.recognitionInit(applicationContext)
+                Log.i("MainActivity","Audio permission was granted.")
+                return
             }
             shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) -> {
                 AlertDialog.Builder(this)
