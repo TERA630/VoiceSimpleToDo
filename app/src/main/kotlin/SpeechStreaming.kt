@@ -29,6 +29,7 @@ class SpeechStreaming(private val vModel: MainViewModel,
 //    var audioDataChannel:Channel<VoiceRawData> = Channel()
 
     fun init(appContext:Context){
+        if(isApiEstablished) return
         mResponseObserver = object : StreamObserver<StreamingRecognizeResponse> {
             override fun onNext(response: StreamingRecognizeResponse?) {
                 // streamingRecognizeから新しいデーターを受信したときのコールバック gRPC
@@ -42,6 +43,7 @@ class SpeechStreaming(private val vModel: MainViewModel,
                 } else {
                         ""
                 }
+                if(text.isNotEmpty()) Log.i(mTag,"$text has been recognized..")
                 if (text.isNotEmpty() && isFinal) {
                     vModel.appendList(ItemEntity(id = vModel.newIdOfItemList(), title = text,tag = mutableListOf("From Voice")))
                     Log.i(mTag, "$text was recognized")
@@ -86,6 +88,7 @@ class SpeechStreaming(private val vModel: MainViewModel,
                 .setStreamingConfig(streamingRecognitionConfig)
                 .build()
             mRequestObserver.onNext(streamingRecognizeRequest)
+            Log.i(mTag,"RequestObserver is Built")
             isRequestServerEstablished = true
             isAccessingServer = false
         }
@@ -105,6 +108,7 @@ class SpeechStreaming(private val vModel: MainViewModel,
             if (channel.isShutdown) {
                 try {
                     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
+                    Log.i(mTag,"gRPC Channel was shutdown.")
                     isApiShuttingDown = false
                 } catch (e: InterruptedException) {
                     Log.e(mTag, "Error shutting down the gRPC channel. $e")

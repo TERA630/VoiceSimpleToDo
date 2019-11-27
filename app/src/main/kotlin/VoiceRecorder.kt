@@ -30,6 +30,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
             val sizeInBytes = AudioRecord.getMinBufferSize(sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT)
             if(sizeInBytes == AudioRecord.ERROR_BAD_VALUE) continue // このサンプリングレートで動作しない場合は次の候補に移る。
             // Bufferの大きさはFrameRateから算出していたが、あまり認識精度がよくない。
+            // Mono, 
             val audioRecord = AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT,1024)
             if(audioRecord.state != AudioRecord.STATE_INITIALIZED) {
                 // AudioRecordが取得できない場合　(Ex. permissionがない..)
@@ -45,7 +46,6 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         }
         return 0
     }
-
     fun processVoice(){
         mStartSteamRecognizingMills = 0
         processVoiceJob = scope.launch(Dispatchers.Default) {
@@ -57,6 +57,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
                 else if((mStartSteamRecognizingMills > 0) && (now - mStartSteamRecognizingMills > SPEECH_TIMEOUT_MILLIS)) { // 無音
                     finishRecognizing()
                 }
+                delay(10)
             }
             mAudioRecord.stop()
         }
@@ -76,7 +77,6 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         if(mLastVoiceHeardMillis == Long.MAX_VALUE) { // 閾値以上のAudioDataが得られたとき
             mStartSteamRecognizingMills = now
             vModel.speechStreaming.buildRequestServer()
-            Log.i(mTag,"Request Sever is Built")
         }
         mLastVoiceHeardMillis = now
         vModel.speechStreaming.recognize(mBuffer,size)

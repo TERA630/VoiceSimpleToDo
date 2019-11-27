@@ -17,19 +17,13 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     lateinit var voiceRecorder:VoiceRecorder
     var mUserRequireAudio:Boolean = false
 
-    var voiceChannel = Channel<String>()
-    lateinit var mReceiveJob:Job
-
-    fun init() {
-
-        viewModelScope.launch {
+    fun init() = viewModelScope.launch {
             val list = withContext(Dispatchers.Default) {
                 myDao.findAll().toMutableList()
             }
             val listFromDBOrDefault = list.takeUnless { it.isEmpty() } ?: makeDummyList()
             makeTagList(listFromDBOrDefault)
             listObservable.postValue(listFromDBOrDefault)
-        }
     }
     fun recognitionInit(appContext: Context){
         voiceRecorder = VoiceRecorder(viewModelScope,this)
@@ -77,7 +71,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             if(_tags.isEmpty()) {
                  return getListValue()
             } else {         // いずれかのタグを含むリストを作成。
-
                 val result = mutableListOf<ItemEntity>()
                 _tags.forEach { tag ->
                     val itemsWithTag = getListValue().filter { it.tag.contains(tag) }
