@@ -30,7 +30,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
             val sizeInBytes = AudioRecord.getMinBufferSize(sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT)
             if(sizeInBytes == AudioRecord.ERROR_BAD_VALUE) continue // このサンプリングレートで動作しない場合は次の候補に移る。
             // Bufferの大きさはFrameRateから算出していたが、あまり認識精度がよくない。
-            // Mono, 
+            // Mono,
             val audioRecord = AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT,1024)
             if(audioRecord.state != AudioRecord.STATE_INITIALIZED) {
                 // AudioRecordが取得できない場合　(Ex. permissionがない..)
