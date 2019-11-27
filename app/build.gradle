@@ -112,6 +112,6 @@ dependencies {
 
     // Assertions
     testImplementation 'androidx.test.ext:junit:1.1.1'
-    testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.4.2'
+    testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
     testImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
