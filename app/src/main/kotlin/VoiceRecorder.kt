@@ -79,7 +79,8 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     private fun loudVoiceProcess(size:Int, loopTime:Long){
         if(mLastVoiceHeardMillis == Long.MAX_VALUE) { // 閾値以上のAudioDataが得られたとき
             mStartSteamRecognizingMills = loopTime
-            vModel.speechStreaming.buildRequestServer()
+
+             vModel.speechStreaming.buildRequestServer()
         }
         vModel.speechStreaming.recognize(mBuffer,size)
         mLastVoiceHeardMillis = loopTime
@@ -91,11 +92,10 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         var i = 0
         while (i < size - 1) {
             // The buffer has LINEAR16 in little endian.
-            var s = buffer[i + 1].toInt()
-            if (s < 0) s *= -1
-            s = s shl 8
-            s += abs (buffer[i].toInt())
-            if (s > 1500) {
+            var s = buffer[i + 1]
+          //  s = s shl 8
+         //   s += abs (buffer[i].toInt())
+            if (s > 0x06 || s<-0x06) {
                 return true
             }
             i += 2
