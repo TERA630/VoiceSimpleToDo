@@ -53,7 +53,6 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
             while (isActive) {
                 val size = mAudioRecord.read(mBuffer, 0, mBuffer.size) // size は　AudioRecordで得られたデータ数
                 val now = System.currentTimeMillis()
-                Log.i(mTag,"$size was read at $now ")
                 if (isHearingVoice(mBuffer, size)) {
                     loudVoiceProcess(size,loopTime = now)
                 } else if(mLastVoiceHeardMillis != Long.MAX_VALUE) { // 無音かつ一度有音があった場合
@@ -92,14 +91,30 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         var i = 0
         while (i < size - 1) {
             // The buffer has LINEAR16 in little endian.
-            var s = buffer[i + 1]
-          //  s = s shl 8
-         //   s += abs (buffer[i].toInt())
-            if (s > 0x06 || s<-0x06) {
+            val s = buffer[i + 1].toInt()
+            loggVoice(s)
+            if(abs(s)>6) {
                 return true
-            }
-            i += 2
+            }  else i += 2
         }
         return false
+    }
+
+    private fun loggVoice(number:Int){
+        val starNumber = when(number){
+            in 0..6 ->"0"
+            in 6..24-> "*"
+            in 24..48-> "**"
+            in 48..76-> "***"
+            in 76..90-> "****"
+            in 90..114 -> "*****"
+            in 114..138 -> "******"
+            in 138..162 -> "*******"
+            in 162..186 -> "********"
+            in 186..210 -> "*********"
+            else-> "**********"
+        }
+        Log.i(mTag,starNumber)
+
     }
 }
