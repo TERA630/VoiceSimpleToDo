@@ -107,10 +107,14 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         }
     }
     private fun bindContents(holder: RecyclerView.ViewHolder,position: Int){
-        holder.itemView.setOnClickListener {
+        holder.itemView.rowText.setOnClickListener {
             val idToEdit = listWithViewType[position].rootId
             vModel.setCurrentItemId(idToEdit)
             mHandler.transitOriginToDetail()
+        }
+        holder.itemView.rowDelete.setOnClickListener {
+            val idToDelete = listWithViewType[position].rootId
+            vModel.removeItemHasId(idToDelete)
         }
     }
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {

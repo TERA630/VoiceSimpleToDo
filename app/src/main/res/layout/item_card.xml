@@ -26,5 +26,11 @@
         android:textSize="14sp"
         android:paddingEnd="8dp"
         tools:text="this one" />
+    <ImageButton
+        android:id="@+id/rowDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:src="@drawable/ic_delete_black_24dp"/>
 
 </androidx.cardview.widget.CardView>
