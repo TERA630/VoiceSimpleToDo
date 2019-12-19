@@ -92,8 +92,8 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         while (i < size - 1) {
             // The buffer has LINEAR16 in little endian.
             val s = buffer[i + 1].toInt()
-            loggVoice(s)
             if(abs(s)>6) {
+                loggVoice(s)
                 return true
             }  else i += 2
         }
@@ -101,7 +101,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     }
 
     private fun loggVoice(number:Int){
-        val starNumber = when(number){
+        val starNumber = when(abs(number)){
             in 0..6 ->"0"
             in 6..24-> "*"
             in 24..48-> "**"
@@ -112,9 +112,9 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
             in 138..162 -> "*******"
             in 162..186 -> "********"
             in 186..210 -> "*********"
+            in 210..255 -> "**********"
             else-> "**********"
         }
         Log.i(mTag,starNumber)
-
     }
 }
