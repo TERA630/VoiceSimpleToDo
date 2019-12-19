@@ -8,7 +8,7 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.abs
 
-const val AUDIO_BUFFER_SIZE = 16 * 100 * 2  // sampling per ms * 100 ms
+const val AUDIO_BUFFER_SIZE = 16 * 100 *2  // sampling per ms * 100 ms
 const val MAX_SPEECH_LENGTH_MILLIS = 10 * 1000 // Original 30000
 const val SPEECH_TIMEOUT_MILLIS = 2000
 
@@ -78,7 +78,6 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
     private fun loudVoiceProcess(size:Int, loopTime:Long){
         if(mLastVoiceHeardMillis == Long.MAX_VALUE) { // 閾値以上のAudioDataが得られたとき
             mStartSteamRecognizingMills = loopTime
-
              vModel.speechStreaming.buildRequestServer()
         }
         vModel.speechStreaming.recognize(mBuffer,size)
@@ -92,7 +91,7 @@ class VoiceRecorder(val scope:CoroutineScope,val vModel: MainViewModel){
         while (i < size - 1) {
             // The buffer has LINEAR16 in little endian.
             val s = buffer[i + 1].toInt()
-            if(abs(s)>6) {
+            if(abs(s)>7) {
                 loggVoice(s)
                 return true
             }  else i += 2
