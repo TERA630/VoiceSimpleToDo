@@ -16,8 +16,7 @@ class OriginFragment:Fragment(){
     private lateinit var mAdaptor: HierarchicalAdaptor
     companion object {
         @JvmStatic
-        fun newInstance() =
-            OriginFragment()
+        fun newInstance() = OriginFragment()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,11 +48,11 @@ class OriginFragment:Fragment(){
         val flexAdaptor = FlexBoxTagOriginAdaptor(vModel)
         originTagList.adapter = flexAdaptor
         originList.adapter = mAdaptor
-        vModel.listObservable.observe(this, Observer {
+        vModel.listObservable.observe(viewLifecycleOwner, Observer {
             mAdaptor.updateAllList()
             flexAdaptor.upDateTags()
         })
-        vModel.tagObservable.observe(this, Observer {
+        vModel.tagObservable.observe(viewLifecycleOwner, Observer {
             mAdaptor.updateAllList()
             flexAdaptor.upDateTags()
         })
