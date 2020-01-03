@@ -18,7 +18,6 @@ class OriginFragment:Fragment(){
         @JvmStatic
         fun newInstance() = OriginFragment()
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mAdaptor = HierarchicalAdaptor(vModel)
@@ -30,13 +29,20 @@ class OriginFragment:Fragment(){
                     replace(R.id.activityFrame, DetailFragment.newInstance())?.
                     commit()
             }
+
+            override fun transitOriginToEditor() {
+                activity?.supportFragmentManager?.
+                    beginTransaction()?.
+                    addToBackStack(null)?.
+                    replace(R.id.activityFrame, EditorFragment.newInstance())?.
+                    commit()
+            }
         })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_origin, container, false)
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val flexBoxLayoutManager = FlexboxLayoutManager(this.context)
@@ -60,7 +66,6 @@ class OriginFragment:Fragment(){
 
     interface EventToFragment {
         fun transitOriginToDetail()
+        fun transitOriginToEditor()
     }
-
-
 }

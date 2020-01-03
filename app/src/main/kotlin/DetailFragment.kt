@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import com.google.android.flexbox.*
 import kotlinx.android.synthetic.main.fragment_detail.*
+import model.ItemEntity
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 // TODO
@@ -72,7 +73,7 @@ class DetailFragment : Fragment() {
         }
         detail_parent.adapter = adaptor
     }
-    private fun viewToEntity(item:ItemEntity){
+    private fun viewToEntity(item: ItemEntity){
         item.title = detail_title.text.toString()
         val spinnerPosition = detail_parent.selectedItemPosition
         if(spinnerPosition == 0 ) {

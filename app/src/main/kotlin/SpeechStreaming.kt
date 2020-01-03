@@ -9,7 +9,7 @@ import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import model.ItemEntity
 import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
 
@@ -45,7 +45,13 @@ class SpeechStreaming(private val vModel: MainViewModel,
                 }
                 if(text.isNotEmpty()) Log.i(mTag,"$text has been recognized..")
                 if (text.isNotEmpty() && isFinal) {
-                    vModel.appendList(ItemEntity(id = vModel.newIdOfItemList(), title = text,tag = mutableListOf("From Voice")))
+                    vModel.appendList(
+                        ItemEntity(
+                            id = vModel.newIdOfItemList(),
+                            title = text,
+                            tag = mutableListOf("From Voice")
+                        )
+                    )
                     Log.i(mTag, "$text was recognized")
                 }
             }

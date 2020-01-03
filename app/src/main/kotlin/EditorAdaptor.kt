@@ -6,59 +6,49 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_card.view.*
 import kotlinx.android.synthetic.main.list_footer.view.*
 import model.ItemEntity
 
-class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
+// 仕様
+// 段階エディタ
+//　プラスをクリックすると下の要素が開く
+// タブで1レベル下げる
+// 先頭でのBSかShiftTABで1レベル上げる
+
+
+
+class EditorAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     // Local Const
-    private val cParent = 1
-    private val cChild =  2
-    private val cFooter = 3
+    private val cItem = 1
+    private val cFooter = 2
 
     // local property
-    private val listWithViewType = mutableListOf<ItemWithViewType>()
+    private val listWithViewStatus = mutableListOf<ItemWithViewStatus>()
     private lateinit var contentRange:IntRange
     private var footerRange:Int = 1
-    private lateinit var mHandler:OriginFragment.EventToFragment
+    private lateinit var mHandler: EditorFragment.EventToFragment
 
     // Recycler Adaptor lifecycle
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         makeListToShow()
-        val itemTouchHelper = ItemTouchHelper( object : ItemTouchHelper.SimpleCallback
-            (0,(ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) ) {
-            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-                return false
-            }
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                removeRowItem(viewHolder.adapterPosition)
-            }
-        })
-        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
-    override fun getItemCount(): Int =  listWithViewType.size +1 // データ＋入力用フッタ
+    override fun getItemCount(): Int =  listWithViewStatus.size +1 // データ＋入力用フッタ
     override fun getItemViewType(position: Int): Int {
-        return when (position) {
-            in contentRange -> listWithViewType[position].viewType
+        return when(position) {
+            in contentRange -> cItem
             else -> cFooter
         }
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-
         return when (viewType) {
-            cParent -> {
-                val itemView = layoutInflater.inflate(R.layout.item_card, parent, false)
+            cItem -> {
+                val itemView = layoutInflater.inflate(R.layout.row_editor, parent, false)
                 ViewHolderOfCell(itemView)
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
-            cChild->{
-                val itemView = layoutInflater.inflate(R.layout.item_child,parent,false)
-                ViewHolderOfCell(itemView)
-            }
             else -> {
                 val footerView = LayoutInflater.from(parent.context).inflate(R.layout.list_footer ,parent,false)
                 ViewHolderOfCell(footerView)
@@ -68,9 +58,9 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int){
         when (position) {
             in contentRange -> {
-                holder.itemView.rowText.text = listWithViewType[position].title
-                if(holder.itemViewType == cParent ){
-                    if (vModel.idHasChild(listWithViewType[position].rootId) ) {
+                holder.itemView.rowText.text = listWithViewStatus[position].title
+                if(holder.itemViewType == cItem ){
+                    if (vModel.idHasChild(listWithViewStatus[position].rootId) ) {
                         bindContentsWithChildren(holder,position)
                     } else {
                         bindContents(holder,position)
@@ -85,37 +75,34 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
 
     // lifecycle sub-routine
     private fun makeListToShow(){
-        val withChildList = mutableListOf<ItemWithViewType>()
+        val withChildList = mutableListOf<ItemWithViewStatus>()
         val list = vModel.getItemTitlesSelected()
-         list.forEach {item->
-             if(item.isChildOf == 0)  { withChildList.add(ItemWithViewType(item.title,cParent,item.id))} // 何かの子要素でないものは親リストに加える
-             if(item.isOpened ){ // 親リストがオープンしていれば､子要素を検索する｡
-                    val childList = vModel.getListValue().filter{ it.isChildOf == item.id}
-                    childList.forEach { childItem ->
-                            withChildList.add(ItemWithViewType(childItem.title, cChild, childItem.id))
-                    }
-             }
-         }
-        listWithViewType.clear()
-        listWithViewType.addAll(withChildList)
-        contentRange = IntRange(0,listWithViewType.lastIndex)
-        footerRange = listWithViewType.lastIndex +1
+        list.forEach {item->
+            if(item.isChildOf == 0)  { withChildList.add(ItemWithViewStatus(title = item.title,indent = 0,rootId = item.id,isOpened = item.isOpened))} // 何かの子要素でないものは親リストに加える
+            if(item.isOpened ){ // オープンしていれば､子要素を検索する｡
+                val childList = vModel.getListValue().filter{ it.isChildOf == item.id}
+                childList.forEach { childItem ->
+                    val indent = 1
+                    withChildList.add(ItemWithViewStatus(childItem.title,indent,childItem.id,childItem.isOpened))
+                }
+            }
+        }
+        listWithViewStatus.clear()
+        listWithViewStatus.addAll(withChildList)
+        contentRange = IntRange(0,listWithViewStatus.lastIndex)
+        footerRange = listWithViewStatus.lastIndex +1
     }
     private  fun bindContentsWithChildren(holder: RecyclerView.ViewHolder, position:Int){
         holder.itemView.setOnClickListener {
-            val id = listWithViewType[position].rootId
+            val id = listWithViewStatus[position].rootId
             vModel.flipOpenedItemHasId(id)
         }
     }
     private fun bindContents(holder: RecyclerView.ViewHolder,position: Int){
         holder.itemView.rowText.setOnClickListener {
-            val idToEdit = listWithViewType[position].rootId
+            val idToEdit = listWithViewStatus[position].rootId
             vModel.setCurrentItemId(idToEdit)
-            mHandler.transitOriginToDetail()
-        }
-        holder.itemView.rowDelete.setOnClickListener {
-            val idToDelete = listWithViewType[position].rootId
-            vModel.removeItemHasId(idToDelete)
+            mHandler.transitEditorToOrigin()
         }
     }
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
@@ -153,7 +140,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         )
     }
     private fun removeRowItem(position: Int){
-        val idToReMove = listWithViewType[position].rootId
+        val idToReMove = listWithViewStatus[position].rootId
         if(idToReMove==0) return // tagの時はなにもしない｡
         vModel.removeItemHasId(idToReMove)
     }
@@ -166,20 +153,11 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     }
 
     // public method
-    fun updateAllList(){
-        val old  = mutableListOf<ItemWithViewType>()
-        old.addAll(listWithViewType)
-        val oldList = old.toList()
-        makeListToShow()
-        val new = listWithViewType
-        val diffResult = DiffUtil.calculateDiff(MyDiffUtil(oldList,new),true)
-        diffResult.dispatchUpdatesTo(this)
-    }
-    fun setHandler(_handler: OriginFragment.EventToFragment) {
+    fun setHandler(_handler: EditorFragment.EventToFragment) {
         this.mHandler = _handler
     }
-
+    class ItemWithViewStatus( val title:String,
+                              var indent:Int,
+                              val rootId:Int,
+                              var isOpened:Boolean)
 }
-class ItemWithViewType( val title:String,
-                        val viewType:Int,
-                        val rootId:Int)

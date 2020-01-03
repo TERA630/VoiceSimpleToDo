@@ -6,7 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
+import model.ItemEntity
+import model.MyDao
+import model.TagState
 
 class MainViewModel(private val myDao: MyDao) : ViewModel() {
     val listObservable  = MutableLiveData<MutableList<ItemEntity>>()
@@ -41,7 +43,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         updateTagAndList(list)
         return
     }
-    fun currentItem()  : ItemEntity{
+    fun currentItem()  : ItemEntity {
         val list = getListValue()
         val idToGet = list.indexOfFirst { it.id == currentId }
         return list[idToGet]
@@ -94,20 +96,102 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     }
     private fun makeDummyList(): MutableList<ItemEntity> {
         val result = mutableListOf<ItemEntity>()
-        result.add(ItemEntity(1, "Wearing socks", "まず腰を下ろす", mutableListOf("準備","服装")))
+        result.add(
+            ItemEntity(
+                1,
+                "Wearing socks",
+                "まず腰を下ろす",
+                mutableListOf("準備", "服装")
+            )
+        )
         result.add(ItemEntity(2, "天気を確認する", "スマホ", mutableListOf("準備")))
-        result.add(ItemEntity(3, "服に着替える", "自転車通勤か電車通勤か､研究会があるか", mutableListOf("準備")))
+        result.add(
+            ItemEntity(
+                3,
+                "服に着替える",
+                "自転車通勤か電車通勤か､研究会があるか",
+                mutableListOf("準備")
+            )
+        )
         result.add(ItemEntity(4, "口を洗浄する", "うがい､歯磨き", mutableListOf("準備")))
-        result.add(ItemEntity(5,"洗口液","使えば無くなる",mutableListOf("準備"),isChildOf = 4))
-        result.add(ItemEntity(6, "髪を整える", "しっかりと", mutableListOf("準備"), isOpened = true))
-        result.add(ItemEntity(7,"櫛を入れる","",mutableListOf("準備"),isChildOf = 6))
-        result.add(ItemEntity(8,"スプレーをする","かう",mutableListOf("準備"),isChildOf = 6))
-        result.add(ItemEntity(9, "プロテインを作る", "3杯､可能なら牛乳を入れる", mutableListOf("準備")))
-        result.add(ItemEntity(10,"自転車の空気を確かめる","どちらも",mutableListOf("自転車")))
-        result.add(ItemEntity(11,"入金チェック","SBJ、スルガ、三井住友",mutableListOf("財政")))
-        result.add(ItemEntity(12,"書類整備","クリアファイルに入れて整理",mutableListOf("財政")))
-        result.add(ItemEntity(13,"股関節柔軟","BMCの動画",mutableListOf("運動")))
-        result.add(ItemEntity(14,"踵寄せ","座位であぐらをかき､踵を股間に寄せる",mutableListOf("運動"),isChildOf = 13))
+        result.add(
+            ItemEntity(
+                5,
+                "洗口液",
+                "使えば無くなる",
+                mutableListOf("準備"),
+                isChildOf = 4
+            )
+        )
+        result.add(
+            ItemEntity(
+                6,
+                "髪を整える",
+                "しっかりと",
+                mutableListOf("準備"),
+                isOpened = true
+            )
+        )
+        result.add(
+            ItemEntity(
+                7,
+                "櫛を入れる",
+                "",
+                mutableListOf("準備"),
+                isChildOf = 6
+            )
+        )
+        result.add(
+            ItemEntity(
+                8,
+                "スプレーをする",
+                "かう",
+                mutableListOf("準備"),
+                isChildOf = 6
+            )
+        )
+        result.add(
+            ItemEntity(
+                9,
+                "プロテインを作る",
+                "3杯､可能なら牛乳を入れる",
+                mutableListOf("準備")
+            )
+        )
+        result.add(
+            ItemEntity(
+                10,
+                "自転車の空気を確かめる",
+                "どちらも",
+                mutableListOf("自転車")
+            )
+        )
+        result.add(
+            ItemEntity(
+                11,
+                "入金チェック",
+                "SBJ、スルガ、三井住友",
+                mutableListOf("財政")
+            )
+        )
+        result.add(
+            ItemEntity(
+                12,
+                "書類整備",
+                "クリアファイルに入れて整理",
+                mutableListOf("財政")
+            )
+        )
+        result.add(ItemEntity(13, "股関節柔軟", "BMCの動画", mutableListOf("運動")))
+        result.add(
+            ItemEntity(
+                14,
+                "踵寄せ",
+                "座位であぐらをかき､踵を股間に寄せる",
+                mutableListOf("運動"),
+                isChildOf = 13
+            )
+        )
         return result
     }
     fun removeItemHasId(id:Int){
@@ -145,13 +229,18 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             while( tagStateList.any{ it.id == newTagIndex} ) {
                 newTagIndex++
             }
-            val newTag = TagState(newTagIndex, newTagTitle, isSelected = false,isUsing = true)
+            val newTag = TagState(
+                newTagIndex,
+                newTagTitle,
+                isSelected = false,
+                isUsing = true
+            )
             tagStateList.add(newTag)
         } else  { // すでにタグが存在する場合
             sameNameTag.isUsing = true
         }
     }
-    fun getTagById(_idToGet:Int):TagState{
+    fun getTagById(_idToGet:Int): TagState {
         val destTag = tagStateList.find { it.id == _idToGet}
         if(destTag != null) {
             return destTag

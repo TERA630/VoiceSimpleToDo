@@ -2,6 +2,7 @@ package com.example.voicesimpletodo
 
 import android.app.Application
 import androidx.room.Room
+import model.MyDataBase
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
@@ -19,7 +20,7 @@ class MyApplication:Application(){
     }
     private val myModule:Module = module {
         single {
-            Room.databaseBuilder(androidContext(),MyDataBase::class.java,"myDatabase.db").build()
+            Room.databaseBuilder(androidContext(), MyDataBase::class.java,"myDatabase.db").build()
         }
         factory { get<MyDataBase>().myDao() }
         viewModel { MainViewModel(get()) }

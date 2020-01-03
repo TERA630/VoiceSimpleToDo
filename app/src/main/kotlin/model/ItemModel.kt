@@ -1,6 +1,6 @@
-package com.example.voicesimpletodo
+package model
 import androidx.room.*
-import com.example.voicesimpletodo.StringListTypeConverter
+import com.example.voicesimpletodo.model.StringListTypeConverter
 
 @Entity(tableName = "recordItem")
 data class ItemEntity( // table within the database . field correspond to columns

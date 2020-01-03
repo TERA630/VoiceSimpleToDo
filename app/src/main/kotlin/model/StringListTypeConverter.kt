@@ -1,4 +1,4 @@
-package com.example.voicesimpletodo
+package com.example.voicesimpletodo.model
 
 import androidx.room.TypeConverter
 
