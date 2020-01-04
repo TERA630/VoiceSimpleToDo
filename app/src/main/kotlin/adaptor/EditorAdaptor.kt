@@ -1,4 +1,4 @@
-package com.example.voicesimpletodo
+package com.example.voicesimpletodo.adaptor
 
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -7,6 +7,10 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.voicesimpletodo.EditorFragment
+import com.example.voicesimpletodo.MainViewModel
+import com.example.voicesimpletodo.R
+import com.example.voicesimpletodo.hideSoftKeyBoard
 import kotlinx.android.synthetic.main.item_card.view.*
 import kotlinx.android.synthetic.main.list_footer.view.*
 import model.ItemEntity
@@ -19,7 +23,7 @@ import model.ItemEntity
 
 
 
-class EditorAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
+class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     // Local Const
     private val cItem = 1
     private val cFooter = 2
@@ -47,11 +51,15 @@ class EditorAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter<Recyc
         return when (viewType) {
             cItem -> {
                 val itemView = layoutInflater.inflate(R.layout.row_editor, parent, false)
-                ViewHolderOfCell(itemView)
+                ViewHolderOfCell(
+                    itemView
+                )
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
             else -> {
-                val footerView = LayoutInflater.from(parent.context).inflate(R.layout.list_footer ,parent,false)
-                ViewHolderOfCell(footerView)
+                val footerView = LayoutInflater.from(parent.context).inflate(R.layout.list_footer,parent,false)
+                ViewHolderOfCell(
+                    footerView
+                )
             }   // Footer アイテム追加
         }
     }
@@ -78,12 +86,26 @@ class EditorAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter<Recyc
         val withChildList = mutableListOf<ItemWithViewStatus>()
         val list = vModel.getItemTitlesSelected()
         list.forEach {item->
-            if(item.isChildOf == 0)  { withChildList.add(ItemWithViewStatus(title = item.title,indent = 0,rootId = item.id,isOpened = item.isOpened))} // 何かの子要素でないものは親リストに加える
+            if(item.isChildOf == 0)  { withChildList.add(
+                ItemWithViewStatus(
+                    title = item.title,
+                    indent = 0,
+                    rootId = item.id,
+                    isOpened = item.isOpened
+                )
+            )} // 何かの子要素でないものは親リストに加える
             if(item.isOpened ){ // オープンしていれば､子要素を検索する｡
                 val childList = vModel.getListValue().filter{ it.isChildOf == item.id}
                 childList.forEach { childItem ->
                     val indent = 1
-                    withChildList.add(ItemWithViewStatus(childItem.title,indent,childItem.id,childItem.isOpened))
+                    withChildList.add(
+                        ItemWithViewStatus(
+                            childItem.title,
+                            indent,
+                            childItem.id,
+                            childItem.isOpened
+                        )
+                    )
                 }
             }
         }

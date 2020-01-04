@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:background="@color/colorWheat"
         android:theme="@style/AppTheme.AppBarOverlay">
-        <!-- enterAlwaysCollapsed 上までスクロールすると出てくる-->>
     <com.google.android.material.appbar.CollapsingToolbarLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

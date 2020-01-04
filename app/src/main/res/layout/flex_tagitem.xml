@@ -17,6 +17,6 @@
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="@string/hint_title"
+        tools:text="@string/tagTest"
         />
 </androidx.constraintlayout.widget.ConstraintLayout>

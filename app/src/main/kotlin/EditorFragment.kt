@@ -6,14 +6,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import com.example.voicesimpletodo.adaptor.EditorAdaptor
 import kotlinx.android.synthetic.main.fragment_editor.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 
 class EditorFragment : Fragment() {
 
-    private lateinit var mAdaptor:EditorAdaptor
+    private lateinit var mAdaptor: EditorAdaptor
 
     companion object {
         fun newInstance() = EditorFragment()

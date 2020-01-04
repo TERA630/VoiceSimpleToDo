@@ -18,6 +18,7 @@
     <string name="listening">listening..</string>
     <string name="inputOK">確定</string>
     <string name="cancel">cancel</string>
+    <string name="tagTest">tagTest</string>
     // Content
     <string name="button">push to action</string>
     <string name="rowContents">enter row item</string>
