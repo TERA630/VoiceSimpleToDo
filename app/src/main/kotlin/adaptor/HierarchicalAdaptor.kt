@@ -19,7 +19,6 @@ class HierarchicalAdaptor(private val vModel: MainViewModel):RecyclerView.Adapte
     private val cParent = 1
     private val cChild =  2
     private val cFooter = 3
-
     // local property
     private val listWithViewType = mutableListOf<ItemWithViewType>()
     private lateinit var contentRange:IntRange
@@ -94,9 +93,7 @@ class HierarchicalAdaptor(private val vModel: MainViewModel):RecyclerView.Adapte
              if(item.isOpened ){ // 親リストがオープンしていれば､子要素を検索する｡
                     val childList = vModel.getListValue().filter{ it.isChildOf == item.id}
                     childList.forEach { childItem ->
-                            withChildList.add(
-                                ItemWithViewType(childItem.title, cChild, childItem.id)
-                            )
+                            withChildList.add(ItemWithViewType(childItem.title, cChild, childItem.id))
                     }
              }
          }
@@ -105,7 +102,7 @@ class HierarchicalAdaptor(private val vModel: MainViewModel):RecyclerView.Adapte
         contentRange = IntRange(0,listWithViewType.lastIndex)
         footerRange = listWithViewType.lastIndex +1
     }
-    private  fun bindContentsWithChildren(holder: RecyclerView.ViewHolder, position:Int){
+    private fun bindContentsWithChildren(holder: RecyclerView.ViewHolder, position:Int){
         holder.itemView.setOnClickListener {
             val id = listWithViewType[position].rootId
             vModel.flipOpenedItemHasId(id)

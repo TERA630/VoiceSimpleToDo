@@ -13,6 +13,7 @@ import com.example.voicesimpletodo.R
 import com.example.voicesimpletodo.hideSoftKeyBoard
 import kotlinx.android.synthetic.main.item_card.view.*
 import kotlinx.android.synthetic.main.list_footer.view.*
+import kotlinx.android.synthetic.main.row_editor.view.*
 import model.ItemEntity
 
 // 仕様
@@ -27,7 +28,6 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
     // Local Const
     private val cItem = 1
     private val cFooter = 2
-
     // local property
     private val listWithViewStatus = mutableListOf<ItemWithViewStatus>()
     private lateinit var contentRange:IntRange
@@ -51,15 +51,11 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
         return when (viewType) {
             cItem -> {
                 val itemView = layoutInflater.inflate(R.layout.row_editor, parent, false)
-                ViewHolderOfCell(
-                    itemView
-                )
+                ViewHolderOfCell(itemView)
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
             else -> {
                 val footerView = LayoutInflater.from(parent.context).inflate(R.layout.list_footer,parent,false)
-                ViewHolderOfCell(
-                    footerView
-                )
+                ViewHolderOfCell(footerView)
             }   // Footer アイテム追加
         }
     }
@@ -87,25 +83,13 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
         val list = vModel.getItemTitlesSelected()
         list.forEach {item->
             if(item.isChildOf == 0)  { withChildList.add(
-                ItemWithViewStatus(
-                    title = item.title,
-                    indent = 0,
-                    rootId = item.id,
-                    isOpened = item.isOpened
-                )
+                ItemWithViewStatus(title = item.title, indent = 0, rootId = item.id, isOpened = item.isOpened)
             )} // 何かの子要素でないものは親リストに加える
             if(item.isOpened ){ // オープンしていれば､子要素を検索する｡
                 val childList = vModel.getListValue().filter{ it.isChildOf == item.id}
                 childList.forEach { childItem ->
                     val indent = 1
-                    withChildList.add(
-                        ItemWithViewStatus(
-                            childItem.title,
-                            indent,
-                            childItem.id,
-                            childItem.isOpened
-                        )
-                    )
+                    withChildList.add(ItemWithViewStatus(childItem.title, indent, childItem.id, childItem.isOpened))
                 }
             }
         }
@@ -115,12 +99,14 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
         footerRange = listWithViewStatus.lastIndex +1
     }
     private  fun bindContentsWithChildren(holder: RecyclerView.ViewHolder, position:Int){
+        holder.itemView.rowEditor.text = listWithViewStatus[position].title
         holder.itemView.setOnClickListener {
             val id = listWithViewStatus[position].rootId
             vModel.flipOpenedItemHasId(id)
         }
     }
     private fun bindContents(holder: RecyclerView.ViewHolder,position: Int){
+        holder.itemView.rowEditor.text = listWithViewStatus[position].title
         holder.itemView.rowText.setOnClickListener {
             val idToEdit = listWithViewStatus[position].rootId
             vModel.setCurrentItemId(idToEdit)

@@ -21,8 +21,7 @@ class EditorFragment : Fragment() {
 
     private val viewModel by sharedViewModel<MainViewModel>()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_editor, container, false)
     }
 
@@ -31,10 +30,10 @@ class EditorFragment : Fragment() {
         mAdaptor = EditorAdaptor(viewModel)
         mAdaptor.setHandler(object :EventToFragment{
             override fun transitEditorToDetail() {
-                activity?.supportFragmentManager
-                    ?.beginTransaction()
-                    ?.addToBackStack(null)
-                    ?.replace(R.id.activityFrame, DetailFragment.newInstance())?.commit()
+                activity?.supportFragmentManager?.
+                    beginTransaction()?.
+                    addToBackStack(null)?.
+                    replace(R.id.activityFrame, DetailFragment.newInstance())?.commit()
             }
             override fun transitEditorToOrigin() {
                 activity?.supportFragmentManager?.

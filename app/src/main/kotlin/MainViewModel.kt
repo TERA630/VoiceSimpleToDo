@@ -36,7 +36,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         }
         else Log.i("viewModel","voiceRecorder was not initialized so SpeechStreaming doesn't work")
     }
-
     fun appendList(item: ItemEntity) {
         val list = getListValue()
         list.add(item)

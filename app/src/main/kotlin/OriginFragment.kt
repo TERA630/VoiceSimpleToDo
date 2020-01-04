@@ -32,7 +32,6 @@ class OriginFragment:Fragment(){
                     replace(R.id.activityFrame, DetailFragment.newInstance())?.
                     commit()
             }
-
             override fun transitOriginToEditor() {
                 activity?.supportFragmentManager?.
                     beginTransaction()?.
