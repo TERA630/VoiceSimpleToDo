@@ -1,4 +1,4 @@
-package com.example.voicesimpletodo
+package com.example.voicesimpletodo.adaptor
 
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -9,11 +9,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.example.voicesimpletodo.*
 import kotlinx.android.synthetic.main.item_card.view.*
 import kotlinx.android.synthetic.main.list_footer.view.*
 import model.ItemEntity
 
-class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
+class HierarchicalAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     // Local Const
     private val cParent = 1
     private val cChild =  2
@@ -23,7 +24,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     private val listWithViewType = mutableListOf<ItemWithViewType>()
     private lateinit var contentRange:IntRange
     private var footerRange:Int = 1
-    private lateinit var mHandler:OriginFragment.EventToFragment
+    private lateinit var mHandler: OriginFragment.EventToFragment
 
     // Recycler Adaptor lifecycle
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -60,7 +61,7 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
                 ViewHolderOfCell(itemView)
             }
             else -> {
-                val footerView = LayoutInflater.from(parent.context).inflate(R.layout.list_footer ,parent,false)
+                val footerView = LayoutInflater.from(parent.context).inflate(R.layout.list_footer,parent,false)
                 ViewHolderOfCell(footerView)
             }   // Footer アイテム追加
         }
@@ -88,11 +89,14 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         val withChildList = mutableListOf<ItemWithViewType>()
         val list = vModel.getItemTitlesSelected()
          list.forEach {item->
-             if(item.isChildOf == 0)  { withChildList.add(ItemWithViewType(item.title,cParent,item.id))} // 何かの子要素でないものは親リストに加える
+             if(item.isChildOf == 0)  { withChildList.add(ItemWithViewType(item.title, cParent, item.id)
+             )} // 何かの子要素でないものは親リストに加える
              if(item.isOpened ){ // 親リストがオープンしていれば､子要素を検索する｡
                     val childList = vModel.getListValue().filter{ it.isChildOf == item.id}
                     childList.forEach { childItem ->
-                            withChildList.add(ItemWithViewType(childItem.title, cChild, childItem.id))
+                            withChildList.add(
+                                ItemWithViewType(childItem.title, cChild, childItem.id)
+                            )
                     }
              }
          }
@@ -108,14 +112,20 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         }
     }
     private fun bindContents(holder: RecyclerView.ViewHolder,position: Int){
-        holder.itemView.rowText.setOnClickListener {
+        val iV = holder.itemView
+        iV.rowText.setOnClickListener {
             val idToEdit = listWithViewType[position].rootId
             vModel.setCurrentItemId(idToEdit)
             mHandler.transitOriginToDetail()
         }
-        holder.itemView.rowDelete.setOnClickListener {
+        iV.rowDelete.setOnClickListener {
             val idToDelete = listWithViewType[position].rootId
             vModel.removeItemHasId(idToDelete)
+        }
+        iV.rowEdit.setOnClickListener {
+            val idToEdit = listWithViewType[position].rootId
+            vModel.setCurrentItemId(idToEdit)
+            mHandler.transitOriginToEditor()
         }
     }
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
@@ -144,18 +154,15 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
     private fun appendRowItem(text:String,position: Int){
         val idToAppend = vModel.newIdOfItemList()
         vModel.appendList(
-            ItemEntity(
-                idToAppend,
-                text,
-                "text description",
-                mutableListOf("未分類")
-            )
+            ItemEntity(idToAppend, text, "text description", mutableListOf("未分類"))
         )
+        makeListToShow()
     }
     private fun removeRowItem(position: Int){
         val idToReMove = listWithViewType[position].rootId
         if(idToReMove==0) return // tagの時はなにもしない｡
         vModel.removeItemHasId(idToReMove)
+        makeListToShow()
     }
     private fun onFooterEditorEnd(editText: TextView,position: Int) {
         val newText = editText.text.toString()
@@ -164,7 +171,6 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         editText.text = ""
         editText.hideSoftKeyBoard()
     }
-
     // public method
     fun updateAllList(){
         val old  = mutableListOf<ItemWithViewType>()
@@ -172,7 +178,11 @@ class HierarchicalAdaptor(private val vModel:MainViewModel):RecyclerView.Adapter
         val oldList = old.toList()
         makeListToShow()
         val new = listWithViewType
-        val diffResult = DiffUtil.calculateDiff(MyDiffUtil(oldList,new),true)
+        val diffResult = DiffUtil.calculateDiff(
+            MyDiffUtil(
+                oldList,
+                new
+            ),true)
         diffResult.dispatchUpdatesTo(this)
     }
     fun setHandler(_handler: OriginFragment.EventToFragment) {

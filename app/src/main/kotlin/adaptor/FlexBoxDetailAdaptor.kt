@@ -1,4 +1,4 @@
-package com.example.voicesimpletodo
+package com.example.voicesimpletodo.adaptor
 
 import android.content.Context
 import android.util.Log
@@ -10,11 +10,14 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.voicesimpletodo.MainViewModel
+import com.example.voicesimpletodo.R
 import kotlinx.android.synthetic.main.flex_end.view.*
 import kotlinx.android.synthetic.main.flex_item.view.*
 
 class FlexBoxDetailAdaptor(
-    private val vModel: MainViewModel) :RecyclerView.Adapter<FlexBoxDetailAdaptor.FlexBoxVH>(){
+    private val vModel: MainViewModel
+) :RecyclerView.Adapter<FlexBoxDetailAdaptor.FlexBoxVH>(){
     private val cItem = 0
     private val cEnd = 1
     private lateinit var contextHere:Context
@@ -26,13 +29,11 @@ class FlexBoxDetailAdaptor(
         super.onAttachedToRecyclerView(recyclerView)
         contextHere = recyclerView.context
     }
-    override fun getItemCount(): Int {
-        return vModel.allTags().size
-    }
+    override fun getItemCount() = vModel.allTags().size
     override fun getItemViewType(position: Int): Int {
         return when(position){
-            in  IntRange(0,vModel.allTags().lastIndex) ->{cItem}
-            else->{ cEnd }
+            in  IntRange(0,vModel.allTags().lastIndex) -> cItem
+            else-> cEnd
         }
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FlexBoxVH {
@@ -41,7 +42,9 @@ class FlexBoxDetailAdaptor(
             else -> R.layout.flex_end
         }
         val view = LayoutInflater.from(parent.context).inflate(resourceID,parent,false)
-        return FlexBoxVH(view)
+        return FlexBoxVH(
+            view
+        )
     }
     override fun onBindViewHolder(holder: FlexBoxVH, position: Int) {
         when (holder.itemViewType){
@@ -50,7 +53,7 @@ class FlexBoxDetailAdaptor(
         }
     }
     // Lifecycle Sub-routine
-    private fun bindItem(holder: FlexBoxVH,position: Int){ // position は thisItemsTagのIndexと一致
+    private fun bindItem(holder: FlexBoxVH, position: Int){ // position は thisItemsTagのIndexと一致
         val tagHere =  vModel.allTags()[position]
         holder.itemView.item_name.text = tagHere
         val iView = holder.itemView
@@ -73,8 +76,7 @@ class FlexBoxDetailAdaptor(
         notifyItemChanged(position)
     }
 
-
-    private fun bindEnd(holder: FlexBoxVH,position: Int){
+    private fun bindEnd(holder: FlexBoxVH, position: Int){
         val iv = holder.itemView
         val autoCompleteCandidates = ArrayAdapter<String>(contextHere,android.R.layout.simple_list_item_1)
         autoCompleteCandidates.addAll(vModel.allTags())

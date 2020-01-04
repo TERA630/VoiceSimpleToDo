@@ -1,6 +1,7 @@
 package com.example.voicesimpletodo
 
 import androidx.recyclerview.widget.DiffUtil
+import com.example.voicesimpletodo.adaptor.ItemWithViewType
 
 class MyDiffUtil(private val old:List<ItemWithViewType>,
                  private val new:List<ItemWithViewType>):DiffUtil.Callback(){

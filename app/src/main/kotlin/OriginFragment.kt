@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import com.example.voicesimpletodo.adaptor.FlexBoxTagOriginAdaptor
+import com.example.voicesimpletodo.adaptor.HierarchicalAdaptor
 import com.google.android.flexbox.*
 import kotlinx.android.synthetic.main.fragment_origin.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -20,7 +22,8 @@ class OriginFragment:Fragment(){
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mAdaptor = HierarchicalAdaptor(vModel)
+        mAdaptor =
+            HierarchicalAdaptor(vModel)
         mAdaptor.setHandler(object :EventToFragment{
             override fun transitOriginToDetail() {
                 activity?.supportFragmentManager?.
@@ -51,7 +54,8 @@ class OriginFragment:Fragment(){
         flexBoxLayoutManager.justifyContent = JustifyContent.FLEX_START
         flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
         originTagList.layoutManager = flexBoxLayoutManager
-        val flexAdaptor = FlexBoxTagOriginAdaptor(vModel)
+        val flexAdaptor =
+            FlexBoxTagOriginAdaptor(vModel)
         originTagList.adapter = flexAdaptor
         originList.adapter = mAdaptor
         vModel.listObservable.observe(viewLifecycleOwner, Observer {

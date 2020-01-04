@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import com.example.voicesimpletodo.adaptor.FlexBoxDetailAdaptor
 import com.google.android.flexbox.*
 import kotlinx.android.synthetic.main.fragment_detail.*
 import model.ItemEntity
@@ -54,7 +55,8 @@ class DetailFragment : Fragment() {
         flexBoxLayoutManager.alignItems = AlignItems.FLEX_START
         detail_tag2.layoutManager = flexBoxLayoutManager
 
-        val flexAdaptor = FlexBoxDetailAdaptor(vModel)
+        val flexAdaptor =
+            FlexBoxDetailAdaptor(vModel)
         detail_tag2.adapter = flexAdaptor
         detail_description.setText(item.description)
         makeSpinner()
