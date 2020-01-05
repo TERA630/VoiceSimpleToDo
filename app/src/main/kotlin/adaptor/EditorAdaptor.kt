@@ -80,10 +80,13 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
     // lifecycle sub-routine
     private fun makeListToShow(){
         val parentItem = vModel.currentItem()
-        val childList = vModel.getItemsWithParentId(parentItem.id)
-        val totalList = mutableListOf(listWithViewStatus())
+
+        val totalList = mutableListOf(ItemWithViewStatus(parentItem.title,0,parentItem.id,parentItem.isOpened))
         if(parentItem.isOpened){
-            totalList.addAll(childList)
+            val childList = vModel.getItemsWithParentId(parentItem.id)
+            childList.forEach {child->
+                totalList.add(ItemWithViewStatus(child.title,totalList[0].indent+1,child.id,child.isOpened))
+            }
         }
         listWithViewStatus.clear()
         listWithViewStatus.addAll(totalList)
