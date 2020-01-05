@@ -79,22 +79,14 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
 
     // lifecycle sub-routine
     private fun makeListToShow(){
-        val withChildList = mutableListOf<ItemWithViewStatus>()
-        val list = vModel.getItemTitlesSelected()
-        list.forEach {item->
-            if(item.isChildOf == 0)  { withChildList.add(
-                ItemWithViewStatus(title = item.title, indent = 0, rootId = item.id, isOpened = item.isOpened)
-            )} // 何かの子要素でないものは親リストに加える
-            if(item.isOpened ){ // オープンしていれば､子要素を検索する｡
-                val childList = vModel.getListValue().filter{ it.isChildOf == item.id}
-                childList.forEach { childItem ->
-                    val indent = 1
-                    withChildList.add(ItemWithViewStatus(childItem.title, indent, childItem.id, childItem.isOpened))
-                }
-            }
+        val parentItem = vModel.currentItem()
+        val childList = vModel.getItemsWithParentId(parentItem.id)
+        val totalList = mutableListOf(listWithViewStatus())
+        if(parentItem.isOpened){
+            totalList.addAll(childList)
         }
         listWithViewStatus.clear()
-        listWithViewStatus.addAll(withChildList)
+        listWithViewStatus.addAll(totalList)
         contentRange = IntRange(0,listWithViewStatus.lastIndex)
         footerRange = listWithViewStatus.lastIndex +1
     }

@@ -80,7 +80,11 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
                 return result
             }
     }
-    fun getItemTitlesSelected():MutableList<ItemEntity>{
+    fun getItemsWithParentId(id:Int) : List<ItemEntity>{
+        return  getListValue().filter { it.isChildOf == id }
+    }
+
+    fun getItemsByTag():MutableList<ItemEntity>{
         val tagsSelected = tagStateList.filter { it.isSelected }
         val tagTitlesSelected = List(tagsSelected.size){ index:Int-> tagsSelected[index].title}
         return getItemsTitleContainsTag(tagTitlesSelected)
@@ -96,65 +100,31 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     private fun makeDummyList(): MutableList<ItemEntity> {
         val result = mutableListOf<ItemEntity>()
         result.add(
-            ItemEntity(
-                1,
-                "Wearing socks",
-                "まず腰を下ろす",
-                mutableListOf("準備", "服装")
-            )
+            ItemEntity(1, "Kotlin", "Android Program to earn money",
+                mutableListOf("パソコン"))
         )
-        result.add(ItemEntity(2, "天気を確認する", "スマホ", mutableListOf("準備")))
+        result.add(ItemEntity(2, "天気を確認する", "スマホ",
+            mutableListOf("準備")))
         result.add(
-            ItemEntity(
-                3,
-                "服に着替える",
-                "自転車通勤か電車通勤か､研究会があるか",
-                mutableListOf("準備")
-            )
+            ItemEntity(3, "服に着替える", "自転車通勤か電車通勤か､研究会があるか",
+                mutableListOf("準備"))
         )
-        result.add(ItemEntity(4, "口を洗浄する", "うがい､歯磨き", mutableListOf("準備")))
-        result.add(
-            ItemEntity(
-                5,
-                "洗口液",
-                "使えば無くなる",
-                mutableListOf("準備"),
-                isChildOf = 4
-            )
+        result.add(ItemEntity(4, "口を洗浄する", "うがい､歯磨き",
+            mutableListOf("準備")))
+        result.add(ItemEntity(5, "VoiceSimpleToDo", "子リストが実現すれば実際に使用してみる",
+                mutableListOf("プログラム"),
+                isChildOf = 1)
         )
-        result.add(
-            ItemEntity(
-                6,
-                "髪を整える",
-                "しっかりと",
-                mutableListOf("準備"),
-                isOpened = true
-            )
+        result.add(ItemEntity(6, "CampusTest","SurfaceViewのテスト､今は中断中",
+                mutableListOf("プログラム"),
+                isChildOf = 1)
         )
-        result.add(
-            ItemEntity(
-                7,
-                "櫛を入れる",
-                "",
+        result.add(ItemEntity(7,"Python", "Webの巡回",
+                mutableListOf("プログラム"))
+        )
+        result.add(ItemEntity(8, "スプレーをする","かう",
                 mutableListOf("準備"),
                 isChildOf = 6
-            )
-        )
-        result.add(
-            ItemEntity(
-                8,
-                "スプレーをする",
-                "かう",
-                mutableListOf("準備"),
-                isChildOf = 6
-            )
-        )
-        result.add(
-            ItemEntity(
-                9,
-                "プロテインを作る",
-                "3杯､可能なら牛乳を入れる",
-                mutableListOf("準備")
             )
         )
         result.add(
@@ -249,7 +219,6 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
             return tag // 異常ケースでは先頭アイテムを返す。
         }
     }
-
     private fun makeTagList(_list: MutableList<ItemEntity>){ // 初期化の時に1回呼ばれる
         val newTagList = mutableListOf<String>()
         _list.forEach {//現在の使用されているタグを重複を含め、すべて列挙する。

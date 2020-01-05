@@ -86,7 +86,7 @@ class HierarchicalAdaptor(private val vModel: MainViewModel):RecyclerView.Adapte
     // lifecycle sub-routine
     private fun makeListToShow(){
         val withChildList = mutableListOf<ItemWithViewType>()
-        val list = vModel.getItemTitlesSelected()
+        val list = vModel.getItemsByTag()
          list.forEach {item->
              if(item.isChildOf == 0)  { withChildList.add(ItemWithViewType(item.title, cParent, item.id)
              )} // 何かの子要素でないものは親リストに加える
