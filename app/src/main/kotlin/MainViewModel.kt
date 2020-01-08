@@ -120,46 +120,34 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
                 isChildOf = 1)
         )
         result.add(ItemEntity(7,"Python", "Webの巡回",
-                mutableListOf("プログラム"))
-        )
+                mutableListOf("プログラム"),
+                isOpened = true))
         result.add(ItemEntity(8, "スプレーをする","かう",
                 mutableListOf("準備"),
-                isChildOf = 6
-            )
-        )
+                isChildOf = 6))
         result.add(
-            ItemEntity(
-                10,
-                "自転車の空気を確かめる",
-                "どちらも",
+            ItemEntity(10, "自転車の空気を確かめる", "どちらも",
                 mutableListOf("自転車")
             )
         )
         result.add(
-            ItemEntity(
-                11,
-                "入金チェック",
-                "SBJ、スルガ、三井住友",
+            ItemEntity(11, "入金チェック", "SBJ、スルガ、三井住友",
                 mutableListOf("財政")
             )
         )
         result.add(
-            ItemEntity(
-                12,
-                "書類整備",
-                "クリアファイルに入れて整理",
-                mutableListOf("財政")
-            )
+            ItemEntity(12, "書類整備", "クリアファイルに入れて整理",
+                mutableListOf("財政"))
         )
         result.add(ItemEntity(13, "股関節柔軟", "BMCの動画", mutableListOf("運動")))
-        result.add(
-            ItemEntity(
-                14,
-                "踵寄せ",
-                "座位であぐらをかき､踵を股間に寄せる",
+        result.add(ItemEntity(14, "踵寄せ", "座位であぐらをかき､踵を股間に寄せる",
                 mutableListOf("運動"),
-                isChildOf = 13
-            )
+                isChildOf = 13)
+        )
+        result.add(
+            ItemEntity(15,"未読チェック","クラスから検索する必要がありそう",
+                mutableListOf("プログラム"),
+                isChildOf = 7)
         )
         return result
     }
