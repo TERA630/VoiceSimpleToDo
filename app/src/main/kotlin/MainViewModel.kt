@@ -19,7 +19,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     lateinit var voiceRecorder:VoiceRecorder
     var mUserRequireAudio:Boolean = false
 
-    fun init() = viewModelScope.launch {
+     fun init() = viewModelScope.launch {
             val list = withContext(Dispatchers.Default) {
                 myDao.findAll().toMutableList()
             }
@@ -68,7 +68,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
         list[idToFlip].isOpened = (!list[idToFlip].isOpened) // IsOpenedの反転
         listObservable.postValue(list)
     }
-    private fun getItemsTitleContainsTag(_tags:List<String>):MutableList<ItemEntity>{
+    private fun getItemsByTagTitleOrAll(_tags:List<String>):MutableList<ItemEntity>{
             if(_tags.isEmpty()) {
                  return getListValue()
             } else {         // いずれかのタグを含むリストを作成。
@@ -87,7 +87,7 @@ class MainViewModel(private val myDao: MyDao) : ViewModel() {
     fun getItemsByTag():MutableList<ItemEntity>{
         val tagsSelected = tagStateList.filter { it.isSelected }
         val tagTitlesSelected = List(tagsSelected.size){ index:Int-> tagsSelected[index].title}
-        return getItemsTitleContainsTag(tagTitlesSelected)
+        return getItemsByTagTitleOrAll(tagTitlesSelected)
     }
     fun idHasChild(itemId:Int):Boolean{
         val list = listObservable.value

@@ -176,9 +176,7 @@ class HierarchicalAdaptor(private val vModel: MainViewModel):RecyclerView.Adapte
         makeListToShow()
         val new = listWithViewType
         val diffResult = DiffUtil.calculateDiff(
-            MyDiffUtil(
-                oldList,
-                new
+            MyDiffUtil(oldList, new
             ),true)
         diffResult.dispatchUpdatesTo(this)
     }
