@@ -51,32 +51,21 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
         return when (viewType) {
             cItem -> {
                 val itemView = layoutInflater.inflate(R.layout.row_editor, parent, false)
-                ViewHolderOfCell(itemView)
+                ViewHolderOfEditorRow(itemView)
             } // アイテム表示　(0～アイテムの個数)　編集可能TextView
             else -> {
                 val footerView = LayoutInflater.from(parent.context).inflate(R.layout.list_footer,parent,false)
-                ViewHolderOfCell(footerView)
+                ViewHolderOfEditorRow(footerView)
             }   // Footer アイテム追加
         }
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int){
         when (position) {
-            in contentRange -> {
-                holder.itemView.rowText.text = listWithViewStatus[position].title
-                if(holder.itemViewType == cItem ){
-                    if (vModel.idHasChild(listWithViewStatus[position].rootId) ) {
-                        bindContentsWithChildren(holder,position)
-                    } else {
-                        bindContents(holder,position)
-                    }
-                }
-            }
+            in contentRange -> bindContents(holder,position)
             footerRange -> bindFooter(holder, position)
             else -> throw IllegalStateException("$position is out of range")
         }
     }
-    class ViewHolderOfCell(rowView: View) : RecyclerView.ViewHolder(rowView)
-
     // lifecycle sub-routine
     private fun makeListToShow(){
         val parentItem = vModel.currentItem()
@@ -93,16 +82,10 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
         contentRange = IntRange(0,listWithViewStatus.lastIndex)
         footerRange = listWithViewStatus.lastIndex +1
     }
-    private  fun bindContentsWithChildren(holder: RecyclerView.ViewHolder, position:Int){
-        holder.itemView.rowEditor.text = listWithViewStatus[position].title
-        holder.itemView.setOnClickListener {
-            val id = listWithViewStatus[position].rootId
-            vModel.flipOpenedItemHasId(id)
-        }
-    }
     private fun bindContents(holder: RecyclerView.ViewHolder,position: Int){
+
         holder.itemView.rowEditor.text = listWithViewStatus[position].title
-        holder.itemView.rowText.setOnClickListener {
+        holder.itemView.rowEditor.setOnClickListener {
             val idToEdit = listWithViewStatus[position].rootId
             vModel.setCurrentItemId(idToEdit)
             mHandler.transitEditorToOrigin()
@@ -142,11 +125,6 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
             )
         )
     }
-    private fun removeRowItem(position: Int){
-        val idToReMove = listWithViewStatus[position].rootId
-        if(idToReMove==0) return // tagの時はなにもしない｡
-        vModel.removeItemHasId(idToReMove)
-    }
     private fun onFooterEditorEnd(editText: TextView,position: Int) {
         val newText = editText.text.toString()
         if (newText.isBlank()) return
@@ -163,4 +141,5 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
                               var indent:Int,
                               val rootId:Int,
                               var isOpened:Boolean)
+    class ViewHolderOfEditorRow(rowView:View) : RecyclerView.ViewHolder(rowView)
 }
