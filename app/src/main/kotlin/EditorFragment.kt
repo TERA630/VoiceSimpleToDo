@@ -14,17 +14,14 @@ import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 class EditorFragment : Fragment() {
 
     private lateinit var mAdaptor: EditorAdaptor
-
     companion object {
         fun newInstance() = EditorFragment()
     }
-
     private val viewModel by sharedViewModel<MainViewModel>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_editor, container, false)
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mAdaptor = EditorAdaptor(viewModel)

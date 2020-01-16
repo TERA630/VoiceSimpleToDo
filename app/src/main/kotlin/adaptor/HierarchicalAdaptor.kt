@@ -70,10 +70,9 @@ class HierarchicalAdaptor(private val vModel: MainViewModel):RecyclerView.Adapte
             in contentRange -> {
                 holder.itemView.rowText.text = listWithViewType[position].title
                 if(holder.itemViewType == cParent ){
+                    bindContents(holder,position)
                     if (vModel.idHasChild(listWithViewType[position].rootId) ) {
-                        bindContentsWithChildren(holder,position)
-                    } else {
-                        bindContents(holder,position)
+                        bindContentsWithChildren(holder, position)
                     }
                 }
             }
@@ -82,7 +81,6 @@ class HierarchicalAdaptor(private val vModel: MainViewModel):RecyclerView.Adapte
         }
     }
     class ViewHolderOfCell(rowView: View) : RecyclerView.ViewHolder(rowView)
-
     // lifecycle sub-routine
     private fun makeListToShow(){
         val withChildList = mutableListOf<ItemWithViewType>()
