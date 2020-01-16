@@ -101,7 +101,7 @@ class HierarchicalAdaptor(private val vModel: MainViewModel):RecyclerView.Adapte
         footerRange = listWithViewType.lastIndex +1
     }
     private fun bindContentsWithChildren(holder: RecyclerView.ViewHolder, position:Int){
-        holder.itemView.setOnClickListener {
+        holder.itemView.rowText.setOnClickListener {
             val id = listWithViewType[position].rootId
             vModel.flipOpenedItemHasId(id)
         }
