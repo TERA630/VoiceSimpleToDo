@@ -4,14 +4,11 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <ImageButton
-        android:id="@+id/rowDetailButton"
-        style="@style/myImgButton"
-        android:src="@drawable/ic_mode_edit_black_24dp"/>
+
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="32sp"
-        android:src="@drawable/ic_format_line_spacing_black_24dp"
+        android:src="@drawable/tree_open_selector"
         android:layout_margin="2dp"
         android:contentDescription="@string/button"/>
     <TextView
@@ -19,6 +16,9 @@
         style = "@style/myEditorText"
         android:textSize="24sp"
         tools:text="@string/hint_title" />
-
+    <ImageButton
+        android:id="@+id/rowDetailButton"
+        style="@style/myImgButton"
+        android:src="@drawable/ic_mode_edit_black_24dp"/>
 
 </LinearLayout>

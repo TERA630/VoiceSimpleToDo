@@ -61,7 +61,7 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int){
         when (position) {
-            in contentRange -> bindContents(holder,position)
+            in contentRange -> bindContents(holder.itemView,position)
             footerRange -> bindFooter(holder, position)
             else -> throw IllegalStateException("$position is out of range")
         }
@@ -69,7 +69,6 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
     // lifecycle sub-routine
     private fun makeListToShow(){
         val parentItem = vModel.currentItem()
-
         val totalList = mutableListOf(ItemWithViewStatus(parentItem.title,0,parentItem.id,parentItem.isOpened))
         if(parentItem.isOpened){
             val childList = vModel.getItemsWithParentId(parentItem.id)
@@ -82,14 +81,14 @@ class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<Recy
         contentRange = IntRange(0,listWithViewStatus.lastIndex)
         footerRange = listWithViewStatus.lastIndex +1
     }
-    private fun bindContents(holder: RecyclerView.ViewHolder,position: Int){
-
-        holder.itemView.rowEditor.text = listWithViewStatus[position].title
-        holder.itemView.rowEditor.setOnClickListener {
+    private fun bindContents(rowView:View,position: Int){
+        rowView.rowEditor.text = listWithViewStatus[position].title
+        rowView.rowEditor.setOnClickListener {
             val idToEdit = listWithViewStatus[position].rootId
             vModel.setCurrentItemId(idToEdit)
             mHandler.transitEditorToOrigin()
         }
+
     }
     private fun bindFooter(holder: RecyclerView.ViewHolder, position: Int) {
         val iV = holder.itemView
