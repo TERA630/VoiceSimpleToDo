@@ -21,8 +21,6 @@ import model.ItemEntity
 // タブで1レベル下げる
 // 先頭でのBSかShiftTABで1レベル上げる
 
-
-
 class EditorAdaptor(private val vModel: MainViewModel):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     // Local Const
     private val cItem = 1
